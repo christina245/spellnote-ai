@@ -1,0 +1,946 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  Alert,
+  Modal
+} from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Bell, Plus, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import NavigationMenu from '@/components/NavigationMenu';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+interface NotificationEntry {
+  id: string;
+  header: string;
+  details: string;
+  date: string;
+  time: string;
+  characterName: string;
+  characterType: 'character' | 'spellbot' | 'ai-free';
+  avatarSource: any;
+  isFirst?: boolean;
+  sendWithoutAI?: boolean;
+}
+
+interface CharacterInfo {
+  name: string;
+  type: 'character' | 'spellbot' | 'ai-free';
+  avatarSource: any;
+}
+
+export default function HomeTab() {
+  const [userEmail] = useState('useremail@gmail.com'); // This will be dynamic later
+  const [userMode, setUserMode] = useState<'character' | 'spellbot' | 'ai-free'>('character'); // Default to character mode
+  const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [weekStartDate, setWeekStartDate] = useState(new Date());
+  const [showNavigationMenu, setShowNavigationMenu] = useState(false);
+  const [characterInfo, setCharacterInfo] = useState<CharacterInfo | null>(null);
+  const [showBetaModal, setShowBetaModal] = useState(false);
+  const router = useRouter();
+  const params = useLocalSearchParams();
+
+  const [fontsLoaded] = useFonts({
+    Montserrat_700Bold,
+  });
+
+  useEffect(() => {
+    // Check if user mode was passed from navigation (e.g., from character creation or mode switching)
+    if (params.userMode) {
+      setUserMode(params.userMode as 'character' | 'spellbot' | 'ai-free');
+    }
+    
+    // Set character info based on user's selection during onboarding
+    if (params.characterType) {
+      const characterType = params.characterType as 'character' | 'spellbot' | 'ai-free';
+      setUserMode(characterType);
+      
+      if (characterType === 'spellbot') {
+        setCharacterInfo({
+          name: 'Spellbot',
+          type: 'spellbot',
+          avatarSource: require('../../assets/images/square logo 2.png')
+        });
+      } else if (characterType === 'character') {
+        setCharacterInfo({
+          name: params.characterName as string || 'Character Name',
+          type: 'character',
+          avatarSource: params.userAvatarUri 
+            ? { uri: params.userAvatarUri as string }
+            : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
+        });
+      } else if (characterType === 'ai-free') {
+        setCharacterInfo({
+          name: 'AI-Free Mode',
+          type: 'ai-free',
+          avatarSource: require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png')
+        });
+      }
+    }
+    
+    // Load user's notifications - this would come from storage/API in real app
+    loadNotifications();
+    
+    // Set initial week start date (start of current week)
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+    setWeekStartDate(startOfWeek);
+    
+    // Update current date
+    const timer = setInterval(() => {
+      setCurrentDate(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, [params]);
+
+  const loadNotifications = () => {
+    const loadedNotifications: NotificationEntry[] = [];
+
+    // 1. Load the original onboarding notification (if exists)
+    const originalHeader = params.notificationHeader as string;
+    const originalDetails = params.notificationDetails as string;
+    const originalTime = params.time as string;
+
+    if (originalHeader?.trim() || originalDetails?.trim() || originalTime?.trim()) {
+      // Determine character info for original notification
+      let characterName = 'Character Name';
+      let avatarSource = require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
+      
+      if (characterInfo) {
+        characterName = characterInfo.name;
+        avatarSource = characterInfo.avatarSource;
+      } else if (userMode === 'spellbot') {
+        characterName = 'Spellbot';
+        avatarSource = require('../../assets/images/square logo 2.png');
+      } else if (userMode === 'ai-free') {
+        characterName = 'AI-Free Mode';
+        avatarSource = require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png');
+      }
+
+      const originalNotification: NotificationEntry = {
+        id: 'original-1',
+        header: originalHeader?.trim() || 'Reminder',
+        details: originalDetails?.trim() || 'Your reminder details',
+        date: formatDate(new Date()),
+        time: originalTime?.trim() || '6:30 PM',
+        characterName: characterName,
+        characterType: userMode,
+        avatarSource: avatarSource,
+        isFirst: true
+      };
+
+      loadedNotifications.push(originalNotification);
+    }
+
+    // 2. Load new notification from add-notification screen (if exists)
+    const newHeader = params.newNotificationHeader as string;
+    const newDetails = params.newNotificationDetails as string;
+    const newTime = params.newNotificationTime as string;
+    const newDate = params.newNotificationDate as string;
+    const selectedCharacterId = params.selectedCharacterId as string;
+    const sendWithoutAI = params.sendWithoutAI === 'true';
+
+    if (newHeader?.trim() || newDetails?.trim()) {
+      // Determine character info for new notification
+      let newCharacterName = 'Character Name';
+      let newAvatarSource = require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
+      let newCharacterType: 'character' | 'spellbot' | 'ai-free' = userMode;
+
+      // Use the selected character from add-notification screen
+      if (selectedCharacterId === '1') { // Main character slot
+        if (characterInfo) {
+          newCharacterName = characterInfo.name;
+          newAvatarSource = characterInfo.avatarSource;
+          newCharacterType = characterInfo.type;
+        } else if (userMode === 'spellbot') {
+          newCharacterName = 'Spellbot';
+          newAvatarSource = require('../../assets/images/square logo 2.png');
+          newCharacterType = 'spellbot';
+        } else if (userMode === 'ai-free') {
+          newCharacterName = 'AI-Free Mode';
+          newAvatarSource = require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png');
+          newCharacterType = 'ai-free';
+        }
+      }
+
+      const newNotification: NotificationEntry = {
+        id: `new-${Date.now()}`, // Unique ID based on timestamp
+        header: newHeader.trim(),
+        details: newDetails.trim(),
+        date: newDate ? formatDate(new Date(newDate)) : formatDate(new Date()),
+        time: newTime?.trim() || '6:30 PM',
+        characterName: newCharacterName,
+        characterType: newCharacterType,
+        avatarSource: newAvatarSource,
+        isFirst: false, // New notifications are not marked as first
+        sendWithoutAI: sendWithoutAI
+      };
+
+      loadedNotifications.push(newNotification);
+    }
+
+    // 3. Sort notifications by date/time (most recent first)
+    loadedNotifications.sort((a, b) => {
+      // For now, just maintain the order: original first, then new ones
+      if (a.isFirst) return -1;
+      if (b.isFirst) return 1;
+      return 0;
+    });
+
+    setNotifications(loadedNotifications);
+  };
+
+  const formatDate = (date: Date) => {
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
+  const formatDateForDisplay = (dateString: string) => {
+    const today = formatDate(new Date());
+    const tomorrow = formatDate(new Date(Date.now() + 86400000));
+    
+    if (dateString === today) {
+      return 'Today';
+    } else if (dateString === tomorrow) {
+      return 'Tomorrow';
+    } else {
+      return dateString;
+    }
+  };
+
+  const getMonthName = (date: Date) => {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                   'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[date.getMonth()];
+  };
+
+  const navigateWeek = (direction: 'prev' | 'next') => {
+    const newWeekStart = new Date(weekStartDate);
+    if (direction === 'prev') {
+      newWeekStart.setDate(newWeekStart.getDate() - 7);
+    } else {
+      newWeekStart.setDate(newWeekStart.getDate() + 7);
+    }
+    setWeekStartDate(newWeekStart);
+  };
+
+  const selectDate = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  const getWeekDates = () => {
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(weekStartDate);
+      date.setDate(weekStartDate.getDate() + i);
+      dates.push(date);
+    }
+    return dates;
+  };
+
+  const renderWeekDays = () => {
+    const weekDates = getWeekDates();
+    const today = new Date();
+    
+    return weekDates.map((date, index) => {
+      const isToday = date.toDateString() === today.toDateString();
+      const isSelected = date.toDateString() === selectedDate.toDateString();
+      const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      
+      return (
+        <TouchableOpacity
+          key={index}
+          style={[
+            styles.weekDayContainer,
+            isToday && styles.weekDayContainerToday,
+            isSelected && styles.weekDayContainerSelected
+          ]}
+          onPress={() => selectDate(date)}
+          activeOpacity={0.7}
+        >
+          <Text style={[
+            styles.weekDayLabel,
+            isToday && styles.weekDayLabelToday,
+            isSelected && styles.weekDayLabelSelected
+          ]}>
+            {dayNames[date.getDay()]}
+          </Text>
+          <Text style={[
+            styles.weekDayNumber,
+            isToday && styles.weekDayNumberToday,
+            isSelected && styles.weekDayNumberSelected
+          ]}>
+            {date.getDate()}
+          </Text>
+        </TouchableOpacity>
+      );
+    });
+  };
+
+  const handleNotificationPress = () => {
+    // Navigate to notification details or edit screen
+    console.log('Notification pressed');
+  };
+
+  const handleAddNotification = () => {
+    // Navigate to add notification screen with current user data
+    router.push({
+      pathname: '/add-notification',
+      params: {
+        userMode: userMode,
+        characterType: characterInfo?.type || userMode,
+        characterName: characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name'),
+        userAvatarUri: characterInfo?.avatarSource?.uri || undefined
+      }
+    });
+  };
+
+  const handleBellPress = () => {
+    // Navigate to notifications screen (to be created later)
+    console.log('Bell pressed');
+  };
+
+  const handleMenuPress = () => {
+    setShowNavigationMenu(true);
+  };
+
+  const handleNavigationMenuClose = () => {
+    setShowNavigationMenu(false);
+  };
+
+  const closeBetaModal = () => {
+    setShowBetaModal(false);
+  };
+
+  const handleNavigationMenuNavigate = (route: string) => {
+    // Handle navigation based on route
+    switch (route) {
+      case 'account':
+        Alert.alert('Account', 'Account page will be implemented');
+        break;
+      case 'browse-characters':
+        Alert.alert('Browse Characters', 'Browse characters page will be implemented');
+        break;
+      case 'my-reports':
+        Alert.alert('My Reports', 'My reports page will be implemented');
+        break;
+      case 'help-center':
+        Alert.alert('Help Center', 'Help center page will be implemented');
+        break;
+      case 'submit-feedback':
+        Alert.alert('Submit Feedback', 'Submit feedback page will be implemented');
+        break;
+      case 'report-issue':
+        Alert.alert('Report Issue', 'Report issue page will be implemented');
+        break;
+      case 'contact-support':
+        Alert.alert('Contact Support', 'Contact support page will be implemented');
+        break;
+      case 'switch-to-ai-free':
+        // Show beta modal instead of navigating
+        setShowBetaModal(true);
+        break;
+      case 'switch-to-ai-mode':
+        // DIRECT NAVIGATION - NO ALERT
+        router.push('/switch-to-ai-mode');
+        break;
+      case 'logout':
+        Alert.alert(
+          'Log Out',
+          'Are you sure you want to log out?',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Log Out', style: 'destructive', onPress: () => {
+              // Handle logout logic here
+              router.push('/sign-in');
+            }}
+          ]
+        );
+        break;
+      default:
+        console.log('Unknown route:', route);
+    }
+  };
+
+  // Custom three dots component
+  const ThreeDotsIcon = () => (
+    <View style={styles.threeDotsContainer}>
+      <View style={styles.dot} />
+      <View style={styles.dot} />
+      <View style={styles.dot} />
+    </View>
+  );
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.bellButton}
+          onPress={handleBellPress}
+          activeOpacity={0.7}
+        >
+          <Bell size={24} color="#F3CC95" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.menuButton}
+          onPress={handleMenuPress}
+          activeOpacity={0.7}
+        >
+          <ThreeDotsIcon />
+        </TouchableOpacity>
+      </View>
+
+      {/* Main Content */}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Character Slots - Only show for Character Mode and Spellbot, hide for AI-free */}
+        {userMode !== 'ai-free' && (
+          <View style={styles.characterSlotsSection}>
+            <View style={styles.characterSlots}>
+              {/* First Character Slot - Empty */}
+              <View style={styles.characterSlot}>
+                <View style={[styles.characterAvatarContainer, styles.emptySlot]}>
+                  <Plus size={24} color="#9CA3AF" />
+                </View>
+                <Text style={styles.characterNameEmpty}>Add character</Text>
+              </View>
+
+              {/* Second Character Slot - Active (Center) */}
+              <View style={[styles.characterSlot, styles.characterSlotActive]}>
+                <View style={styles.characterAvatarContainer}>
+                  <Image 
+                    source={characterInfo?.avatarSource || (userMode === 'spellbot' 
+                      ? require('../../assets/images/square logo 2.png')
+                      : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
+                    )}
+                    style={styles.characterAvatar}
+                    resizeMode="cover"
+                  />
+                </View>
+                <Text style={styles.characterName}>
+                  {characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name')}
+                </Text>
+              </View>
+
+              {/* Third Character Slot - Empty */}
+              <View style={styles.characterSlot}>
+                <View style={[styles.characterAvatarContainer, styles.emptySlot]}>
+                  <Plus size={24} color="#9CA3AF" />
+                </View>
+                <Text style={styles.characterNameEmpty}>Add character</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Compact Date Picker Section */}
+        <View style={styles.datePickerSection}>
+          <View style={styles.datePickerHeader}>
+            <TouchableOpacity 
+              style={styles.monthNavButton}
+              onPress={() => navigateWeek('prev')}
+              activeOpacity={0.7}
+            >
+              <ChevronLeft size={20} color="#FFFFFF" />
+            </TouchableOpacity>
+            
+            <Text style={styles.monthYearText}>
+              {getMonthName(weekStartDate)} {weekStartDate.getFullYear()}
+            </Text>
+            
+            <TouchableOpacity 
+              style={styles.monthNavButton}
+              onPress={() => navigateWeek('next')}
+              activeOpacity={0.7}
+            >
+              <ChevronRight size={20} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Week Days Row */}
+          <View style={styles.weekDaysRow}>
+            {renderWeekDays()}
+          </View>
+        </View>
+
+        {/* Upcoming Notifications Section */}
+        <View style={styles.notificationsSection}>
+          <Text style={styles.sectionTitle}>Upcoming notifications</Text>
+          
+          {notifications.length > 0 ? (
+            notifications.map((notification, index) => (
+              <TouchableOpacity
+                key={notification.id}
+                style={styles.notificationCard}
+                onPress={handleNotificationPress}
+                activeOpacity={0.8}
+              >
+                {/* Notification Content with Avatar and Text Side by Side */}
+                <View style={styles.notificationContent}>
+                  {/* Avatar positioned to the left */}
+                  <View style={[
+                    styles.notificationAvatarContainer,
+                    notification.isFirst && styles.notificationAvatarContainerFirst
+                  ]}>
+                    <Image 
+                      source={notification.avatarSource}
+                      style={styles.notificationAvatar}
+                      resizeMode="cover"
+                    />
+                  </View>
+
+                  {/* Text content positioned to the right of avatar */}
+                  <View style={styles.notificationTextContent}>
+                    {/* Header and timestamp on the same line */}
+                    <View style={styles.notificationHeaderRow}>
+                      <Text style={styles.notificationTitle}>
+                        {notification.header}
+                      </Text>
+                      <Text style={styles.notificationTimestamp}>{notification.time}</Text>
+                    </View>
+                    
+                    <Text 
+                      style={[
+                        styles.notificationDetails,
+                        notification.sendWithoutAI && styles.notificationDetailsAIFree
+                      ]}
+                      numberOfLines={3}
+                      ellipsizeMode="tail"
+                    >
+                      {notification.details}
+                    </Text>
+
+                    {/* AI-Free Badge */}
+                    {notification.sendWithoutAI && (
+                      <View style={styles.aiFreeBadge}>
+                        <Text style={styles.aiFreeBadgeText}>AI-FREE</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            // Empty state when no notifications
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No notifications yet</Text>
+              <Text style={styles.emptyStateSubtext}>Tap "Add notification" to create your first reminder</Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Add Notification Button */}
+      <View style={styles.addButtonContainer}>
+        <TouchableOpacity 
+          style={styles.addNotificationButton}
+          onPress={handleAddNotification}
+          activeOpacity={0.8}
+        >
+          <Plus size={20} color="#1C1830" />
+          <Text style={styles.addNotificationButtonText}>Add notification</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Navigation Menu */}
+      <NavigationMenu
+        visible={showNavigationMenu}
+        onClose={handleNavigationMenuClose}
+        onNavigate={handleNavigationMenuNavigate}
+        userMode={userMode}
+      />
+
+      {/* Beta Modal for AI-Free Switch */}
+      <Modal
+        visible={showBetaModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeBetaModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>AI-Free Mode Unavailable</Text>
+            <Text style={styles.modalMessage}>
+              Switching to AI-Free mode is currently unavailable in beta. We're working on it!
+              {'\n\n'}
+              As of now, you can set any notification to be delivered AI-free.
+            </Text>
+            <TouchableOpacity 
+              style={styles.modalButton}
+              onPress={closeBetaModal}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1C1830',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 16,
+  },
+  bellButton: {
+    padding: 8,
+  },
+  menuButton: {
+    padding: 8,
+  },
+  threeDotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#F3CC95',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 120, // Space for floating add button
+  },
+  characterSlotsSection: {
+    marginBottom: 32,
+  },
+  characterSlots: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  characterSlot: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 8,
+  },
+  characterSlotActive: {
+    // Additional styling for active character slot
+  },
+  characterAvatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    overflow: 'hidden',
+    backgroundColor: '#374151',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  characterAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: '#34A853', // Green outline for active character
+  },
+  emptySlot: {
+    backgroundColor: '#374151',
+    borderWidth: 2,
+    borderColor: '#4B5563',
+    borderStyle: 'dashed',
+  },
+  characterName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+  },
+  characterNameEmpty: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#9CA3AF',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+  },
+  datePickerSection: {
+    marginBottom: 30, // Maximum 30px gap as requested
+  },
+  datePickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 8,
+  },
+  monthNavButton: {
+    padding: 8,
+  },
+  monthYearText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+  },
+  weekDaysRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+  },
+  weekDayContainer: {
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    minWidth: 40,
+  },
+  weekDayContainerToday: {
+    backgroundColor: '#34A853',
+  },
+  weekDayContainerSelected: {
+    backgroundColor: '#F3CC95',
+  },
+  weekDayLabel: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: '#9CA3AF',
+    fontFamily: 'Inter',
+    marginBottom: 4,
+  },
+  weekDayLabelToday: {
+    color: '#FFFFFF',
+  },
+  weekDayLabelSelected: {
+    color: '#1C1830',
+  },
+  weekDayNumber: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+  },
+  weekDayNumberToday: {
+    color: '#FFFFFF',
+  },
+  weekDayNumberSelected: {
+    color: '#1C1830',
+  },
+  notificationsSection: {
+    flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+    marginBottom: 16,
+  },
+  notificationCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    minHeight: 120, // Ensure adequate height for content
+  },
+  notificationContent: {
+    flex: 1,
+    flexDirection: 'row', // Side by side layout
+    alignItems: 'flex-start', // Align to top for proper text alignment
+  },
+  notificationAvatarContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginRight: 12, // 5px minimum gap + 7px for visual balance
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    flexShrink: 0, // Prevent avatar from shrinking
+    marginTop: 2, // Slight adjustment to center with first line of text
+  },
+  notificationAvatarContainerFirst: {
+    borderColor: '#34A853',
+    borderWidth: 2,
+  },
+  notificationAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  notificationTextContent: {
+    flex: 1, // Take remaining space
+    justifyContent: 'flex-start',
+  },
+  notificationHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start', // Align to top for proper baseline alignment
+    marginBottom: 6,
+  },
+  notificationTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+    lineHeight: 20,
+    flex: 1, // Take available space, leaving room for timestamp
+    marginRight: 8, // Small gap between title and timestamp
+  },
+  notificationTimestamp: {
+    fontSize: 11, // Inter, light, 11px as specified
+    fontWeight: '300', // Light weight
+    color: '#E1B8B2', // Color as specified
+    fontFamily: 'Inter',
+    flexShrink: 0, // Prevent timestamp from shrinking
+    lineHeight: 20, // Match title line height for perfect alignment
+  },
+  notificationDetails: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontFamily: 'Inter',
+    lineHeight: 18,
+    flex: 1,
+  },
+  notificationDetailsAIFree: {
+    marginBottom: 8, // Add space for AI-Free badge
+  },
+  aiFreeBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.4)',
+  },
+  aiFreeBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#A78BFA',
+    fontFamily: 'Inter',
+    letterSpacing: 0.5,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#9CA3AF',
+    fontFamily: 'Inter',
+    marginBottom: 8,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#6B7280',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+  },
+  addButtonContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  addNotificationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#F3CC95',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 25,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    minWidth: 200,
+  },
+  addNotificationButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1C1830',
+    fontFamily: 'Inter',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 320,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F2937',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  modalMessage: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#6B7280',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  modalButton: {
+    backgroundColor: '#F3CC95',
+    borderRadius: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1C1830',
+    fontFamily: 'Inter',
+  },
+});
