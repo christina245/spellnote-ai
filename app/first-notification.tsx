@@ -44,6 +44,11 @@ export default function FirstNotification() {
     router.back();
   };
 
+  const handleSkipForNow = () => {
+    // Navigate directly to main app dashboard without any notification data
+    router.push('/(tabs)');
+  };
+
   const formatDate = (date: Date | null) => {
     if (!date) return 'MM/DD/YYYY';
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -221,7 +226,7 @@ export default function FirstNotification() {
 
   return (
     <View style={styles.container}>
-      {/* Header with Back Button */}
+      {/* Header with Back Button and Skip Button */}
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -230,6 +235,15 @@ export default function FirstNotification() {
         >
           <ArrowLeft size={20} color="#F3CC95" />
           <Text style={styles.backText}>BACK</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.skipButton}
+          onPress={handleSkipForNow}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.skipText}>SKIP FOR NOW</Text>
+          <ArrowRight size={20} color="#F3CC95" />
         </TouchableOpacity>
         
         <Text style={styles.title}>
@@ -532,8 +546,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginBottom: 20,
+    position: 'absolute',
+    top: 60,
+    left: Math.max(38, screenWidth * 0.097),
+    zIndex: 10,
   },
   backText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#F3CC95',
+    fontFamily: 'Inter',
+  },
+  skipButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
+    position: 'absolute',
+    top: 60,
+    right: Math.max(38, screenWidth * 0.097),
+    zIndex: 10,
+  },
+  skipText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#F3CC95',
@@ -547,6 +581,7 @@ const styles = StyleSheet.create({
     lineHeight: 36,
     letterSpacing: -0.28,
     marginBottom: 16,
+    marginTop: 40, // Add top margin to account for the buttons
   },
   subtitle: {
     fontSize: 14, // Changed from 12px to 14px
