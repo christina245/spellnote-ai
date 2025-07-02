@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500', // Decreased from 600 to 500 (100 weight decrease)
     color: '#F3CC95',
     fontFamily: 'Inter',
   },
