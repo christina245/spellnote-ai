@@ -45,8 +45,8 @@ export default function FirstNotification() {
   };
 
   const handleSkipForNow = () => {
-    // Navigate directly to main app dashboard without any notification data
-    router.push('/(tabs)');
+    // Navigate to character selection without any notification data
+    router.push('/character-selection');
   };
 
   const formatDate = (date: Date | null) => {

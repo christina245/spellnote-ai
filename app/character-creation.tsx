@@ -168,24 +168,41 @@ export default function CharacterCreation() {
       return;
     }
     
-    // Navigate to notification preview with character data AND notification data
-    router.push({
-      pathname: '/notification-preview',
-      params: {
-        characterType: 'character',
-        characterName: characterName,
-        characterDescription: characterDescription,
-        characterVibes: JSON.stringify(selectedVibes),
-        // Pass through the notification data from first-notification
-        notificationHeader: params.notificationHeader || 'Board game night prep',
-        notificationDetails: params.notificationDetails || 'Need to brush up on how to play Catan at 6 pm this Wednesday before board game night at 8. Ping me at 5 and 5:30 pm.',
-        startDate: params.startDate,
-        endDate: params.endDate,
-        time: params.time,
-        isRepeat: params.isRepeat,
-        isTextItToMe: params.isTextItToMe
-      }
-    });
+    // Check if user has notification data (came from first-notification screen)
+    const hasNotificationData = params.notificationHeader || params.notificationDetails;
+    
+    if (hasNotificationData) {
+      // Navigate to notification preview with character data AND notification data
+      router.push({
+        pathname: '/notification-preview',
+        params: {
+          characterType: 'character',
+          characterName: characterName,
+          characterDescription: characterDescription,
+          characterVibes: JSON.stringify(selectedVibes),
+          // Pass through the notification data from first-notification
+          notificationHeader: params.notificationHeader || 'Board game night prep',
+          notificationDetails: params.notificationDetails || 'Need to brush up on how to play Catan at 6 pm this Wednesday before board game night at 8. Ping me at 5 and 5:30 pm.',
+          startDate: params.startDate,
+          endDate: params.endDate,
+          time: params.time,
+          isRepeat: params.isRepeat,
+          isTextItToMe: params.isTextItToMe
+        }
+      });
+    } else {
+      // User skipped notification creation, go directly to dashboard
+      router.push({
+        pathname: '/(tabs)',
+        params: {
+          userMode: 'character',
+          characterType: 'character',
+          characterName: characterName,
+          characterDescription: characterDescription,
+          characterVibes: JSON.stringify(selectedVibes)
+        }
+      });
+    }
   };
 
   const togglePublicPrivate = () => {
