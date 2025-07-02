@@ -15,6 +15,13 @@ export default function IntroScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Bolt.new Logo in upper right corner */}
+      <Image 
+        source={require('../assets/images/white_circle_360x360.png')}
+        style={styles.boltLogo}
+        resizeMode="contain"
+      />
+      
       <View style={styles.content}>
         <Image 
           source={require('../assets/images/spellnote ai logo.png')}
@@ -40,6 +47,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#2D2B4A',
     paddingHorizontal: 32,
     paddingVertical: 60,
+  },
+  boltLogo: {
+    position: 'absolute',
+    top: 60, // Safe area padding from top
+    right: 32, // Consistent with container padding
+    width: 100,
+    height: 100,
+    zIndex: 10, // Ensure it appears above other content
   },
   content: {
     flex: 1,
