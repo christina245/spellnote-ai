@@ -55,6 +55,7 @@ export default function HomeTab() {
   const [activeCharacterId, setActiveCharacterId] = useState<string | null>(null);
   const [showBetaModal, setShowBetaModal] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [processedNotificationIds, setProcessedNotificationIds] = useState<Set<string>>(new Set());
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -96,6 +97,7 @@ export default function HomeTab() {
       setActiveCharacterId(demoCharacter.id);
       setUserMode('character');
       setNotifications([]);
+      setProcessedNotificationIds(new Set());
       setIsInitialized(true);
       return;
     }
@@ -179,6 +181,7 @@ export default function HomeTab() {
     params.newNotificationDate,
     params.selectedCharacterId,
     params.sendWithoutAI,
+    params.notificationTimestamp, // Add this to detect new notifications
     characters,
     activeCharacterId,
     isInitialized
@@ -194,21 +197,22 @@ export default function HomeTab() {
   }, []);
 
   const loadNotifications = () => {
-    // Start with existing notifications to preserve them
+    // CRITICAL: Start with existing notifications to preserve them
     let loadedNotifications: NotificationEntry[] = [...notifications];
 
     // 1. Load the original onboarding notification (if exists and not already loaded)
     const originalHeader = params.notificationHeader as string;
     const originalDetails = params.notificationDetails as string;
     const originalTime = params.time as string;
+    const originalId = 'original-1';
 
     if ((originalHeader?.trim() || originalDetails?.trim() || originalTime?.trim()) && 
-        !loadedNotifications.some(n => n.id === 'original-1')) {
+        !processedNotificationIds.has(originalId)) {
       // Get active character info for notification
       const activeCharacter = characters.find(char => char.id === activeCharacterId);
       
       const originalNotification: NotificationEntry = {
-        id: 'original-1',
+        id: originalId,
         header: originalHeader?.trim() || 'Reminder',
         details: originalDetails?.trim() || 'Your reminder details',
         date: formatDate(new Date()),
@@ -221,6 +225,7 @@ export default function HomeTab() {
       };
 
       loadedNotifications.push(originalNotification);
+      setProcessedNotificationIds(prev => new Set([...prev, originalId]));
     }
 
     // 2. Load new notification from add-notification screen (if exists)
@@ -230,20 +235,14 @@ export default function HomeTab() {
     const newDate = params.newNotificationDate as string;
     const selectedCharacterId = params.selectedCharacterId as string;
     const sendWithoutAI = params.sendWithoutAI === 'true';
+    const notificationTimestamp = params.notificationTimestamp as string;
 
-    if (newHeader?.trim() || newDetails?.trim()) {
-      // Create unique ID based on content and timestamp to avoid duplicates
-      const newNotificationId = `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    if ((newHeader?.trim() || newDetails?.trim()) && notificationTimestamp) {
+      // Create unique ID based on timestamp to ensure uniqueness
+      const newNotificationId = `notification-${notificationTimestamp}`;
       
-      // Check if this notification already exists (avoid duplicates)
-      const isDuplicate = loadedNotifications.some(n => 
-        n.header === newHeader?.trim() && 
-        n.details === newDetails?.trim() && 
-        n.time === newTime?.trim() &&
-        Math.abs(n.createdAt - Date.now()) < 5000 // Within 5 seconds
-      );
-
-      if (!isDuplicate) {
+      // Check if this notification has already been processed
+      if (!processedNotificationIds.has(newNotificationId)) {
         // Get character info for new notification
         const selectedCharacter = characters.find(char => char.id === selectedCharacterId) || 
                                  characters.find(char => char.id === activeCharacterId);
@@ -259,10 +258,11 @@ export default function HomeTab() {
           avatarSource: selectedCharacter?.avatarSource || require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
           isFirst: false,
           sendWithoutAI: sendWithoutAI,
-          createdAt: Date.now()
+          createdAt: parseInt(notificationTimestamp)
         };
 
         loadedNotifications.push(newNotification);
+        setProcessedNotificationIds(prev => new Set([...prev, newNotificationId]));
       }
     }
 
@@ -275,7 +275,10 @@ export default function HomeTab() {
       return b.createdAt - a.createdAt;
     });
 
-    setNotifications(loadedNotifications);
+    // CRITICAL: Only update state if notifications have actually changed
+    if (JSON.stringify(loadedNotifications) !== JSON.stringify(notifications)) {
+      setNotifications(loadedNotifications);
+    }
   };
 
   const formatDate = (date: Date) => {
