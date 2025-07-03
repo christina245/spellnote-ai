@@ -125,6 +125,16 @@ export default function HomeTab() {
           avatarSource: require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png')
         });
       }
+    } else {
+      // Default demo character setup - Xaden the Destroyer
+      setCharacterInfo({
+        name: 'Xaden the Destroyer',
+        type: 'character',
+        avatarSource: require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+        description: 'A fierce and dramatic warrior with a sharp wit and fiery personality. Known for being intense and passionate about everything they do. Has a tendency to be overly dramatic but means well.',
+        vibes: ['dramatic', 'witty', 'fiery'],
+        tagline: 'Destroyer of boredom and slayer of procrastination'
+      });
     }
     
     // Load user's notifications
@@ -440,15 +450,6 @@ export default function HomeTab() {
     }
   };
 
-  // Custom three dots component
-  const ThreeDotsIcon = () => (
-    <View style={styles.threeDotsContainer}>
-      <View style={styles.dot} />
-      <View style={styles.dot} />
-      <View style={styles.dot} />
-    </View>
-  );
-
   // Check if character is clickable (has real name and is not AI-free)
   const isCharacterClickable = () => {
     return characterInfo && 
@@ -457,6 +458,15 @@ export default function HomeTab() {
            characterInfo.name !== 'Add character' &&
            characterInfo.type !== 'ai-free';
   };
+
+  // Custom three dots component
+  const ThreeDotsIcon = () => (
+    <View style={styles.threeDotsContainer}>
+      <View style={styles.dot} />
+      <View style={styles.dot} />
+      <View style={styles.dot} />
+    </View>
+  );
 
   if (!fontsLoaded) {
     return null;
@@ -501,7 +511,7 @@ export default function HomeTab() {
                 <Text style={styles.characterNameEmpty}>Add character</Text>
               </View>
 
-              {/* Second Character Slot - Active (Center) - Only clickable if character has real name */}
+              {/* Second Character Slot - Active (Center) - Clickable without special styling */}
               {isCharacterClickable() ? (
                 <TouchableOpacity 
                   style={[styles.characterSlot, styles.characterSlotActive]}
@@ -518,7 +528,7 @@ export default function HomeTab() {
                       resizeMode="cover"
                     />
                   </View>
-                  <Text style={[styles.characterName, styles.characterNameClickable]}>
+                  <Text style={styles.characterName}>
                     {characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name')}
                   </Text>
                 </TouchableOpacity>
@@ -777,10 +787,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Inter',
     textAlign: 'center',
-  },
-  characterNameClickable: {
-    textDecorationLine: 'underline',
-    color: '#F3CC95', // Highlight clickable character names
   },
   characterNameEmpty: {
     fontSize: 12,
