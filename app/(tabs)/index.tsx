@@ -39,6 +39,7 @@ interface CharacterInfo {
   description?: string;
   vibes?: string[];
   tagline?: string;
+  isDemo?: boolean; // Flag to identify demo character
 }
 
 export default function HomeTab() {
@@ -60,6 +61,18 @@ export default function HomeTab() {
     Montserrat_700Bold,
   });
 
+  // Create default demo character
+  const createDemoCharacter = (): CharacterInfo => ({
+    id: 'demo-muffin-1',
+    name: 'Muffin the fluffy bunny',
+    type: 'character',
+    avatarSource: require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+    description: 'A sweet and gentle bunny with a fluffy coat and caring personality. Muffin loves to help others stay organized and motivated with gentle reminders. Known for being encouraging, warm, and always ready with a kind word.',
+    vibes: ['bubbly', 'gentle', 'caring'],
+    tagline: 'Your fluffy friend for gentle reminders',
+    isDemo: true
+  });
+
   // Initialize component only once
   useEffect(() => {
     if (isInitialized) return;
@@ -76,93 +89,74 @@ export default function HomeTab() {
 
     // Handle character deletion
     if (characterDeletedParam === 'true') {
-      // Remove the active character and reset to default
-      setCharacters([]);
-      setActiveCharacterId(null);
+      // Reset to just the demo character
+      const demoCharacter = createDemoCharacter();
+      setCharacters([demoCharacter]);
+      setActiveCharacterId(demoCharacter.id);
       setUserMode('character');
       setNotifications([]);
       setIsInitialized(true);
       return;
     }
 
-    // Initialize with default demo character if no params
-    if (!characterTypeParam && !characterNameParam) {
-      const defaultCharacter: CharacterInfo = {
-        id: 'demo-character-1',
-        name: 'Muffin the fluffy bunny',
-        type: 'character',
-        avatarSource: require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
-        description: 'A sweet and gentle bunny with a fluffy coat and caring personality. Muffin loves to help others stay organized and motivated with gentle reminders. Known for being encouraging, warm, and always ready with a kind word.',
-        vibes: ['bubbly', 'gentle', 'caring'],
-        tagline: 'Your fluffy friend for gentle reminders'
-      };
-      setCharacters([defaultCharacter]);
-      setActiveCharacterId(defaultCharacter.id);
-      setUserMode('character');
-    } else {
-      // Set user mode from params
-      if (userModeParam) {
-        setUserMode(userModeParam as 'character' | 'spellbot' | 'ai-free');
-      }
+    // Always start with demo character in slot 1
+    const demoCharacter = createDemoCharacter();
+    let initialCharacters = [demoCharacter];
+    let initialActiveId = demoCharacter.id;
+
+    // Handle new character creation or updates
+    if (characterTypeParam && characterNameParam) {
+      const characterType = characterTypeParam as 'character' | 'spellbot' | 'ai-free';
       
-      // Handle new character creation or updates
-      if (characterTypeParam && characterNameParam) {
-        const characterType = characterTypeParam as 'character' | 'spellbot' | 'ai-free';
-        
-        // Parse character vibes if available
-        let parsedVibes: string[] = [];
-        if (characterVibesParam) {
-          try {
-            parsedVibes = JSON.parse(characterVibesParam);
-          } catch (error) {
-            console.log('Error parsing character vibes:', error);
-          }
+      // Parse character vibes if available
+      let parsedVibes: string[] = [];
+      if (characterVibesParam) {
+        try {
+          parsedVibes = JSON.parse(characterVibesParam);
+        } catch (error) {
+          console.log('Error parsing character vibes:', error);
         }
-
-        const newCharacter: CharacterInfo = {
-          id: `character-${Date.now()}`, // Generate unique ID
-          name: characterNameParam,
-          type: characterType,
-          avatarSource: userAvatarUriParam 
-            ? { uri: userAvatarUriParam }
-            : characterType === 'spellbot'
-            ? require('../../assets/images/square logo 2.png')
-            : characterType === 'ai-free'
-            ? require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png')
-            : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
-          description: characterDescriptionParam,
-          vibes: parsedVibes,
-          tagline: characterTaglineParam
-        };
-
-        // Smart character management
-        setCharacters(prevCharacters => {
-          // Check if this is an update to existing character (same ID or name)
-          const existingIndex = prevCharacters.findIndex(char => 
-            char.id === newCharacter.id || char.name === characterNameParam
-          );
-          
-          if (existingIndex !== -1) {
-            // Update existing character
-            const updatedCharacters = [...prevCharacters];
-            updatedCharacters[existingIndex] = newCharacter;
-            return updatedCharacters;
-          } else {
-            // Add as new character - find next available slot
-            if (prevCharacters.length < 3) {
-              // Add to next available slot
-              return [...prevCharacters, newCharacter];
-            } else {
-              // All slots full - replace the last character
-              return [...prevCharacters.slice(0, 2), newCharacter];
-            }
-          }
-        });
-
-        setActiveCharacterId(newCharacter.id);
-        setUserMode(characterType);
       }
+
+      const newCharacter: CharacterInfo = {
+        id: `character-${Date.now()}`, // Generate unique ID
+        name: characterNameParam,
+        type: characterType,
+        avatarSource: userAvatarUriParam 
+          ? { uri: userAvatarUriParam }
+          : characterType === 'spellbot'
+          ? require('../../assets/images/square logo 2.png')
+          : characterType === 'ai-free'
+          ? require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png')
+          : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+        description: characterDescriptionParam,
+        vibes: parsedVibes,
+        tagline: characterTaglineParam,
+        isDemo: false
+      };
+
+      // CRITICAL: Always preserve Muffin in slot 1, add new characters to slots 2 and 3
+      if (characterNameParam !== 'Muffin the fluffy bunny') {
+        // This is a new character, add it to slot 2 (index 1)
+        initialCharacters = [demoCharacter, newCharacter];
+        initialActiveId = newCharacter.id; // Make new character active
+      } else {
+        // This is an update to Muffin (shouldn't happen in normal flow, but just in case)
+        initialCharacters = [{ ...demoCharacter, ...newCharacter, id: demoCharacter.id, isDemo: true }];
+        initialActiveId = demoCharacter.id;
+      }
+
+      // Set user mode from character type
+      setUserMode(characterType);
     }
+
+    // Set user mode from params if provided
+    if (userModeParam) {
+      setUserMode(userModeParam as 'character' | 'spellbot' | 'ai-free');
+    }
+
+    setCharacters(initialCharacters);
+    setActiveCharacterId(initialActiveId);
     
     // Load user's notifications
     loadNotifications();
