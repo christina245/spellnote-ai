@@ -1094,9 +1094,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '500', // UPDATED: Decreased from 600 to 500 (100 weight decrease)
+    fontWeight: '500',
     color: '#FFFFFF',
-    fontFamily: 'Inter',
+    fontFamily: 'Montserrat_700Bold', // UPDATED: Changed from 'Inter' to 'Montserrat_700Bold'
     marginBottom: 16,
   },
   // NEW: Date header styling with green mint color
