@@ -43,6 +43,10 @@ interface CharacterInfo {
   isDemo?: boolean;
 }
 
+// CRITICAL: Global notification storage to persist across navigation
+let globalNotifications: NotificationEntry[] = [];
+let globalProcessedIds: Set<string> = new Set();
+
 export default function HomeTab() {
   const [userEmail] = useState('useremail@gmail.com');
   const [userMode, setUserMode] = useState<'character' | 'spellbot' | 'ai-free'>('character');
@@ -55,7 +59,6 @@ export default function HomeTab() {
   const [activeCharacterId, setActiveCharacterId] = useState<string | null>(null);
   const [showBetaModal, setShowBetaModal] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [processedNotificationIds, setProcessedNotificationIds] = useState<Set<string>>(new Set());
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -96,8 +99,10 @@ export default function HomeTab() {
       setCharacters([demoCharacter]);
       setActiveCharacterId(demoCharacter.id);
       setUserMode('character');
+      // CRITICAL: Clear all notifications when character is deleted
+      globalNotifications = [];
+      globalProcessedIds = new Set();
       setNotifications([]);
-      setProcessedNotificationIds(new Set());
       setIsInitialized(true);
       return;
     }
@@ -197,8 +202,8 @@ export default function HomeTab() {
   }, []);
 
   const loadNotifications = () => {
-    // CRITICAL: Start with existing notifications to preserve them
-    let loadedNotifications: NotificationEntry[] = [...notifications];
+    // CRITICAL: Start with existing global notifications to preserve them
+    let loadedNotifications: NotificationEntry[] = [...globalNotifications];
 
     // 1. Load the original onboarding notification (if exists and not already loaded)
     const originalHeader = params.notificationHeader as string;
@@ -207,7 +212,7 @@ export default function HomeTab() {
     const originalId = 'original-1';
 
     if ((originalHeader?.trim() || originalDetails?.trim() || originalTime?.trim()) && 
-        !processedNotificationIds.has(originalId)) {
+        !globalProcessedIds.has(originalId)) {
       // Get active character info for notification
       const activeCharacter = characters.find(char => char.id === activeCharacterId);
       
@@ -225,7 +230,7 @@ export default function HomeTab() {
       };
 
       loadedNotifications.push(originalNotification);
-      setProcessedNotificationIds(prev => new Set([...prev, originalId]));
+      globalProcessedIds.add(originalId);
     }
 
     // 2. Load new notification from add-notification screen (if exists)
@@ -242,7 +247,7 @@ export default function HomeTab() {
       const newNotificationId = `notification-${notificationTimestamp}`;
       
       // Check if this notification has already been processed
-      if (!processedNotificationIds.has(newNotificationId)) {
+      if (!globalProcessedIds.has(newNotificationId)) {
         // Get character info for new notification
         const selectedCharacter = characters.find(char => char.id === selectedCharacterId) || 
                                  characters.find(char => char.id === activeCharacterId);
@@ -262,7 +267,7 @@ export default function HomeTab() {
         };
 
         loadedNotifications.push(newNotification);
-        setProcessedNotificationIds(prev => new Set([...prev, newNotificationId]));
+        globalProcessedIds.add(newNotificationId);
       }
     }
 
@@ -275,10 +280,9 @@ export default function HomeTab() {
       return b.createdAt - a.createdAt;
     });
 
-    // CRITICAL: Only update state if notifications have actually changed
-    if (JSON.stringify(loadedNotifications) !== JSON.stringify(notifications)) {
-      setNotifications(loadedNotifications);
-    }
+    // CRITICAL: Update global storage and local state
+    globalNotifications = loadedNotifications;
+    setNotifications(loadedNotifications);
   };
 
   const formatDate = (date: Date) => {
