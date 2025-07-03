@@ -715,7 +715,10 @@ export default function HomeTab() {
           {selectedDateNotifications.length > 0 ? (
             // Show notifications for selected date
             <>
-              <Text style={styles.dateHeader}>
+              <Text style={[
+                styles.dateHeader,
+                styles.firstDateHeader // UPDATED: Apply special styling for first date header
+              ]}>
                 {formatDateForSectionHeader(formatDate(selectedDate))}
               </Text>
               {selectedDateNotifications.map((notification, index) => (
@@ -776,7 +779,10 @@ export default function HomeTab() {
             groupedNotifications.map((group, groupIndex) => (
               <View key={group.date}>
                 {/* Date Header */}
-                <Text style={styles.dateHeader}>
+                <Text style={[
+                  styles.dateHeader,
+                  groupIndex === 0 && styles.firstDateHeader // UPDATED: Apply special styling for first date header
+                ]}>
                   {formatDateForSectionHeader(group.date)}
                 </Text>
                 
@@ -1082,7 +1088,11 @@ const styles = StyleSheet.create({
     lineHeight: 36, // 300% line height as specified
     letterSpacing: 2,
     marginBottom: 8,
-    marginTop: 16, // Add some space above each date section
+    marginTop: 16, // Default margin for subsequent date headers
+  },
+  // UPDATED: Special styling for the first date header to ensure maximum 25px gap
+  firstDateHeader: {
+    marginTop: 8, // UPDATED: Reduced from 16px to 8px to ensure maximum 25px gap (16px section title marginBottom + 8px = 24px total)
   },
   notificationCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
