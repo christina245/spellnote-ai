@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
   deleteButtonContainer: {
     marginTop: 40, // Extra space above delete button
     marginBottom: 32, // Space below delete button
-    paddingHorizontal: 0, // No extra horizontal padding
+    paddingHorizontal: 40, // UPDATED: Maximum 40px padding on left and right
   },
   deleteButton: {
     flexDirection: 'row',
@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.3)',
-    width: '100%', // Full width to match other elements
+    width: '100%', // Full width within the container (which now has 40px padding)
   },
   deleteButtonText: {
     fontSize: 16,
