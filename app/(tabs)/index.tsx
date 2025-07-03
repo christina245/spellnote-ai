@@ -38,8 +38,8 @@ interface CharacterInfo {
 }
 
 export default function HomeTab() {
-  const [userEmail] = useState('useremail@gmail.com'); // This will be dynamic later
-  const [userMode, setUserMode] = useState<'character' | 'spellbot' | 'ai-free'>('character'); // Default to character mode
+  const [userEmail] = useState('useremail@gmail.com');
+  const [userMode, setUserMode] = useState<'character' | 'spellbot' | 'ai-free'>('character');
   const [notifications, setNotifications] = useState<NotificationEntry[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -47,6 +47,7 @@ export default function HomeTab() {
   const [showNavigationMenu, setShowNavigationMenu] = useState(false);
   const [characterInfo, setCharacterInfo] = useState<CharacterInfo | null>(null);
   const [showBetaModal, setShowBetaModal] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -54,15 +55,24 @@ export default function HomeTab() {
     Montserrat_700Bold,
   });
 
+  // Initialize component only once
   useEffect(() => {
-    // Check if user mode was passed from navigation (e.g., from character creation or mode switching)
-    if (params.userMode) {
-      setUserMode(params.userMode as 'character' | 'spellbot' | 'ai-free');
+    if (isInitialized) return;
+
+    // Extract specific values from params to avoid infinite re-renders
+    const userModeParam = params.userMode as string;
+    const characterTypeParam = params.characterType as string;
+    const characterNameParam = params.characterName as string;
+    const userAvatarUriParam = params.userAvatarUri as string;
+
+    // Set user mode from params
+    if (userModeParam) {
+      setUserMode(userModeParam as 'character' | 'spellbot' | 'ai-free');
     }
     
     // Set character info based on user's selection during onboarding
-    if (params.characterType) {
-      const characterType = params.characterType as 'character' | 'spellbot' | 'ai-free';
+    if (characterTypeParam) {
+      const characterType = characterTypeParam as 'character' | 'spellbot' | 'ai-free';
       setUserMode(characterType);
       
       if (characterType === 'spellbot') {
@@ -73,10 +83,10 @@ export default function HomeTab() {
         });
       } else if (characterType === 'character') {
         setCharacterInfo({
-          name: params.characterName as string || 'Character Name',
+          name: characterNameParam || 'Character Name',
           type: 'character',
-          avatarSource: params.userAvatarUri 
-            ? { uri: params.userAvatarUri as string }
+          avatarSource: userAvatarUriParam 
+            ? { uri: userAvatarUriParam }
             : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
         });
       } else if (characterType === 'ai-free') {
@@ -88,7 +98,7 @@ export default function HomeTab() {
       }
     }
     
-    // Load user's notifications - this would come from storage/API in real app
+    // Load user's notifications
     loadNotifications();
     
     // Set initial week start date (start of current week)
@@ -97,16 +107,20 @@ export default function HomeTab() {
     startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
     setWeekStartDate(startOfWeek);
     
-    // Update current date
+    setIsInitialized(true);
+  }, [isInitialized]); // Only depend on isInitialized flag
+
+  // Separate effect for time updates
+  useEffect(() => {
     const timer = setInterval(() => {
       setCurrentDate(new Date());
     }, 60000); // Update every minute
 
     return () => clearInterval(timer);
-  }, [params]);
+  }, []);
 
   const loadNotifications = () => {
-    const loadedNotifications: NotificationEntry[] = [];
+    const loadedNotifications: NotificationEntry[]= [];
 
     // 1. Load the original onboarding notification (if exists)
     const originalHeader = params.notificationHeader as string;
