@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Camera } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import PhotoUploadModal from '@/components/PhotoUploadModal';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -23,11 +24,12 @@ export default function CreateCharacter() {
   const [characterTagline, setCharacterTagline] = useState('');
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(false);
-  const [avatarUploaded, setAvatarUploaded] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [generatedVibes, setGeneratedVibes] = useState<string[]>([]);
   const [generateClickCount, setGenerateClickCount] = useState(0);
   const [showBetaModal, setShowBetaModal] = useState(false);
   const [betaModalType, setBetaModalType] = useState<'public' | 'avatar'>('public');
+  const [showPhotoUploadModal, setShowPhotoUploadModal] = useState(false);
   const router = useRouter();
 
   const [fontsLoaded] = useFonts({
@@ -67,8 +69,12 @@ export default function CreateCharacter() {
   };
 
   const handleAvatarUpload = () => {
-    setBetaModalType('avatar');
-    setShowBetaModal(true);
+    setShowPhotoUploadModal(true);
+  };
+
+  const handlePhotoSelected = (uri: string) => {
+    setAvatarUri(uri);
+    setShowPhotoUploadModal(false);
   };
 
   const generateVibesBasedOnSelection = () => {
@@ -183,7 +189,8 @@ export default function CreateCharacter() {
                 characterName: characterName,
                 characterDescription: characterDescription,
                 characterTagline: characterTagline,
-                characterVibes: JSON.stringify(selectedVibes)
+                characterVibes: JSON.stringify(selectedVibes),
+                userAvatarUri: avatarUri || undefined
               }
             });
           }
@@ -270,10 +277,14 @@ export default function CreateCharacter() {
               activeOpacity={0.7}
             >
               <View style={styles.avatarCircle}>
-                {!avatarUploaded ? (
-                  <Text style={styles.uploadText}>UPLOAD IMAGE</Text>
+                {avatarUri ? (
+                  <Image 
+                    source={{ uri: avatarUri }}
+                    style={styles.uploadedAvatar}
+                    resizeMode="cover"
+                  />
                 ) : (
-                  <Text style={styles.uploadText}>✓ UPLOADED</Text>
+                  <Text style={styles.uploadText}>UPLOAD IMAGE</Text>
                 )}
               </View>
             </TouchableOpacity>
@@ -433,6 +444,13 @@ Give as much description as you can!"
         </TouchableOpacity>
       </View>
 
+      {/* Photo Upload Modal */}
+      <PhotoUploadModal
+        visible={showPhotoUploadModal}
+        onClose={() => setShowPhotoUploadModal(false)}
+        onPhotoSelected={handlePhotoSelected}
+      />
+
       {/* Beta Modal */}
       <Modal
         visible={showBetaModal}
@@ -571,6 +589,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D1D5DB',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   uploadText: {
     fontSize: 12,
@@ -578,6 +597,11 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontFamily: 'Inter',
     textAlign: 'center',
+  },
+  uploadedAvatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   cameraIcon: {
     position: 'absolute',

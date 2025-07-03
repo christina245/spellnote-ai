@@ -4,8 +4,8 @@ import {
   Text, 
   StyleSheet, 
   ScrollView,
-  TouchableOpacity,
   TextInput,
+  TouchableOpacity,
   Dimensions,
   Alert,
   Image,
@@ -14,6 +14,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Camera, ArrowRight } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import PhotoUploadModal from '@/components/PhotoUploadModal';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -23,10 +24,11 @@ export default function CharacterCreation() {
   const [characterTagline, setCharacterTagline] = useState('');
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(false);
-  const [avatarUploaded, setAvatarUploaded] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [generatedVibes, setGeneratedVibes] = useState<string[]>([]);
   const [generateClickCount, setGenerateClickCount] = useState(0);
   const [showBetaModal, setShowBetaModal] = useState(false);
+  const [showPhotoUploadModal, setShowPhotoUploadModal] = useState(false);
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -67,9 +69,12 @@ export default function CharacterCreation() {
   };
 
   const handleAvatarUpload = () => {
-    // Simulate avatar upload
-    Alert.alert('Avatar Upload', 'Avatar upload functionality would be implemented here');
-    setAvatarUploaded(true);
+    setShowPhotoUploadModal(true);
+  };
+
+  const handlePhotoSelected = (uri: string) => {
+    setAvatarUri(uri);
+    setShowPhotoUploadModal(false);
   };
 
   const generateVibesBasedOnSelection = () => {
@@ -180,6 +185,8 @@ export default function CharacterCreation() {
           characterName: characterName,
           characterDescription: characterDescription,
           characterVibes: JSON.stringify(selectedVibes),
+          characterTagline: characterTagline,
+          userAvatarUri: avatarUri || undefined,
           // Pass through the notification data from first-notification
           notificationHeader: params.notificationHeader || 'Board game night prep',
           notificationDetails: params.notificationDetails || 'Need to brush up on how to play Catan at 6 pm this Wednesday before board game night at 8. Ping me at 5 and 5:30 pm.',
@@ -199,7 +206,9 @@ export default function CharacterCreation() {
           characterType: 'character',
           characterName: characterName,
           characterDescription: characterDescription,
-          characterVibes: JSON.stringify(selectedVibes)
+          characterVibes: JSON.stringify(selectedVibes),
+          characterTagline: characterTagline,
+          userAvatarUri: avatarUri || undefined
         }
       });
     }
@@ -217,6 +226,13 @@ export default function CharacterCreation() {
 
   const closeBetaModal = () => {
     setShowBetaModal(false);
+  };
+
+  const getAvatarSource = () => {
+    if (avatarUri) {
+      return { uri: avatarUri };
+    }
+    return require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
   };
 
   if (!fontsLoaded) {
@@ -284,10 +300,14 @@ export default function CharacterCreation() {
               activeOpacity={0.7}
             >
               <View style={styles.avatarCircle}>
-                {!avatarUploaded ? (
-                  <Text style={styles.uploadText}>UPLOAD IMAGE</Text>
+                {avatarUri ? (
+                  <Image 
+                    source={{ uri: avatarUri }}
+                    style={styles.uploadedAvatar}
+                    resizeMode="cover"
+                  />
                 ) : (
-                  <Text style={styles.uploadText}>✓ UPLOADED</Text>
+                  <Text style={styles.uploadText}>UPLOAD IMAGE</Text>
                 )}
               </View>
             </TouchableOpacity>
@@ -446,6 +466,13 @@ Give as much description as you can!"
         </TouchableOpacity>
       </ScrollView>
 
+      {/* Photo Upload Modal */}
+      <PhotoUploadModal
+        visible={showPhotoUploadModal}
+        onClose={() => setShowPhotoUploadModal(false)}
+        onPhotoSelected={handlePhotoSelected}
+      />
+
       {/* Beta Modal */}
       <Modal
         visible={showBetaModal}
@@ -579,6 +606,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#D1D5DB',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   uploadText: {
     fontSize: 12,
@@ -586,6 +614,11 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontFamily: 'Inter',
     textAlign: 'center',
+  },
+  uploadedAvatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   cameraIcon: {
     position: 'absolute',

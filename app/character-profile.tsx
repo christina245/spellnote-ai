@@ -14,6 +14,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Camera, Trash2 } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import PhotoUploadModal from '@/components/PhotoUploadModal';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -23,10 +24,11 @@ export default function CharacterProfile() {
   const [characterTagline, setCharacterTagline] = useState('');
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(false);
-  const [avatarUploaded, setAvatarUploaded] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showBetaModal, setShowBetaModal] = useState(false);
   const [betaModalType, setBetaModalType] = useState<'public' | 'avatar'>('public');
+  const [showPhotoUploadModal, setShowPhotoUploadModal] = useState(false);
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -59,7 +61,7 @@ export default function CharacterProfile() {
 
     // Check if user has uploaded avatar
     if (params.userAvatarUri) {
-      setAvatarUploaded(true);
+      setAvatarUri(params.userAvatarUri as string);
     }
   }, [params]);
 
@@ -76,8 +78,12 @@ export default function CharacterProfile() {
   };
 
   const handleAvatarUpload = () => {
-    setBetaModalType('avatar');
-    setShowBetaModal(true);
+    setShowPhotoUploadModal(true);
+  };
+
+  const handlePhotoSelected = (uri: string) => {
+    setAvatarUri(uri);
+    setShowPhotoUploadModal(false);
   };
 
   const handleSaveChanges = () => {
@@ -111,7 +117,7 @@ export default function CharacterProfile() {
                 characterDescription: characterDescription,
                 characterTagline: characterTagline,
                 characterVibes: JSON.stringify(selectedVibes),
-                userAvatarUri: params.userAvatarUri
+                userAvatarUri: avatarUri || undefined
               }
             });
           }
@@ -164,6 +170,9 @@ export default function CharacterProfile() {
   };
 
   const getAvatarSource = () => {
+    if (avatarUri) {
+      return { uri: avatarUri };
+    }
     if (params.userAvatarUri) {
       return { uri: params.userAvatarUri as string };
     }
@@ -344,6 +353,13 @@ Give as much description as you can!"
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Photo Upload Modal */}
+      <PhotoUploadModal
+        visible={showPhotoUploadModal}
+        onClose={() => setShowPhotoUploadModal(false)}
+        onPhotoSelected={handlePhotoSelected}
+      />
 
       {/* Delete Confirmation Modal */}
       <Modal
