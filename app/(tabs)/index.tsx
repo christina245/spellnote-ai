@@ -298,7 +298,7 @@ export default function HomeTab() {
     }
   };
 
-  // NEW: Format date for section headers (green mint color)
+  // FIXED: Format date for section headers (green mint color)
   const formatDateForSectionHeader = (dateString: string) => {
     const today = formatDate(new Date());
     const tomorrow = formatDate(new Date(Date.now() + 86400000));
@@ -308,11 +308,40 @@ export default function HomeTab() {
     } else if (dateString === tomorrow) {
       return 'TOMORROW';
     } else {
-      // Format as "JULY 4" style
-      const date = new Date(dateString);
-      const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-                     'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-      return `${months[date.getMonth()]} ${date.getDate()}`;
+      // CRITICAL FIX: Parse the MM/DD/YYYY format correctly
+      try {
+        // Split the date string (MM/DD/YYYY format)
+        const parts = dateString.split('/');
+        if (parts.length === 3) {
+          const month = parseInt(parts[0], 10) - 1; // Month is 0-indexed in Date constructor
+          const day = parseInt(parts[1], 10);
+          const year = parseInt(parts[2], 10);
+          
+          // Create date object
+          const date = new Date(year, month, day);
+          
+          // Validate the date
+          if (!isNaN(date.getTime())) {
+            const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                           'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+            return `${months[date.getMonth()]} ${date.getDate()}`;
+          }
+        }
+        
+        // Fallback: try parsing as ISO string or other formats
+        const date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+          const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                         'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+          return `${months[date.getMonth()]} ${date.getDate()}`;
+        }
+        
+        // If all parsing fails, return the original string
+        return dateString.toUpperCase();
+      } catch (error) {
+        console.log('Error parsing date for section header:', error);
+        return dateString.toUpperCase();
+      }
     }
   };
 
