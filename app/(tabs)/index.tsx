@@ -400,6 +400,11 @@ export default function HomeTab() {
     }
   };
 
+  const handleEmptyCharacterPress = () => {
+    // Navigate to create character page for empty slots
+    router.push('/create-character');
+  };
+
   const handleNavigationMenuNavigate = (route: string) => {
     // Handle navigation based on route
     switch (route) {
@@ -504,12 +509,16 @@ export default function HomeTab() {
           <View style={styles.characterSlotsSection}>
             <View style={styles.characterSlots}>
               {/* First Character Slot - Empty */}
-              <View style={styles.characterSlot}>
+              <TouchableOpacity 
+                style={styles.characterSlot}
+                onPress={handleEmptyCharacterPress}
+                activeOpacity={0.7}
+              >
                 <View style={[styles.characterAvatarContainer, styles.emptySlot]}>
                   <Plus size={24} color="#9CA3AF" />
                 </View>
                 <Text style={styles.characterNameEmpty}>Add character</Text>
-              </View>
+              </TouchableOpacity>
 
               {/* Second Character Slot - Active (Center) - Clickable without special styling */}
               {isCharacterClickable() ? (
@@ -551,12 +560,16 @@ export default function HomeTab() {
               )}
 
               {/* Third Character Slot - Empty */}
-              <View style={styles.characterSlot}>
+              <TouchableOpacity 
+                style={styles.characterSlot}
+                onPress={handleEmptyCharacterPress}
+                activeOpacity={0.7}
+              >
                 <View style={[styles.characterAvatarContainer, styles.emptySlot]}>
                   <Plus size={24} color="#9CA3AF" />
                 </View>
                 <Text style={styles.characterNameEmpty}>Add character</Text>
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
         )}
