@@ -382,7 +382,70 @@ export default function HomeTab() {
     return dates;
   };
 
-  // NEW: Group notifications by date for chronological display
+  // UPDATED: Check if selected date is today
+  const isSelectedDateToday = () => {
+    const today = new Date();
+    return selectedDate.toDateString() === today.toDateString();
+  };
+
+  // UPDATED: Get notifications to display based on new logic
+  const getNotificationsToDisplay = () => {
+    const selectedDateString = formatDate(selectedDate);
+    
+    if (isSelectedDateToday()) {
+      // TODAY SELECTED: Show all notifications stacked chronologically
+      return getGroupedNotifications();
+    } else {
+      // OTHER DATE SELECTED: Show only that date's notifications
+      const selectedDateNotifications = notifications.filter(n => n.date === selectedDateString);
+      
+      if (selectedDateNotifications.length > 0) {
+        // Has notifications for selected date - show them
+        return [{
+          date: selectedDateString,
+          notifications: selectedDateNotifications
+        }];
+      } else {
+        // NO NOTIFICATIONS for selected date - show next upcoming notifications
+        return getUpcomingNotificationsFromDate(selectedDateString);
+      }
+    }
+  };
+
+  // NEW: Get upcoming notifications starting from a specific date
+  const getUpcomingNotificationsFromDate = (fromDateString: string) => {
+    const fromDate = new Date(fromDateString);
+    
+    // Filter notifications that are on or after the selected date
+    const upcomingNotifications = notifications.filter(notification => {
+      const notificationDate = new Date(notification.date);
+      return notificationDate >= fromDate;
+    });
+    
+    // Group by date
+    const grouped: { [date: string]: NotificationEntry[] } = {};
+    upcomingNotifications.forEach(notification => {
+      const date = notification.date;
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(notification);
+    });
+
+    // Sort dates chronologically (earliest first)
+    const sortedDates = Object.keys(grouped).sort((a, b) => {
+      const dateA = new Date(a);
+      const dateB = new Date(b);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    return sortedDates.map(date => ({
+      date,
+      notifications: grouped[date]
+    }));
+  };
+
+  // Group notifications by date for chronological display
   const getGroupedNotifications = () => {
     const grouped: { [date: string]: NotificationEntry[] } = {};
     
@@ -405,19 +468,6 @@ export default function HomeTab() {
       date,
       notifications: grouped[date]
     }));
-  };
-
-  // Get notifications for the selected date
-  const getNotificationsForSelectedDate = () => {
-    const selectedDateString = formatDate(selectedDate);
-    return notifications.filter(notification => notification.date === selectedDateString);
-  };
-
-  // Get notifications for the current week
-  const getNotificationsForCurrentWeek = () => {
-    const weekDates = getWeekDates();
-    const weekDateStrings = weekDates.map(date => formatDate(date));
-    return notifications.filter(notification => weekDateStrings.includes(notification.date));
   };
 
   const renderWeekDays = () => {
@@ -630,9 +680,8 @@ export default function HomeTab() {
   const characterSlots = getCharacterSlots();
   const activeCharacter = getActiveCharacter();
   
-  // Determine which notifications to show
-  const selectedDateNotifications = getNotificationsForSelectedDate();
-  const groupedNotifications = getGroupedNotifications();
+  // UPDATED: Get notifications to display based on new logic
+  const notificationsToDisplay = getNotificationsToDisplay();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -747,77 +796,14 @@ export default function HomeTab() {
         <View style={styles.notificationsSection}>
           <Text style={styles.sectionTitle}>Upcoming notifications</Text>
           
-          {/* Show notifications for selected date if any, otherwise show chronologically grouped */}
-          {selectedDateNotifications.length > 0 ? (
-            // Show notifications for selected date
-            <>
-              <Text style={[
-                styles.dateHeader,
-                styles.firstDateHeader // UPDATED: Apply special styling for first date header
-              ]}>
-                {formatDateForSectionHeader(formatDate(selectedDate))}
-              </Text>
-              {selectedDateNotifications.map((notification, index) => (
-                <TouchableOpacity
-                  key={notification.id}
-                  style={styles.notificationCard}
-                  onPress={handleNotificationPress}
-                  activeOpacity={0.8}
-                >
-                  {/* Notification Content with Avatar and Text Side by Side */}
-                  <View style={styles.notificationContent}>
-                    {/* Avatar positioned to the left */}
-                    <View style={[
-                      styles.notificationAvatarContainer,
-                      notification.isFirst && styles.notificationAvatarContainerFirst
-                    ]}>
-                      <Image 
-                        source={notification.avatarSource}
-                        style={styles.notificationAvatar}
-                        resizeMode="cover"
-                      />
-                    </View>
-
-                    {/* Text content positioned to the right of avatar */}
-                    <View style={styles.notificationTextContent}>
-                      {/* Header and timestamp on the same line */}
-                      <View style={styles.notificationHeaderRow}>
-                        <Text style={styles.notificationTitle}>
-                          {notification.header}
-                        </Text>
-                        <Text style={styles.notificationTimestamp}>{notification.time}</Text>
-                      </View>
-                      
-                      <Text 
-                        style={[
-                          styles.notificationDetails,
-                          notification.sendWithoutAI && styles.notificationDetailsAIFree
-                        ]}
-                        numberOfLines={3}
-                        ellipsizeMode="tail"
-                      >
-                        {notification.details}
-                      </Text>
-
-                      {/* AI-Free Badge */}
-                      {notification.sendWithoutAI && (
-                        <View style={styles.aiFreeBadge}>
-                          <Text style={styles.aiFreeBadgeText}>AI-FREE</Text>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </>
-          ) : groupedNotifications.length > 0 ? (
-            // Show chronologically grouped notifications
-            groupedNotifications.map((group, groupIndex) => (
+          {/* UPDATED: Display notifications based on new logic */}
+          {notificationsToDisplay.length > 0 ? (
+            notificationsToDisplay.map((group, groupIndex) => (
               <View key={group.date}>
                 {/* Date Header */}
                 <Text style={[
                   styles.dateHeader,
-                  groupIndex === 0 && styles.firstDateHeader // UPDATED: Apply special styling for first date header
+                  groupIndex === 0 && styles.firstDateHeader
                 ]}>
                   {formatDateForSectionHeader(group.date)}
                 </Text>
