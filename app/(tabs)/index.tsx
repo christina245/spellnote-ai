@@ -29,6 +29,7 @@ interface NotificationEntry {
   avatarSource: any;
   isFirst?: boolean;
   sendWithoutAI?: boolean;
+  createdAt: number; // Timestamp for sorting
 }
 
 interface CharacterInfo {
@@ -39,7 +40,7 @@ interface CharacterInfo {
   description?: string;
   vibes?: string[];
   tagline?: string;
-  isDemo?: boolean; // Flag to identify demo character
+  isDemo?: boolean;
 }
 
 export default function HomeTab() {
@@ -119,7 +120,7 @@ export default function HomeTab() {
       }
 
       const newCharacter: CharacterInfo = {
-        id: `character-${Date.now()}`, // Generate unique ID
+        id: `character-${Date.now()}`,
         name: characterNameParam,
         type: characterType,
         avatarSource: userAvatarUriParam 
@@ -158,9 +159,6 @@ export default function HomeTab() {
     setCharacters(initialCharacters);
     setActiveCharacterId(initialActiveId);
     
-    // Load user's notifications
-    loadNotifications();
-    
     // Set initial week start date (start of current week)
     const today = new Date();
     const startOfWeek = new Date(today);
@@ -168,7 +166,23 @@ export default function HomeTab() {
     setWeekStartDate(startOfWeek);
     
     setIsInitialized(true);
-  }, [isInitialized]); // Only depend on isInitialized flag
+  }, [isInitialized]);
+
+  // CRITICAL: Load notifications whenever params change (new notifications added)
+  useEffect(() => {
+    if (!isInitialized) return;
+    loadNotifications();
+  }, [
+    params.newNotificationHeader,
+    params.newNotificationDetails,
+    params.newNotificationTime,
+    params.newNotificationDate,
+    params.selectedCharacterId,
+    params.sendWithoutAI,
+    characters,
+    activeCharacterId,
+    isInitialized
+  ]);
 
   // Separate effect for time updates
   useEffect(() => {
@@ -180,14 +194,16 @@ export default function HomeTab() {
   }, []);
 
   const loadNotifications = () => {
-    const loadedNotifications: NotificationEntry[] = [];
+    // Start with existing notifications to preserve them
+    let loadedNotifications: NotificationEntry[] = [...notifications];
 
-    // 1. Load the original onboarding notification (if exists)
+    // 1. Load the original onboarding notification (if exists and not already loaded)
     const originalHeader = params.notificationHeader as string;
     const originalDetails = params.notificationDetails as string;
     const originalTime = params.time as string;
 
-    if (originalHeader?.trim() || originalDetails?.trim() || originalTime?.trim()) {
+    if ((originalHeader?.trim() || originalDetails?.trim() || originalTime?.trim()) && 
+        !loadedNotifications.some(n => n.id === 'original-1')) {
       // Get active character info for notification
       const activeCharacter = characters.find(char => char.id === activeCharacterId);
       
@@ -200,7 +216,8 @@ export default function HomeTab() {
         characterName: activeCharacter?.name || 'Character Name',
         characterType: activeCharacter?.type || userMode,
         avatarSource: activeCharacter?.avatarSource || require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
-        isFirst: true
+        isFirst: true,
+        createdAt: Date.now() - 1000 // Slightly older to ensure it appears first
       };
 
       loadedNotifications.push(originalNotification);
@@ -215,32 +232,47 @@ export default function HomeTab() {
     const sendWithoutAI = params.sendWithoutAI === 'true';
 
     if (newHeader?.trim() || newDetails?.trim()) {
-      // Get character info for new notification
-      const selectedCharacter = characters.find(char => char.id === selectedCharacterId) || 
-                               characters.find(char => char.id === activeCharacterId);
+      // Create unique ID based on content and timestamp to avoid duplicates
+      const newNotificationId = `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Check if this notification already exists (avoid duplicates)
+      const isDuplicate = loadedNotifications.some(n => 
+        n.header === newHeader?.trim() && 
+        n.details === newDetails?.trim() && 
+        n.time === newTime?.trim() &&
+        Math.abs(n.createdAt - Date.now()) < 5000 // Within 5 seconds
+      );
 
-      const newNotification: NotificationEntry = {
-        id: `new-${Date.now()}`, // Unique ID based on timestamp
-        header: newHeader.trim(),
-        details: newDetails.trim(),
-        date: newDate ? formatDate(new Date(newDate)) : formatDate(new Date()),
-        time: newTime?.trim() || '6:30 PM',
-        characterName: selectedCharacter?.name || 'Character Name',
-        characterType: selectedCharacter?.type || userMode,
-        avatarSource: selectedCharacter?.avatarSource || require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
-        isFirst: false,
-        sendWithoutAI: sendWithoutAI
-      };
+      if (!isDuplicate) {
+        // Get character info for new notification
+        const selectedCharacter = characters.find(char => char.id === selectedCharacterId) || 
+                                 characters.find(char => char.id === activeCharacterId);
 
-      loadedNotifications.push(newNotification);
+        const newNotification: NotificationEntry = {
+          id: newNotificationId,
+          header: newHeader.trim(),
+          details: newDetails.trim(),
+          date: newDate ? formatDate(new Date(newDate)) : formatDate(new Date()),
+          time: newTime?.trim() || '6:30 PM',
+          characterName: selectedCharacter?.name || 'Character Name',
+          characterType: selectedCharacter?.type || userMode,
+          avatarSource: selectedCharacter?.avatarSource || require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+          isFirst: false,
+          sendWithoutAI: sendWithoutAI,
+          createdAt: Date.now()
+        };
+
+        loadedNotifications.push(newNotification);
+      }
     }
 
-    // 3. Sort notifications by date/time (most recent first)
+    // 3. Sort notifications by creation time (newest first, but keep original first if it exists)
     loadedNotifications.sort((a, b) => {
-      // For now, just maintain the order: original first, then new ones
+      // Always keep the original notification first
       if (a.isFirst) return -1;
       if (b.isFirst) return 1;
-      return 0;
+      // Sort others by creation time (newest first)
+      return b.createdAt - a.createdAt;
     });
 
     setNotifications(loadedNotifications);
@@ -296,6 +328,19 @@ export default function HomeTab() {
     return dates;
   };
 
+  // Get notifications for the selected date
+  const getNotificationsForSelectedDate = () => {
+    const selectedDateString = formatDate(selectedDate);
+    return notifications.filter(notification => notification.date === selectedDateString);
+  };
+
+  // Get notifications for the current week
+  const getNotificationsForCurrentWeek = () => {
+    const weekDates = getWeekDates();
+    const weekDateStrings = weekDates.map(date => formatDate(date));
+    return notifications.filter(notification => weekDateStrings.includes(notification.date));
+  };
+
   const renderWeekDays = () => {
     const weekDates = getWeekDates();
     const today = new Date();
@@ -304,6 +349,10 @@ export default function HomeTab() {
       const isToday = date.toDateString() === today.toDateString();
       const isSelected = date.toDateString() === selectedDate.toDateString();
       const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      
+      // Check if this date has notifications
+      const dateString = formatDate(date);
+      const hasNotifications = notifications.some(n => n.date === dateString);
       
       return (
         <TouchableOpacity
@@ -330,6 +379,13 @@ export default function HomeTab() {
           ]}>
             {date.getDate()}
           </Text>
+          {/* Notification indicator dot */}
+          {hasNotifications && (
+            <View style={[
+              styles.notificationDot,
+              isSelected && styles.notificationDotSelected
+            ]} />
+          )}
         </TouchableOpacity>
       );
     });
@@ -352,7 +408,8 @@ export default function HomeTab() {
         characterName: activeCharacter?.name || 'Character Name',
         userAvatarUri: activeCharacter?.avatarSource?.uri || undefined,
         characters: JSON.stringify(characters), // Pass all characters for selection
-        activeCharacterId: activeCharacterId || ''
+        activeCharacterId: activeCharacterId || '',
+        selectedDate: formatDate(selectedDate) // Pass selected date
       }
     });
   };
@@ -493,6 +550,10 @@ export default function HomeTab() {
 
   const characterSlots = getCharacterSlots();
   const activeCharacter = getActiveCharacter();
+  
+  // Determine which notifications to show
+  const displayNotifications = getNotificationsForCurrentWeek();
+  const selectedDateNotifications = getNotificationsForSelectedDate();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -603,12 +664,18 @@ export default function HomeTab() {
           </View>
         </View>
 
-        {/* Upcoming Notifications Section */}
+        {/* Notifications Section */}
         <View style={styles.notificationsSection}>
-          <Text style={styles.sectionTitle}>Upcoming notifications</Text>
+          <Text style={styles.sectionTitle}>
+            {selectedDateNotifications.length > 0 
+              ? `Notifications for ${formatDateForDisplay(formatDate(selectedDate))}`
+              : 'Upcoming notifications'
+            }
+          </Text>
           
-          {notifications.length > 0 ? (
-            notifications.map((notification, index) => (
+          {/* Show notifications for selected date if any, otherwise show all upcoming */}
+          {(selectedDateNotifications.length > 0 ? selectedDateNotifications : displayNotifications).length > 0 ? (
+            (selectedDateNotifications.length > 0 ? selectedDateNotifications : displayNotifications).map((notification, index) => (
               <TouchableOpacity
                 key={notification.id}
                 style={styles.notificationCard}
@@ -639,6 +706,13 @@ export default function HomeTab() {
                       <Text style={styles.notificationTimestamp}>{notification.time}</Text>
                     </View>
                     
+                    {/* Date display if not today */}
+                    {notification.date !== formatDate(new Date()) && (
+                      <Text style={styles.notificationDate}>
+                        {formatDateForDisplay(notification.date)}
+                      </Text>
+                    )}
+                    
                     <Text 
                       style={[
                         styles.notificationDetails,
@@ -663,7 +737,12 @@ export default function HomeTab() {
           ) : (
             // Empty state when no notifications
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>No notifications yet</Text>
+              <Text style={styles.emptyStateText}>
+                {selectedDateNotifications.length === 0 && formatDate(selectedDate) !== formatDate(new Date())
+                  ? `No notifications for ${formatDateForDisplay(formatDate(selectedDate))}`
+                  : 'No notifications yet'
+                }
+              </Text>
               <Text style={styles.emptyStateSubtext}>Tap "Add notification" to create your first reminder</Text>
             </View>
           )}
@@ -842,6 +921,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 12,
     minWidth: 40,
+    position: 'relative',
   },
   weekDayContainerToday: {
     backgroundColor: '#34A853',
@@ -873,6 +953,17 @@ const styles = StyleSheet.create({
   },
   weekDayNumberSelected: {
     color: '#1C1830',
+  },
+  notificationDot: {
+    position: 'absolute',
+    bottom: 2,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#F3CC95',
+  },
+  notificationDotSelected: {
+    backgroundColor: '#1C1830',
   },
   notificationsSection: {
     flex: 1,
@@ -943,6 +1034,13 @@ const styles = StyleSheet.create({
     flexShrink: 0, // Prevent timestamp from shrinking
     lineHeight: 20, // Match title line height for perfect alignment
   },
+  notificationDate: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#8DD3C8',
+    fontFamily: 'Inter',
+    marginBottom: 4,
+  },
   notificationDetails: {
     fontSize: 14,
     fontWeight: '400',
@@ -980,6 +1078,7 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontFamily: 'Inter',
     marginBottom: 8,
+    textAlign: 'center',
   },
   emptyStateSubtext: {
     fontSize: 14,

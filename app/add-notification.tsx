@@ -22,7 +22,7 @@ import TimePickerModal from '@/components/TimePickerModal';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface Character {
-  id: number;
+  id: string;
   name: string;
   type: 'character' | 'spellbot' | 'ai-free' | 'empty';
   avatarSource: any;
@@ -38,7 +38,7 @@ export default function AddNotification() {
   const [time, setTime] = useState('');
   const [isRepeat, setIsRepeat] = useState(false);
   const [isTextItToMe, setIsTextItToMe] = useState(false);
-  const [selectedCharacter, setSelectedCharacter] = useState<number | null>(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [sendWithoutAI, setSendWithoutAI] = useState(false);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
@@ -59,51 +59,98 @@ export default function AddNotification() {
     const characterType = params.characterType as string;
     const characterName = params.characterName as string;
     const userAvatarUri = params.userAvatarUri as string;
+    const charactersParam = params.characters as string;
+    const activeCharacterIdParam = params.activeCharacterId as string;
+    const selectedDateParam = params.selectedDate as string;
+
+    // Set initial date from selected date if provided
+    if (selectedDateParam) {
+      try {
+        const parsedDate = new Date(selectedDateParam);
+        if (!isNaN(parsedDate.getTime())) {
+          setStartDate(parsedDate);
+        }
+      } catch (error) {
+        console.log('Error parsing selected date:', error);
+      }
+    }
 
     // Load user's characters dynamically based on their saved data
     const loadUserCharacters = () => {
-      // Create dynamic character array based on user's actual characters
-      const userCharacters: Character[] = [
-        // First slot - empty
-        {
-          id: 0,
-          name: 'Add character',
-          type: 'empty',
-          avatarSource: null,
-          isEmpty: true
-        },
-        // Second slot - user's main character (last used)
-        {
-          id: 1,
-          name: characterName || (characterType === 'spellbot' ? 'Spellbot' : 'Character Name'),
-          type: (characterType as 'character' | 'spellbot' | 'ai-free') || 'character',
-          avatarSource: userAvatarUri 
-            ? { uri: userAvatarUri }
-            : (characterType === 'spellbot' 
-              ? require('../assets/images/square logo 2.png')
-              : characterType === 'ai-free'
-              ? require('../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png')
-              : require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
-            ),
-          isEmpty: false,
-          isLastUsed: true
-        },
-        // Third slot - empty
-        {
-          id: 2,
-          name: 'Add character',
-          type: 'empty',
-          avatarSource: null,
-          isEmpty: true
-        }
-      ];
+      let userCharacters: Character[] = [];
 
-      setCharacters(userCharacters);
+      // Try to parse characters from params first
+      if (charactersParam) {
+        try {
+          const parsedCharacters = JSON.parse(charactersParam);
+          userCharacters = parsedCharacters.map((char: any) => ({
+            id: char.id,
+            name: char.name,
+            type: char.type,
+            avatarSource: char.avatarSource,
+            isEmpty: false,
+            isLastUsed: char.id === activeCharacterIdParam
+          }));
+        } catch (error) {
+          console.log('Error parsing characters:', error);
+        }
+      }
+
+      // If no characters parsed, create default structure
+      if (userCharacters.length === 0) {
+        userCharacters = [
+          // First slot - empty
+          {
+            id: 'empty-0',
+            name: 'Add character',
+            type: 'empty',
+            avatarSource: null,
+            isEmpty: true
+          },
+          // Second slot - user's main character (last used)
+          {
+            id: activeCharacterIdParam || 'character-1',
+            name: characterName || (characterType === 'spellbot' ? 'Spellbot' : 'Character Name'),
+            type: (characterType as 'character' | 'spellbot' | 'ai-free') || 'character',
+            avatarSource: userAvatarUri 
+              ? { uri: userAvatarUri }
+              : (characterType === 'spellbot' 
+                ? require('../assets/images/square logo 2.png')
+                : characterType === 'ai-free'
+                ? require('../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png')
+                : require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
+              ),
+            isEmpty: false,
+            isLastUsed: true
+          },
+          // Third slot - empty
+          {
+            id: 'empty-2',
+            name: 'Add character',
+            type: 'empty',
+            avatarSource: null,
+            isEmpty: true
+          }
+        ];
+      }
+
+      // Ensure we have exactly 3 slots
+      while (userCharacters.length < 3) {
+        userCharacters.push({
+          id: `empty-${userCharacters.length}`,
+          name: 'Add character',
+          type: 'empty',
+          avatarSource: null,
+          isEmpty: true
+        });
+      }
+
+      setCharacters(userCharacters.slice(0, 3)); // Limit to 3 slots
       
       // Set the last used character as selected by default
       const lastUsedCharacter = userCharacters.find(char => char.isLastUsed && !char.isEmpty);
       if (lastUsedCharacter) {
-        setSelectedCharacter(lastUsedCharacter.id);
+        setSelectedCharacterId(lastUsedCharacter.id);
       }
     };
 
@@ -113,7 +160,10 @@ export default function AddNotification() {
     params.userMode,
     params.characterType,
     params.characterName,
-    params.userAvatarUri
+    params.userAvatarUri,
+    params.characters,
+    params.activeCharacterId,
+    params.selectedDate
   ]);
 
   const handleBack = () => {
@@ -141,6 +191,8 @@ export default function AddNotification() {
           text: 'OK',
           onPress: () => {
             // Navigate back to home with the new notification data
+            // Use a unique timestamp to ensure each notification is treated as new
+            const timestamp = Date.now();
             router.push({
               pathname: '/(tabs)',
               params: {
@@ -149,8 +201,10 @@ export default function AddNotification() {
                 newNotificationDetails: details.trim(),
                 newNotificationTime: time,
                 newNotificationDate: startDate?.toISOString(),
-                selectedCharacterId: selectedCharacter?.toString(),
-                sendWithoutAI: sendWithoutAI.toString()
+                selectedCharacterId: selectedCharacterId?.toString(),
+                sendWithoutAI: sendWithoutAI.toString(),
+                // Add timestamp to ensure uniqueness
+                notificationTimestamp: timestamp.toString()
               }
             });
           }
@@ -192,10 +246,10 @@ export default function AddNotification() {
     }
   };
 
-  const handleCharacterSelect = (characterId: number) => {
+  const handleCharacterSelect = (characterId: string) => {
     const character = characters.find(c => c.id === characterId);
     if (character && !character.isEmpty) {
-      setSelectedCharacter(characterId);
+      setSelectedCharacterId(characterId);
     }
   };
 
@@ -208,7 +262,7 @@ export default function AddNotification() {
   };
 
   const getSelectedCharacter = () => {
-    return characters.find(char => char.id === selectedCharacter);
+    return characters.find(char => char.id === selectedCharacterId);
   };
 
   // Check if all required fields are filled for Save button
@@ -216,7 +270,7 @@ export default function AddNotification() {
     return details.trim() !== '' && 
            startDate !== null && 
            time.trim() !== '' && 
-           selectedCharacter !== null;
+           selectedCharacterId !== null;
   };
 
   if (!fontsLoaded) {
@@ -399,7 +453,7 @@ export default function AddNotification() {
                 key={character.id}
                 style={[
                   styles.characterSlot,
-                  selectedCharacter === character.id && !character.isEmpty && styles.characterSlotSelected
+                  selectedCharacterId === character.id && !character.isEmpty && styles.characterSlotSelected
                 ]}
                 onPress={() => handleCharacterSelect(character.id)}
                 activeOpacity={character.isEmpty ? 1 : 0.7}
@@ -408,7 +462,7 @@ export default function AddNotification() {
                 <View style={[
                   styles.characterAvatarContainer,
                   character.isEmpty && styles.emptyCharacterSlot,
-                  selectedCharacter === character.id && !character.isEmpty && styles.selectedCharacterAvatar
+                  selectedCharacterId === character.id && !character.isEmpty && styles.selectedCharacterAvatar
                 ]}>
                   {character.isEmpty ? (
                     <Text style={styles.addCharacterText}>+</Text>
@@ -423,7 +477,7 @@ export default function AddNotification() {
                 <Text style={[
                   styles.characterName,
                   character.isEmpty && styles.characterNameEmpty,
-                  selectedCharacter === character.id && !character.isEmpty && styles.characterNameSelected
+                  selectedCharacterId === character.id && !character.isEmpty && styles.characterNameSelected
                 ]}>
                   {character.name}
                 </Text>
@@ -821,7 +875,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   selectedCharacterAvatar: {
-    borderColor: '#8DD3C8', // Mint green border for selected character
+    borderColor: '#8DD3C8',
     borderStyle: 'solid',
   },
   addCharacterText: {
@@ -831,13 +885,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
   },
   characterAvatar: {
-    width: 76, // Slightly smaller to account for border
+    width: 76,
     height: 76,
     borderRadius: 38,
   },
   characterName: {
     fontSize: 14,
-    fontWeight: '500', // Base font weight for unselected
+    fontWeight: '500',
     color: '#FFFFFF',
     fontFamily: 'Inter',
     textAlign: 'center',
@@ -848,8 +902,8 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
   },
   characterNameSelected: {
-    color: '#8DD3C8', // Mint green color for selected character name
-    fontWeight: '600', // 100 more font weight for selected (500 + 100 = 600)
+    color: '#8DD3C8',
+    fontWeight: '600',
   },
   aiCheckboxSection: {
     alignItems: 'flex-start',
@@ -872,17 +926,17 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.70)',
     fontFamily: 'Inter',
     lineHeight: 16,
-    paddingLeft: 32, // Align with checkbox label (20px icon width + 12px gap)
+    paddingLeft: 32,
   },
   actionButtonsContainer: {
     gap: 16,
     marginTop: 20,
   },
   duplicateButton: {
-    backgroundColor: 'rgba(139, 92, 246, 0.2)', // Purple background with transparency
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
     borderRadius: 12,
     paddingVertical: 16,
-    paddingHorizontal: 12, // Reduced from 24px to 12px (50% reduction)
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -891,12 +945,12 @@ const styles = StyleSheet.create({
   duplicateButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#A78BFA', // Light purple text
+    color: '#A78BFA',
     fontFamily: 'Inter',
     letterSpacing: 0.5,
   },
   saveNotificationButton: {
-    backgroundColor: '#F3CC95', // Yellow background when enabled
+    backgroundColor: '#F3CC95',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 24,
@@ -912,18 +966,18 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   saveNotificationButtonDisabled: {
-    backgroundColor: '#6B7280', // Gray background when disabled
-    shadowOpacity: 0, // Remove shadow when disabled
+    backgroundColor: '#6B7280',
+    shadowOpacity: 0,
     elevation: 0,
   },
   saveNotificationButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1C1830', // Dark text on yellow background when enabled
+    color: '#1C1830',
     fontFamily: 'Inter',
   },
   saveNotificationButtonTextDisabled: {
-    color: '#9CA3AF', // Gray text when disabled
+    color: '#9CA3AF',
   },
   modalOverlay: {
     flex: 1,
