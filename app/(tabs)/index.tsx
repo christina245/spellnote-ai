@@ -298,6 +298,24 @@ export default function HomeTab() {
     }
   };
 
+  // NEW: Format date for section headers (green mint color)
+  const formatDateForSectionHeader = (dateString: string) => {
+    const today = formatDate(new Date());
+    const tomorrow = formatDate(new Date(Date.now() + 86400000));
+    
+    if (dateString === today) {
+      return 'TODAY';
+    } else if (dateString === tomorrow) {
+      return 'TOMORROW';
+    } else {
+      // Format as "JULY 4" style
+      const date = new Date(dateString);
+      const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+                     'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+      return `${months[date.getMonth()]} ${date.getDate()}`;
+    }
+  };
+
   const getMonthName = (date: Date) => {
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
                    'July', 'August', 'September', 'October', 'November', 'December'];
@@ -326,6 +344,31 @@ export default function HomeTab() {
       dates.push(date);
     }
     return dates;
+  };
+
+  // NEW: Group notifications by date for chronological display
+  const getGroupedNotifications = () => {
+    const grouped: { [date: string]: NotificationEntry[] } = {};
+    
+    notifications.forEach(notification => {
+      const date = notification.date;
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(notification);
+    });
+
+    // Sort dates chronologically (earliest first)
+    const sortedDates = Object.keys(grouped).sort((a, b) => {
+      const dateA = new Date(a);
+      const dateB = new Date(b);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    return sortedDates.map(date => ({
+      date,
+      notifications: grouped[date]
+    }));
   };
 
   // Get notifications for the selected date
@@ -552,8 +595,8 @@ export default function HomeTab() {
   const activeCharacter = getActiveCharacter();
   
   // Determine which notifications to show
-  const displayNotifications = getNotificationsForCurrentWeek();
   const selectedDateNotifications = getNotificationsForSelectedDate();
+  const groupedNotifications = getGroupedNotifications();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -666,83 +709,136 @@ export default function HomeTab() {
 
         {/* Notifications Section */}
         <View style={styles.notificationsSection}>
-          <Text style={styles.sectionTitle}>
-            {selectedDateNotifications.length > 0 
-              ? `Notifications for ${formatDateForDisplay(formatDate(selectedDate))}`
-              : 'Upcoming notifications'
-            }
-          </Text>
+          <Text style={styles.sectionTitle}>Upcoming notifications</Text>
           
-          {/* Show notifications for selected date if any, otherwise show all upcoming */}
-          {(selectedDateNotifications.length > 0 ? selectedDateNotifications : displayNotifications).length > 0 ? (
-            (selectedDateNotifications.length > 0 ? selectedDateNotifications : displayNotifications).map((notification, index) => (
-              <TouchableOpacity
-                key={notification.id}
-                style={styles.notificationCard}
-                onPress={handleNotificationPress}
-                activeOpacity={0.8}
-              >
-                {/* Notification Content with Avatar and Text Side by Side */}
-                <View style={styles.notificationContent}>
-                  {/* Avatar positioned to the left */}
-                  <View style={[
-                    styles.notificationAvatarContainer,
-                    notification.isFirst && styles.notificationAvatarContainerFirst
-                  ]}>
-                    <Image 
-                      source={notification.avatarSource}
-                      style={styles.notificationAvatar}
-                      resizeMode="cover"
-                    />
-                  </View>
-
-                  {/* Text content positioned to the right of avatar */}
-                  <View style={styles.notificationTextContent}>
-                    {/* Header and timestamp on the same line */}
-                    <View style={styles.notificationHeaderRow}>
-                      <Text style={styles.notificationTitle}>
-                        {notification.header}
-                      </Text>
-                      <Text style={styles.notificationTimestamp}>{notification.time}</Text>
+          {/* Show notifications for selected date if any, otherwise show chronologically grouped */}
+          {selectedDateNotifications.length > 0 ? (
+            // Show notifications for selected date
+            <>
+              <Text style={styles.dateHeader}>
+                {formatDateForSectionHeader(formatDate(selectedDate))}
+              </Text>
+              {selectedDateNotifications.map((notification, index) => (
+                <TouchableOpacity
+                  key={notification.id}
+                  style={styles.notificationCard}
+                  onPress={handleNotificationPress}
+                  activeOpacity={0.8}
+                >
+                  {/* Notification Content with Avatar and Text Side by Side */}
+                  <View style={styles.notificationContent}>
+                    {/* Avatar positioned to the left */}
+                    <View style={[
+                      styles.notificationAvatarContainer,
+                      notification.isFirst && styles.notificationAvatarContainerFirst
+                    ]}>
+                      <Image 
+                        source={notification.avatarSource}
+                        style={styles.notificationAvatar}
+                        resizeMode="cover"
+                      />
                     </View>
-                    
-                    {/* Date display if not today */}
-                    {notification.date !== formatDate(new Date()) && (
-                      <Text style={styles.notificationDate}>
-                        {formatDateForDisplay(notification.date)}
-                      </Text>
-                    )}
-                    
-                    <Text 
-                      style={[
-                        styles.notificationDetails,
-                        notification.sendWithoutAI && styles.notificationDetailsAIFree
-                      ]}
-                      numberOfLines={3}
-                      ellipsizeMode="tail"
-                    >
-                      {notification.details}
-                    </Text>
 
-                    {/* AI-Free Badge */}
-                    {notification.sendWithoutAI && (
-                      <View style={styles.aiFreeBadge}>
-                        <Text style={styles.aiFreeBadgeText}>AI-FREE</Text>
+                    {/* Text content positioned to the right of avatar */}
+                    <View style={styles.notificationTextContent}>
+                      {/* Header and timestamp on the same line */}
+                      <View style={styles.notificationHeaderRow}>
+                        <Text style={styles.notificationTitle}>
+                          {notification.header}
+                        </Text>
+                        <Text style={styles.notificationTimestamp}>{notification.time}</Text>
                       </View>
-                    )}
+                      
+                      <Text 
+                        style={[
+                          styles.notificationDetails,
+                          notification.sendWithoutAI && styles.notificationDetailsAIFree
+                        ]}
+                        numberOfLines={3}
+                        ellipsizeMode="tail"
+                      >
+                        {notification.details}
+                      </Text>
+
+                      {/* AI-Free Badge */}
+                      {notification.sendWithoutAI && (
+                        <View style={styles.aiFreeBadge}>
+                          <Text style={styles.aiFreeBadgeText}>AI-FREE</Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              ))}
+            </>
+          ) : groupedNotifications.length > 0 ? (
+            // Show chronologically grouped notifications
+            groupedNotifications.map((group, groupIndex) => (
+              <View key={group.date}>
+                {/* Date Header */}
+                <Text style={styles.dateHeader}>
+                  {formatDateForSectionHeader(group.date)}
+                </Text>
+                
+                {/* Notifications for this date */}
+                {group.notifications.map((notification, index) => (
+                  <TouchableOpacity
+                    key={notification.id}
+                    style={styles.notificationCard}
+                    onPress={handleNotificationPress}
+                    activeOpacity={0.8}
+                  >
+                    {/* Notification Content with Avatar and Text Side by Side */}
+                    <View style={styles.notificationContent}>
+                      {/* Avatar positioned to the left */}
+                      <View style={[
+                        styles.notificationAvatarContainer,
+                        notification.isFirst && styles.notificationAvatarContainerFirst
+                      ]}>
+                        <Image 
+                          source={notification.avatarSource}
+                          style={styles.notificationAvatar}
+                          resizeMode="cover"
+                        />
+                      </View>
+
+                      {/* Text content positioned to the right of avatar */}
+                      <View style={styles.notificationTextContent}>
+                        {/* Header and timestamp on the same line */}
+                        <View style={styles.notificationHeaderRow}>
+                          <Text style={styles.notificationTitle}>
+                            {notification.header}
+                          </Text>
+                          <Text style={styles.notificationTimestamp}>{notification.time}</Text>
+                        </View>
+                        
+                        <Text 
+                          style={[
+                            styles.notificationDetails,
+                            notification.sendWithoutAI && styles.notificationDetailsAIFree
+                          ]}
+                          numberOfLines={3}
+                          ellipsizeMode="tail"
+                        >
+                          {notification.details}
+                        </Text>
+
+                        {/* AI-Free Badge */}
+                        {notification.sendWithoutAI && (
+                          <View style={styles.aiFreeBadge}>
+                            <Text style={styles.aiFreeBadgeText}>AI-FREE</Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
             ))
           ) : (
             // Empty state when no notifications
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>
-                {selectedDateNotifications.length === 0 && formatDate(selectedDate) !== formatDate(new Date())
-                  ? `No notifications for ${formatDateForDisplay(formatDate(selectedDate))}`
-                  : 'No notifications yet'
-                }
-              </Text>
+              <Text style={styles.emptyStateText}>No notifications yet</Text>
               <Text style={styles.emptyStateSubtext}>Tap "Add notification" to create your first reminder</Text>
             </View>
           )}
@@ -970,10 +1066,23 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '500', // UPDATED: Decreased from 600 to 500 (100 weight decrease)
     color: '#FFFFFF',
     fontFamily: 'Inter',
     marginBottom: 16,
+  },
+  // NEW: Date header styling with green mint color
+  dateHeader: {
+    color: '#8DD3C8',
+    textAlign: 'center',
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontStyle: 'normal',
+    fontWeight: '400',
+    lineHeight: 36, // 300% line height as specified
+    letterSpacing: 2,
+    marginBottom: 8,
+    marginTop: 16, // Add some space above each date section
   },
   notificationCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
@@ -1033,13 +1142,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     flexShrink: 0, // Prevent timestamp from shrinking
     lineHeight: 20, // Match title line height for perfect alignment
-  },
-  notificationDate: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#8DD3C8',
-    fontFamily: 'Inter',
-    marginBottom: 4,
   },
   notificationDetails: {
     fontSize: 14,
