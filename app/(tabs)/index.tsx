@@ -89,12 +89,12 @@ export default function HomeTab() {
     if (!characterTypeParam && !characterNameParam) {
       const defaultCharacter: CharacterInfo = {
         id: 'demo-character-1',
-        name: 'Xaden the Destroyer',
+        name: 'Muffin the fluffy bunny',
         type: 'character',
         avatarSource: require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
-        description: 'A fierce and dramatic warrior with a sharp wit and fiery personality. Known for being intense and passionate about everything they do. Has a tendency to be overly dramatic but means well.',
-        vibes: ['dramatic', 'witty', 'fiery'],
-        tagline: 'Destroyer of boredom and slayer of procrastination'
+        description: 'A sweet and gentle bunny with a fluffy coat and caring personality. Muffin loves to help others stay organized and motivated with gentle reminders. Known for being encouraging, warm, and always ready with a kind word.',
+        vibes: ['bubbly', 'gentle', 'caring'],
+        tagline: 'Your fluffy friend for gentle reminders'
       };
       setCharacters([defaultCharacter]);
       setActiveCharacterId(defaultCharacter.id);
@@ -135,21 +135,26 @@ export default function HomeTab() {
           tagline: characterTaglineParam
         };
 
-        // Check if this is an update to existing character or a new one
+        // Smart character management
         setCharacters(prevCharacters => {
-          // If we have an active character with the same name, update it
-          const existingIndex = prevCharacters.findIndex(char => char.name === characterNameParam);
+          // Check if this is an update to existing character (same ID or name)
+          const existingIndex = prevCharacters.findIndex(char => 
+            char.id === newCharacter.id || char.name === characterNameParam
+          );
+          
           if (existingIndex !== -1) {
+            // Update existing character
             const updatedCharacters = [...prevCharacters];
             updatedCharacters[existingIndex] = newCharacter;
             return updatedCharacters;
           } else {
-            // Add as new character (max 3 characters)
+            // Add as new character - find next available slot
             if (prevCharacters.length < 3) {
+              // Add to next available slot
               return [...prevCharacters, newCharacter];
             } else {
-              // Replace the first character if at max capacity
-              return [newCharacter, ...prevCharacters.slice(1)];
+              // All slots full - replace the last character
+              return [...prevCharacters.slice(0, 2), newCharacter];
             }
           }
         });

@@ -45,15 +45,15 @@ export default function SignIn() {
     return text;
   };
 
-  // Mock user data - in a real app, this would come from a database/API
+  // Mock user data - updated with new demo character
   const mockUserData = {
     phone: '555-123-4567',
     password: 'password123',
     userMode: 'character',
     characterType: 'character',
-    characterName: 'Xaden the Destroyer',
-    characterDescription: 'A fierce and dramatic warrior with a sharp wit and fiery personality. Known for being intense and passionate about everything.',
-    characterVibes: ['dramatic', 'witty', 'fiery'],
+    characterName: 'Muffin the fluffy bunny',
+    characterDescription: 'A sweet and gentle bunny with a fluffy coat and caring personality. Muffin loves to help others stay organized and motivated with gentle reminders. Known for being encouraging, warm, and always ready with a kind word.',
+    characterVibes: ['bubbly', 'gentle', 'caring'],
     notificationHeader: 'Board game night prep',
     notificationDetails: 'Need to brush up on how to play Catan at 6 pm this Wednesday before board game night at 8. Ping me at 5 and 5:30 pm.',
     time: '6:30 PM',
