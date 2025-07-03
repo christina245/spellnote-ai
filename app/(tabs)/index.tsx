@@ -32,6 +32,7 @@ interface NotificationEntry {
 }
 
 interface CharacterInfo {
+  id: string;
   name: string;
   type: 'character' | 'spellbot' | 'ai-free';
   avatarSource: any;
@@ -48,7 +49,8 @@ export default function HomeTab() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [weekStartDate, setWeekStartDate] = useState(new Date());
   const [showNavigationMenu, setShowNavigationMenu] = useState(false);
-  const [characterInfo, setCharacterInfo] = useState<CharacterInfo | null>(null);
+  const [characters, setCharacters] = useState<CharacterInfo[]>([]);
+  const [activeCharacterId, setActiveCharacterId] = useState<string | null>(null);
   const [showBetaModal, setShowBetaModal] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
@@ -74,30 +76,39 @@ export default function HomeTab() {
 
     // Handle character deletion
     if (characterDeletedParam === 'true') {
-      setCharacterInfo(null);
-      setUserMode('character'); // Reset to default mode
-      setNotifications([]); // Clear notifications
+      // Remove the active character and reset to default
+      setCharacters([]);
+      setActiveCharacterId(null);
+      setUserMode('character');
+      setNotifications([]);
       setIsInitialized(true);
       return;
     }
 
-    // Set user mode from params
-    if (userModeParam) {
-      setUserMode(userModeParam as 'character' | 'spellbot' | 'ai-free');
-    }
-    
-    // Set character info based on user's selection during onboarding
-    if (characterTypeParam) {
-      const characterType = characterTypeParam as 'character' | 'spellbot' | 'ai-free';
-      setUserMode(characterType);
+    // Initialize with default demo character if no params
+    if (!characterTypeParam && !characterNameParam) {
+      const defaultCharacter: CharacterInfo = {
+        id: 'demo-character-1',
+        name: 'Xaden the Destroyer',
+        type: 'character',
+        avatarSource: require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+        description: 'A fierce and dramatic warrior with a sharp wit and fiery personality. Known for being intense and passionate about everything they do. Has a tendency to be overly dramatic but means well.',
+        vibes: ['dramatic', 'witty', 'fiery'],
+        tagline: 'Destroyer of boredom and slayer of procrastination'
+      };
+      setCharacters([defaultCharacter]);
+      setActiveCharacterId(defaultCharacter.id);
+      setUserMode('character');
+    } else {
+      // Set user mode from params
+      if (userModeParam) {
+        setUserMode(userModeParam as 'character' | 'spellbot' | 'ai-free');
+      }
       
-      if (characterType === 'spellbot') {
-        setCharacterInfo({
-          name: 'Spellbot',
-          type: 'spellbot',
-          avatarSource: require('../../assets/images/square logo 2.png')
-        });
-      } else if (characterType === 'character') {
+      // Handle new character creation or updates
+      if (characterTypeParam && characterNameParam) {
+        const characterType = characterTypeParam as 'character' | 'spellbot' | 'ai-free';
+        
         // Parse character vibes if available
         let parsedVibes: string[] = [];
         if (characterVibesParam) {
@@ -108,33 +119,44 @@ export default function HomeTab() {
           }
         }
 
-        setCharacterInfo({
-          name: characterNameParam || 'Character Name',
-          type: 'character',
+        const newCharacter: CharacterInfo = {
+          id: `character-${Date.now()}`, // Generate unique ID
+          name: characterNameParam,
+          type: characterType,
           avatarSource: userAvatarUriParam 
             ? { uri: userAvatarUriParam }
+            : characterType === 'spellbot'
+            ? require('../../assets/images/square logo 2.png')
+            : characterType === 'ai-free'
+            ? require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png')
             : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
           description: characterDescriptionParam,
           vibes: parsedVibes,
           tagline: characterTaglineParam
+        };
+
+        // Check if this is an update to existing character or a new one
+        setCharacters(prevCharacters => {
+          // If we have an active character with the same name, update it
+          const existingIndex = prevCharacters.findIndex(char => char.name === characterNameParam);
+          if (existingIndex !== -1) {
+            const updatedCharacters = [...prevCharacters];
+            updatedCharacters[existingIndex] = newCharacter;
+            return updatedCharacters;
+          } else {
+            // Add as new character (max 3 characters)
+            if (prevCharacters.length < 3) {
+              return [...prevCharacters, newCharacter];
+            } else {
+              // Replace the first character if at max capacity
+              return [newCharacter, ...prevCharacters.slice(1)];
+            }
+          }
         });
-      } else if (characterType === 'ai-free') {
-        setCharacterInfo({
-          name: 'AI-Free Mode',
-          type: 'ai-free',
-          avatarSource: require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png')
-        });
+
+        setActiveCharacterId(newCharacter.id);
+        setUserMode(characterType);
       }
-    } else {
-      // Default demo character setup - Xaden the Destroyer
-      setCharacterInfo({
-        name: 'Xaden the Destroyer',
-        type: 'character',
-        avatarSource: require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
-        description: 'A fierce and dramatic warrior with a sharp wit and fiery personality. Known for being intense and passionate about everything they do. Has a tendency to be overly dramatic but means well.',
-        vibes: ['dramatic', 'witty', 'fiery'],
-        tagline: 'Destroyer of boredom and slayer of procrastination'
-      });
     }
     
     // Load user's notifications
@@ -167,30 +189,18 @@ export default function HomeTab() {
     const originalTime = params.time as string;
 
     if (originalHeader?.trim() || originalDetails?.trim() || originalTime?.trim()) {
-      // Determine character info for original notification
-      let characterName = 'Character Name';
-      let avatarSource = require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
+      // Get active character info for notification
+      const activeCharacter = characters.find(char => char.id === activeCharacterId);
       
-      if (characterInfo) {
-        characterName = characterInfo.name;
-        avatarSource = characterInfo.avatarSource;
-      } else if (userMode === 'spellbot') {
-        characterName = 'Spellbot';
-        avatarSource = require('../../assets/images/square logo 2.png');
-      } else if (userMode === 'ai-free') {
-        characterName = 'AI-Free Mode';
-        avatarSource = require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png');
-      }
-
       const originalNotification: NotificationEntry = {
         id: 'original-1',
         header: originalHeader?.trim() || 'Reminder',
         details: originalDetails?.trim() || 'Your reminder details',
         date: formatDate(new Date()),
         time: originalTime?.trim() || '6:30 PM',
-        characterName: characterName,
-        characterType: userMode,
-        avatarSource: avatarSource,
+        characterName: activeCharacter?.name || 'Character Name',
+        characterType: activeCharacter?.type || userMode,
+        avatarSource: activeCharacter?.avatarSource || require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
         isFirst: true
       };
 
@@ -206,27 +216,9 @@ export default function HomeTab() {
     const sendWithoutAI = params.sendWithoutAI === 'true';
 
     if (newHeader?.trim() || newDetails?.trim()) {
-      // Determine character info for new notification
-      let newCharacterName = 'Character Name';
-      let newAvatarSource = require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
-      let newCharacterType: 'character' | 'spellbot' | 'ai-free' = userMode;
-
-      // Use the selected character from add-notification screen
-      if (selectedCharacterId === '1') { // Main character slot
-        if (characterInfo) {
-          newCharacterName = characterInfo.name;
-          newAvatarSource = characterInfo.avatarSource;
-          newCharacterType = characterInfo.type;
-        } else if (userMode === 'spellbot') {
-          newCharacterName = 'Spellbot';
-          newAvatarSource = require('../../assets/images/square logo 2.png');
-          newCharacterType = 'spellbot';
-        } else if (userMode === 'ai-free') {
-          newCharacterName = 'AI-Free Mode';
-          newAvatarSource = require('../../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png');
-          newCharacterType = 'ai-free';
-        }
-      }
+      // Get character info for new notification
+      const selectedCharacter = characters.find(char => char.id === selectedCharacterId) || 
+                               characters.find(char => char.id === activeCharacterId);
 
       const newNotification: NotificationEntry = {
         id: `new-${Date.now()}`, // Unique ID based on timestamp
@@ -234,10 +226,10 @@ export default function HomeTab() {
         details: newDetails.trim(),
         date: newDate ? formatDate(new Date(newDate)) : formatDate(new Date()),
         time: newTime?.trim() || '6:30 PM',
-        characterName: newCharacterName,
-        characterType: newCharacterType,
-        avatarSource: newAvatarSource,
-        isFirst: false, // New notifications are not marked as first
+        characterName: selectedCharacter?.name || 'Character Name',
+        characterType: selectedCharacter?.type || userMode,
+        avatarSource: selectedCharacter?.avatarSource || require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+        isFirst: false,
         sendWithoutAI: sendWithoutAI
       };
 
@@ -351,15 +343,59 @@ export default function HomeTab() {
 
   const handleAddNotification = () => {
     // Navigate to add notification screen with current user data
+    const activeCharacter = characters.find(char => char.id === activeCharacterId);
+    
     router.push({
       pathname: '/add-notification',
       params: {
         userMode: userMode,
-        characterType: characterInfo?.type || userMode,
-        characterName: characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name'),
-        userAvatarUri: characterInfo?.avatarSource?.uri || undefined
+        characterType: activeCharacter?.type || userMode,
+        characterName: activeCharacter?.name || 'Character Name',
+        userAvatarUri: activeCharacter?.avatarSource?.uri || undefined,
+        characters: JSON.stringify(characters), // Pass all characters for selection
+        activeCharacterId: activeCharacterId || ''
       }
     });
+  };
+
+  const handleCharacterPress = (characterId: string) => {
+    const character = characters.find(char => char.id === characterId);
+    
+    // Only navigate if character exists and is not AI-free mode
+    if (character && character.type !== 'ai-free') {
+      router.push({
+        pathname: '/character-profile',
+        params: {
+          characterId: character.id,
+          characterName: character.name,
+          characterType: character.type,
+          characterDescription: character.description || '',
+          characterVibes: character.vibes ? JSON.stringify(character.vibes) : '[]',
+          characterTagline: character.tagline || '',
+          userAvatarUri: character.avatarSource?.uri || undefined
+        }
+      });
+    }
+  };
+
+  const handleEmptyCharacterPress = () => {
+    // Navigate to create character page for empty slots
+    router.push('/create-character');
+  };
+
+  const handleCharacterSlotPress = (character: CharacterInfo | null, slotIndex: number) => {
+    if (character) {
+      // Set as active character
+      setActiveCharacterId(character.id);
+      
+      // If clickable, navigate to profile
+      if (character.type !== 'ai-free') {
+        handleCharacterPress(character.id);
+      }
+    } else {
+      // Empty slot - navigate to create character
+      handleEmptyCharacterPress();
+    }
   };
 
   const handleBellPress = () => {
@@ -377,32 +413,6 @@ export default function HomeTab() {
 
   const closeBetaModal = () => {
     setShowBetaModal(false);
-  };
-
-  const handleCharacterPress = () => {
-    // Only navigate if character exists, has a real name, and is not AI-free mode
-    if (characterInfo && 
-        characterInfo.name && 
-        characterInfo.name !== 'Character Name' && 
-        characterInfo.name !== 'Add character' &&
-        characterInfo.type !== 'ai-free') {
-      router.push({
-        pathname: '/character-profile',
-        params: {
-          characterName: characterInfo.name,
-          characterType: characterInfo.type,
-          characterDescription: characterInfo.description || '',
-          characterVibes: characterInfo.vibes ? JSON.stringify(characterInfo.vibes) : '[]',
-          characterTagline: characterInfo.tagline || '',
-          userAvatarUri: characterInfo.avatarSource?.uri || undefined
-        }
-      });
-    }
-  };
-
-  const handleEmptyCharacterPress = () => {
-    // Navigate to create character page for empty slots
-    router.push('/create-character');
   };
 
   const handleNavigationMenuNavigate = (route: string) => {
@@ -455,13 +465,18 @@ export default function HomeTab() {
     }
   };
 
-  // Check if character is clickable (has real name and is not AI-free)
-  const isCharacterClickable = () => {
-    return characterInfo && 
-           characterInfo.name && 
-           characterInfo.name !== 'Character Name' && 
-           characterInfo.name !== 'Add character' &&
-           characterInfo.type !== 'ai-free';
+  // Get characters for display (max 3 slots)
+  const getCharacterSlots = () => {
+    const slots = [];
+    for (let i = 0; i < 3; i++) {
+      slots.push(characters[i] || null);
+    }
+    return slots;
+  };
+
+  // Get active character
+  const getActiveCharacter = () => {
+    return characters.find(char => char.id === activeCharacterId) || characters[0] || null;
   };
 
   // Custom three dots component
@@ -476,6 +491,9 @@ export default function HomeTab() {
   if (!fontsLoaded) {
     return null;
   }
+
+  const characterSlots = getCharacterSlots();
+  const activeCharacter = getActiveCharacter();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -508,68 +526,50 @@ export default function HomeTab() {
         {userMode !== 'ai-free' && (
           <View style={styles.characterSlotsSection}>
             <View style={styles.characterSlots}>
-              {/* First Character Slot - Empty */}
-              <TouchableOpacity 
-                style={styles.characterSlot}
-                onPress={handleEmptyCharacterPress}
-                activeOpacity={0.7}
-              >
-                <View style={[styles.characterAvatarContainer, styles.emptySlot]}>
-                  <Plus size={24} color="#9CA3AF" />
-                </View>
-                <Text style={styles.characterNameEmpty}>Add character</Text>
-              </TouchableOpacity>
-
-              {/* Second Character Slot - Active (Center) - Clickable without special styling */}
-              {isCharacterClickable() ? (
-                <TouchableOpacity 
-                  style={[styles.characterSlot, styles.characterSlotActive]}
-                  onPress={handleCharacterPress}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.characterAvatarContainer}>
-                    <Image 
-                      source={characterInfo?.avatarSource || (userMode === 'spellbot' 
-                        ? require('../../assets/images/square logo 2.png')
-                        : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
-                      )}
-                      style={styles.characterAvatar}
-                      resizeMode="cover"
-                    />
-                  </View>
-                  <Text style={styles.characterName}>
-                    {characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name')}
-                  </Text>
-                </TouchableOpacity>
-              ) : (
-                <View style={[styles.characterSlot, styles.characterSlotActive]}>
-                  <View style={styles.characterAvatarContainer}>
-                    <Image 
-                      source={characterInfo?.avatarSource || (userMode === 'spellbot' 
-                        ? require('../../assets/images/square logo 2.png')
-                        : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
-                      )}
-                      style={styles.characterAvatar}
-                      resizeMode="cover"
-                    />
-                  </View>
-                  <Text style={styles.characterName}>
-                    {characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name')}
-                  </Text>
-                </View>
-              )}
-
-              {/* Third Character Slot - Empty */}
-              <TouchableOpacity 
-                style={styles.characterSlot}
-                onPress={handleEmptyCharacterPress}
-                activeOpacity={0.7}
-              >
-                <View style={[styles.characterAvatarContainer, styles.emptySlot]}>
-                  <Plus size={24} color="#9CA3AF" />
-                </View>
-                <Text style={styles.characterNameEmpty}>Add character</Text>
-              </TouchableOpacity>
+              {characterSlots.map((character, index) => {
+                const isActive = character && character.id === activeCharacterId;
+                const isClickable = character && character.type !== 'ai-free';
+                
+                return (
+                  <TouchableOpacity
+                    key={`slot-${index}`}
+                    style={[
+                      styles.characterSlot,
+                      isActive && styles.characterSlotActive
+                    ]}
+                    onPress={() => handleCharacterSlotPress(character, index)}
+                    activeOpacity={0.7}
+                  >
+                    {character ? (
+                      <>
+                        <View style={[
+                          styles.characterAvatarContainer,
+                          isActive && styles.activeCharacterAvatar
+                        ]}>
+                          <Image 
+                            source={character.avatarSource}
+                            style={styles.characterAvatar}
+                            resizeMode="cover"
+                          />
+                        </View>
+                        <Text style={[
+                          styles.characterName,
+                          isActive && styles.activeCharacterName
+                        ]}>
+                          {character.name}
+                        </Text>
+                      </>
+                    ) : (
+                      <>
+                        <View style={[styles.characterAvatarContainer, styles.emptySlot]}>
+                          <Plus size={24} color="#9CA3AF" />
+                        </View>
+                        <Text style={styles.characterNameEmpty}>Add character</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         )}
@@ -780,17 +780,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#374151',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   characterAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
+    width: 76, // Slightly smaller to account for border
+    height: 76,
+    borderRadius: 38,
+  },
+  activeCharacterAvatar: {
     borderColor: '#34A853', // Green outline for active character
   },
   emptySlot: {
     backgroundColor: '#374151',
-    borderWidth: 2,
     borderColor: '#4B5563',
     borderStyle: 'dashed',
   },
@@ -800,6 +802,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Inter',
     textAlign: 'center',
+  },
+  activeCharacterName: {
+    color: '#34A853', // Green color for active character name
   },
   characterNameEmpty: {
     fontSize: 12,
