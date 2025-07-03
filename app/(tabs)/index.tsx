@@ -35,6 +35,9 @@ interface CharacterInfo {
   name: string;
   type: 'character' | 'spellbot' | 'ai-free';
   avatarSource: any;
+  description?: string;
+  vibes?: string[];
+  tagline?: string;
 }
 
 export default function HomeTab() {
@@ -64,6 +67,19 @@ export default function HomeTab() {
     const characterTypeParam = params.characterType as string;
     const characterNameParam = params.characterName as string;
     const userAvatarUriParam = params.userAvatarUri as string;
+    const characterDescriptionParam = params.characterDescription as string;
+    const characterVibesParam = params.characterVibes as string;
+    const characterTaglineParam = params.characterTagline as string;
+    const characterDeletedParam = params.characterDeleted as string;
+
+    // Handle character deletion
+    if (characterDeletedParam === 'true') {
+      setCharacterInfo(null);
+      setUserMode('character'); // Reset to default mode
+      setNotifications([]); // Clear notifications
+      setIsInitialized(true);
+      return;
+    }
 
     // Set user mode from params
     if (userModeParam) {
@@ -82,12 +98,25 @@ export default function HomeTab() {
           avatarSource: require('../../assets/images/square logo 2.png')
         });
       } else if (characterType === 'character') {
+        // Parse character vibes if available
+        let parsedVibes: string[] = [];
+        if (characterVibesParam) {
+          try {
+            parsedVibes = JSON.parse(characterVibesParam);
+          } catch (error) {
+            console.log('Error parsing character vibes:', error);
+          }
+        }
+
         setCharacterInfo({
           name: characterNameParam || 'Character Name',
           type: 'character',
           avatarSource: userAvatarUriParam 
             ? { uri: userAvatarUriParam }
-            : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
+            : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+          description: characterDescriptionParam,
+          vibes: parsedVibes,
+          tagline: characterTaglineParam
         });
       } else if (characterType === 'ai-free') {
         setCharacterInfo({
@@ -120,7 +149,7 @@ export default function HomeTab() {
   }, []);
 
   const loadNotifications = () => {
-    const loadedNotifications: NotificationEntry[]= [];
+    const loadedNotifications: NotificationEntry[] = [];
 
     // 1. Load the original onboarding notification (if exists)
     const originalHeader = params.notificationHeader as string;
@@ -340,6 +369,23 @@ export default function HomeTab() {
     setShowBetaModal(false);
   };
 
+  const handleCharacterPress = () => {
+    // Only navigate if character exists and is not empty
+    if (characterInfo && characterInfo.type !== 'ai-free') {
+      router.push({
+        pathname: '/character-profile',
+        params: {
+          characterName: characterInfo.name,
+          characterType: characterInfo.type,
+          characterDescription: characterInfo.description || '',
+          characterVibes: characterInfo.vibes ? JSON.stringify(characterInfo.vibes) : '[]',
+          characterTagline: characterInfo.tagline || '',
+          userAvatarUri: characterInfo.avatarSource?.uri || undefined
+        }
+      });
+    }
+  };
+
   const handleNavigationMenuNavigate = (route: string) => {
     // Handle navigation based on route
     switch (route) {
@@ -443,7 +489,11 @@ export default function HomeTab() {
               </View>
 
               {/* Second Character Slot - Active (Center) */}
-              <View style={[styles.characterSlot, styles.characterSlotActive]}>
+              <TouchableOpacity 
+                style={[styles.characterSlot, styles.characterSlotActive]}
+                onPress={handleCharacterPress}
+                activeOpacity={0.7}
+              >
                 <View style={styles.characterAvatarContainer}>
                   <Image 
                     source={characterInfo?.avatarSource || (userMode === 'spellbot' 
@@ -457,7 +507,7 @@ export default function HomeTab() {
                 <Text style={styles.characterName}>
                   {characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name')}
                 </Text>
-              </View>
+              </TouchableOpacity>
 
               {/* Third Character Slot - Empty */}
               <View style={styles.characterSlot}>

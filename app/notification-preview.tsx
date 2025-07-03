@@ -22,6 +22,7 @@ interface NotificationData {
   notificationDetails: string;
   characterVibes?: string[];
   characterDescription?: string;
+  characterTagline?: string;
   avatarSource: any;
   userAvatarUri?: string; // Add support for user-uploaded avatar URI
 }
@@ -69,6 +70,7 @@ export default function NotificationPreview() {
     notificationDetails: getNotificationDetails(),
     characterVibes: params.characterVibes ? JSON.parse(params.characterVibes as string) : ['dramatic', 'witty', 'fiery'],
     characterDescription: params.characterDescription as string || 'A fierce and dramatic warrior with a sharp wit and fiery personality. Known for being intense and passionate about everything.',
+    characterTagline: params.characterTagline as string || '',
     avatarSource: getAvatarSource(),
     userAvatarUri: params.userAvatarUri as string
   };
@@ -162,7 +164,8 @@ export default function NotificationPreview() {
           isTextItToMe: params.isTextItToMe,
           // Also pass character creation data if available
           characterVibes: params.characterVibes,
-          characterDescription: params.characterDescription
+          characterDescription: params.characterDescription,
+          characterTagline: params.characterTagline
         }
       });
     } else {

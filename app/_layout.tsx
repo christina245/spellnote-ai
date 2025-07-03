@@ -19,6 +19,7 @@ export default function RootLayout() {
         <Stack.Screen name="character-selection" />
         <Stack.Screen name="ai-free" />
         <Stack.Screen name="character-creation" />
+        <Stack.Screen name="character-profile" />
         <Stack.Screen name="spellbot" />
         <Stack.Screen name="notification-preview" />
         <Stack.Screen name="sms-integration" />

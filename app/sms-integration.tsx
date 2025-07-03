@@ -49,6 +49,9 @@ export default function SMSIntegration() {
         characterType: characterType,
         characterName: characterName,
         userAvatarUri: params.userAvatarUri,
+        characterDescription: params.characterDescription,
+        characterVibes: params.characterVibes,
+        characterTagline: params.characterTagline,
         // Pass through notification data to homepage
         notificationHeader: params.notificationHeader,
         notificationDetails: params.notificationDetails,
