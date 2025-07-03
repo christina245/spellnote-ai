@@ -370,8 +370,12 @@ export default function HomeTab() {
   };
 
   const handleCharacterPress = () => {
-    // Only navigate if character exists and is not empty
-    if (characterInfo && characterInfo.type !== 'ai-free') {
+    // Only navigate if character exists, has a real name, and is not AI-free mode
+    if (characterInfo && 
+        characterInfo.name && 
+        characterInfo.name !== 'Character Name' && 
+        characterInfo.name !== 'Add character' &&
+        characterInfo.type !== 'ai-free') {
       router.push({
         pathname: '/character-profile',
         params: {
@@ -445,6 +449,15 @@ export default function HomeTab() {
     </View>
   );
 
+  // Check if character is clickable (has real name and is not AI-free)
+  const isCharacterClickable = () => {
+    return characterInfo && 
+           characterInfo.name && 
+           characterInfo.name !== 'Character Name' && 
+           characterInfo.name !== 'Add character' &&
+           characterInfo.type !== 'ai-free';
+  };
+
   if (!fontsLoaded) {
     return null;
   }
@@ -488,26 +501,44 @@ export default function HomeTab() {
                 <Text style={styles.characterNameEmpty}>Add character</Text>
               </View>
 
-              {/* Second Character Slot - Active (Center) */}
-              <TouchableOpacity 
-                style={[styles.characterSlot, styles.characterSlotActive]}
-                onPress={handleCharacterPress}
-                activeOpacity={0.7}
-              >
-                <View style={styles.characterAvatarContainer}>
-                  <Image 
-                    source={characterInfo?.avatarSource || (userMode === 'spellbot' 
-                      ? require('../../assets/images/square logo 2.png')
-                      : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
-                    )}
-                    style={styles.characterAvatar}
-                    resizeMode="cover"
-                  />
+              {/* Second Character Slot - Active (Center) - Only clickable if character has real name */}
+              {isCharacterClickable() ? (
+                <TouchableOpacity 
+                  style={[styles.characterSlot, styles.characterSlotActive]}
+                  onPress={handleCharacterPress}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.characterAvatarContainer}>
+                    <Image 
+                      source={characterInfo?.avatarSource || (userMode === 'spellbot' 
+                        ? require('../../assets/images/square logo 2.png')
+                        : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
+                      )}
+                      style={styles.characterAvatar}
+                      resizeMode="cover"
+                    />
+                  </View>
+                  <Text style={[styles.characterName, styles.characterNameClickable]}>
+                    {characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name')}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <View style={[styles.characterSlot, styles.characterSlotActive]}>
+                  <View style={styles.characterAvatarContainer}>
+                    <Image 
+                      source={characterInfo?.avatarSource || (userMode === 'spellbot' 
+                        ? require('../../assets/images/square logo 2.png')
+                        : require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
+                      )}
+                      style={styles.characterAvatar}
+                      resizeMode="cover"
+                    />
+                  </View>
+                  <Text style={styles.characterName}>
+                    {characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name')}
+                  </Text>
                 </View>
-                <Text style={styles.characterName}>
-                  {characterInfo?.name || (userMode === 'spellbot' ? 'Spellbot' : 'Character Name')}
-                </Text>
-              </TouchableOpacity>
+              )}
 
               {/* Third Character Slot - Empty */}
               <View style={styles.characterSlot}>
@@ -746,6 +777,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Inter',
     textAlign: 'center',
+  },
+  characterNameClickable: {
+    textDecorationLine: 'underline',
+    color: '#F3CC95', // Highlight clickable character names
   },
   characterNameEmpty: {
     fontSize: 12,
