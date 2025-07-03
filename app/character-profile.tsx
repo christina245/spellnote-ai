@@ -338,7 +338,7 @@ Give as much description as you can!"
           />
         </View>
 
-        {/* Delete Character Button - Now below all content */}
+        {/* CRITICAL: Delete Character Button - ALWAYS positioned below all content */}
         <View style={styles.deleteButtonContainer}>
           <TouchableOpacity 
             style={styles.deleteButton}
@@ -350,11 +350,11 @@ Give as much description as you can!"
           </TouchableOpacity>
         </View>
 
-        {/* Extra spacing for floating save button */}
+        {/* Extra spacing to ensure delete button is never covered by floating save button */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Floating Save Button */}
+      {/* CRITICAL: Floating Save Button - ALWAYS positioned above delete button */}
       <View style={styles.floatingSaveContainer}>
         <TouchableOpacity 
           style={[
@@ -648,9 +648,11 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.343)',
     fontFamily: 'Inter',
   },
+  // CRITICAL: Delete button container - positioned at the very bottom of content
   deleteButtonContainer: {
-    marginTop: 32,
-    marginBottom: 24,
+    marginTop: 40, // Extra space above delete button
+    marginBottom: 32, // Space below delete button
+    paddingHorizontal: 0, // No extra horizontal padding
   },
   deleteButton: {
     flexDirection: 'row',
@@ -663,6 +665,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.3)',
+    width: '100%', // Full width to match other elements
   },
   deleteButtonText: {
     fontSize: 16,
@@ -670,16 +673,19 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     fontFamily: 'Inter',
   },
+  // CRITICAL: Extra spacing to ensure delete button is never covered by floating save
   bottomSpacing: {
-    height: 100, // Extra space for floating save button
+    height: 120, // Generous spacing to ensure delete button is always visible above floating save
   },
+  // CRITICAL: Floating save container - positioned above delete button
   floatingSaveContainer: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 40, // Fixed distance from bottom
     left: 0,
     right: 0,
     alignItems: 'center',
     paddingHorizontal: 24,
+    zIndex: 10, // Ensure it floats above content
   },
   floatingSaveButton: {
     backgroundColor: '#F3CC95',
