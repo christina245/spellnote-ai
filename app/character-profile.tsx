@@ -179,6 +179,13 @@ export default function CharacterProfile() {
     return require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
   };
 
+  // Check if all required fields are filled for Save button
+  const canSaveChanges = () => {
+    return characterName.trim() !== '' && 
+           characterDescription.trim() !== '' && 
+           characterDescription.length >= 75;
+  };
+
   if (!fontsLoaded) {
     return null;
   }
@@ -331,9 +338,8 @@ Give as much description as you can!"
           />
         </View>
 
-        {/* Action Buttons */}
-        <View style={styles.actionButtonsContainer}>
-          {/* Delete Character Button */}
+        {/* Delete Character Button - Now below all content */}
+        <View style={styles.deleteButtonContainer}>
           <TouchableOpacity 
             style={styles.deleteButton}
             onPress={handleDeleteCharacter}
@@ -342,17 +348,31 @@ Give as much description as you can!"
             <Trash2 size={16} color="#EF4444" />
             <Text style={styles.deleteButtonText}>Delete Character</Text>
           </TouchableOpacity>
-
-          {/* Save Changes Button */}
-          <TouchableOpacity 
-            style={styles.saveButton}
-            onPress={handleSaveChanges}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.saveButtonText}>Save Changes</Text>
-          </TouchableOpacity>
         </View>
+
+        {/* Extra spacing for floating save button */}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Floating Save Button */}
+      <View style={styles.floatingSaveContainer}>
+        <TouchableOpacity 
+          style={[
+            styles.floatingSaveButton,
+            !canSaveChanges() && styles.floatingSaveButtonDisabled
+          ]}
+          onPress={handleSaveChanges}
+          disabled={!canSaveChanges()}
+          activeOpacity={canSaveChanges() ? 0.8 : 1}
+        >
+          <Text style={[
+            styles.floatingSaveButtonText,
+            !canSaveChanges() && styles.floatingSaveButtonTextDisabled
+          ]}>
+            Save Changes
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Photo Upload Modal */}
       <PhotoUploadModal
@@ -628,9 +648,9 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.343)',
     fontFamily: 'Inter',
   },
-  actionButtonsContainer: {
-    gap: 16,
-    marginTop: 20,
+  deleteButtonContainer: {
+    marginTop: 32,
+    marginBottom: 24,
   },
   deleteButton: {
     flexDirection: 'row',
@@ -650,11 +670,22 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     fontFamily: 'Inter',
   },
-  saveButton: {
+  bottomSpacing: {
+    height: 100, // Extra space for floating save button
+  },
+  floatingSaveContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  floatingSaveButton: {
     backgroundColor: '#F3CC95',
     borderRadius: 12,
     paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingHorizontal: 32,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -665,12 +696,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+    minWidth: 200,
   },
-  saveButtonText: {
+  floatingSaveButtonDisabled: {
+    backgroundColor: '#6B7280',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  floatingSaveButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1C1830',
     fontFamily: 'Inter',
+  },
+  floatingSaveButtonTextDisabled: {
+    color: '#9CA3AF',
   },
   modalOverlay: {
     flex: 1,
