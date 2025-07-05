@@ -169,7 +169,8 @@ export default function HomeTab() {
     // Set initial week start date (start of current week)
     const today = new Date();
     const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+    // Center today in the week view (3 days before, today in middle, 3 days after)
+    startOfWeek.setDate(today.getDate() - 3);
     setWeekStartDate(startOfWeek);
     
     setIsInitialized(true);
