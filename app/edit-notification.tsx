@@ -81,14 +81,14 @@ export default function EditNotification() {
   }, [params]);
 
   const loadUserCharacters = () => {
-    // Create characters based on the design - Muffin in the middle (selected), others around
+    // Create characters with Muffin in the middle (selected), empty slots on left and right
     const userCharacters: Character[] = [
       {
-        id: 'luciano-1',
-        name: 'Luciano Genovese',
-        type: 'character',
-        avatarSource: require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
-        isEmpty: false,
+        id: 'empty-1',
+        name: 'Add character',
+        type: 'empty',
+        avatarSource: null,
+        isEmpty: true,
         isSelected: false
       },
       {
@@ -100,11 +100,11 @@ export default function EditNotification() {
         isSelected: true // Muffin is selected by default (middle character)
       },
       {
-        id: 'obnoxious-3',
-        name: 'Obnoxious Chicken',
-        type: 'character',
-        avatarSource: require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
-        isEmpty: false,
+        id: 'empty-3',
+        name: 'Add character',
+        type: 'empty',
+        avatarSource: null,
+        isEmpty: true,
         isSelected: false
       }
     ];
@@ -176,7 +176,13 @@ export default function EditNotification() {
 
   const handleCharacterSelect = (characterId: string) => {
     const character = characters.find(c => c.id === characterId);
-    if (character && !character.isEmpty) {
+    if (character) {
+      if (character.isEmpty) {
+        // Handle empty slot press - could navigate to character creation
+        Alert.alert('Add Character', 'Character creation functionality will be implemented');
+        return;
+      }
+      
       setSelectedCharacterId(characterId);
       // Update character selection state
       setCharacters(prev => prev.map(char => ({
@@ -374,17 +380,23 @@ export default function EditNotification() {
               >
                 <View style={[
                   styles.characterAvatarContainer,
-                  character.isSelected && styles.selectedCharacterAvatar
+                  character.isSelected && !character.isEmpty && styles.selectedCharacterAvatar,
+                  character.isEmpty && styles.emptyCharacterSlot
                 ]}>
-                  <Image 
-                    source={character.avatarSource}
-                    style={styles.characterAvatar}
-                    resizeMode="cover"
-                  />
+                  {character.isEmpty ? (
+                    <Text style={styles.addCharacterText}>+</Text>
+                  ) : (
+                    <Image 
+                      source={character.avatarSource}
+                      style={styles.characterAvatar}
+                      resizeMode="cover"
+                    />
+                  )}
                 </View>
                 <Text style={[
                   styles.characterName,
-                  character.isSelected && styles.characterNameSelected
+                  character.isSelected && !character.isEmpty && styles.characterNameSelected,
+                  character.isEmpty && styles.characterNameEmpty
                 ]}>
                   {character.name}
                 </Text>
@@ -723,6 +735,17 @@ const styles = StyleSheet.create({
     borderColor: '#8DD3C8', // Mint green border for selected character
     borderStyle: 'solid',
   },
+  emptyCharacterSlot: {
+    backgroundColor: '#374151',
+    borderColor: '#4B5563',
+    borderStyle: 'dashed',
+  },
+  addCharacterText: {
+    fontSize: 32,
+    fontWeight: '300',
+    color: '#9CA3AF',
+    fontFamily: 'Inter',
+  },
   characterAvatar: {
     width: 74, // Slightly smaller to account for thicker border
     height: 74,
@@ -738,6 +761,11 @@ const styles = StyleSheet.create({
   characterNameSelected: {
     color: '#8DD3C8', // Mint green text for selected character
     fontWeight: '600',
+  },
+  characterNameEmpty: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#9CA3AF',
   },
   actionButtonsContainer: {
     gap: 16,
