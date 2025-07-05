@@ -1093,8 +1093,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '400',
     color: '#FFFFFF',
     fontFamily: 'Montserrat_700Bold', // UPDATED: Changed from 'Inter' to 'Montserrat_700Bold'
     marginBottom: 16,
