@@ -81,36 +81,36 @@ export default function EditNotification() {
   }, [params]);
 
   const loadUserCharacters = () => {
-    // Create demo characters based on the design
+    // Create characters based on the design - Muffin in the middle (selected), others around
     const userCharacters: Character[] = [
       {
         id: 'luciano-1',
         name: 'Luciano Genovese',
-        type: 'character',
-        avatarSource: require('../assets/images/pink bunny.jpg'),
-        isEmpty: false,
-        isSelected: true // First character is selected by default
-      },
-      {
-        id: 'obnoxious-2',
-        name: 'Obnoxious Chicken',
         type: 'character',
         avatarSource: require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
         isEmpty: false,
         isSelected: false
       },
       {
-        id: 'empty-3',
-        name: 'Add character',
-        type: 'empty',
-        avatarSource: null,
-        isEmpty: true,
+        id: 'muffin-2',
+        name: 'Muffin',
+        type: 'character',
+        avatarSource: require('../assets/images/pink bunny.jpg'),
+        isEmpty: false,
+        isSelected: true // Muffin is selected by default (middle character)
+      },
+      {
+        id: 'obnoxious-3',
+        name: 'Obnoxious Chicken',
+        type: 'character',
+        avatarSource: require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+        isEmpty: false,
         isSelected: false
       }
     ];
 
     setCharacters(userCharacters);
-    setSelectedCharacterId('luciano-1'); // Set first character as selected
+    setSelectedCharacterId('muffin-2'); // Set Muffin as selected
   };
 
   const handleBack = () => {
@@ -144,7 +144,7 @@ export default function EditNotification() {
   };
 
   const formatDate = (date: Date | null) => {
-    if (!date) return 'MM/DD/YYYY';
+    if (!date) return 'DD/MM/YYYY';
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
@@ -246,14 +246,12 @@ export default function EditNotification() {
 
         {/* Details Field */}
         <View style={styles.fieldGroup}>
-          <Text style={styles.fieldLabel}>
-            DETAILS<Text style={styles.asterisk}>*</Text>
-          </Text>
+          <Text style={styles.fieldLabel}>DETAILS</Text>
           <TextInput
             style={[styles.textInput, styles.textInputMultiline]}
             value={details}
             onChangeText={setDetails}
-            placeholder="What do you need to remember?"
+            placeholder="What do you need to remember? E.g: study habits to try, a new store you want to visit, etiquette for a certain event you keep forgetting, etc."
             placeholderTextColor="rgba(255, 255, 255, 0.50)"
             multiline={true}
             numberOfLines={4}
@@ -264,16 +262,12 @@ export default function EditNotification() {
 
         {/* Time to Send Section */}
         <View style={styles.sectionGroup}>
-          <Text style={styles.sectionLabel}>
-            TIME TO SEND <Text style={styles.asterisk}>*</Text>
-          </Text>
+          <Text style={styles.sectionLabel}>TIME TO SEND</Text>
           
           {/* Start Date */}
           <View style={styles.dateTimeRow}>
             <View style={styles.dateTimeField}>
-              <Text style={styles.dateTimeLabel}>
-                START DATE<Text style={styles.asterisk}>*</Text>
-              </Text>
+              <Text style={styles.dateTimeLabel}>START DATE</Text>
               <TouchableOpacity
                 style={styles.datePickerButton}
                 onPress={() => setShowStartDatePicker(true)}
@@ -313,9 +307,7 @@ export default function EditNotification() {
           {/* Time */}
           <View style={styles.dateTimeRow}>
             <View style={styles.dateTimeField}>
-              <Text style={styles.dateTimeLabel}>
-                TIME<Text style={styles.asterisk}>*</Text>
-              </Text>
+              <Text style={styles.dateTimeLabel}>TIME</Text>
               <TouchableOpacity
                 style={styles.timePickerButton}
                 onPress={() => setShowTimePicker(true)}
@@ -376,33 +368,23 @@ export default function EditNotification() {
             {characters.map((character) => (
               <TouchableOpacity
                 key={character.id}
-                style={[
-                  styles.characterSlot,
-                  character.isSelected && !character.isEmpty && styles.characterSlotSelected
-                ]}
+                style={styles.characterSlot}
                 onPress={() => handleCharacterSelect(character.id)}
-                activeOpacity={character.isEmpty ? 1 : 0.7}
-                disabled={character.isEmpty}
+                activeOpacity={0.7}
               >
                 <View style={[
                   styles.characterAvatarContainer,
-                  character.isEmpty && styles.emptyCharacterSlot,
-                  character.isSelected && !character.isEmpty && styles.selectedCharacterAvatar
+                  character.isSelected && styles.selectedCharacterAvatar
                 ]}>
-                  {character.isEmpty ? (
-                    <Text style={styles.addCharacterText}>+</Text>
-                  ) : (
-                    <Image 
-                      source={character.avatarSource}
-                      style={styles.characterAvatar}
-                      resizeMode="cover"
-                    />
-                  )}
+                  <Image 
+                    source={character.avatarSource}
+                    style={styles.characterAvatar}
+                    resizeMode="cover"
+                  />
                 </View>
                 <Text style={[
                   styles.characterName,
-                  character.isEmpty && styles.characterNameEmpty,
-                  character.isSelected && !character.isEmpty && styles.characterNameSelected
+                  character.isSelected && styles.characterNameSelected
                 ]}>
                   {character.name}
                 </Text>
@@ -420,24 +402,6 @@ export default function EditNotification() {
             activeOpacity={0.8}
           >
             <Text style={styles.duplicateButtonText}>DUPLICATE</Text>
-          </TouchableOpacity>
-
-          {/* Save Notification Button */}
-          <TouchableOpacity 
-            style={[
-              styles.saveNotificationButton,
-              !canSaveNotification() && styles.saveNotificationButtonDisabled
-            ]}
-            onPress={handleSaveNotification}
-            disabled={!canSaveNotification()}
-            activeOpacity={canSaveNotification() ? 0.8 : 1}
-          >
-            <Text style={[
-              styles.saveNotificationButtonText,
-              !canSaveNotification() && styles.saveNotificationButtonTextDisabled
-            ]}>
-              Save notification
-            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -570,9 +534,6 @@ const styles = StyleSheet.create({
     lineHeight: 17.5,
     letterSpacing: 0.7,
     marginBottom: 8,
-  },
-  asterisk: {
-    color: '#E64646',
   },
   headerInput: {
     backgroundColor: 'rgba(60, 60, 67, 0.30)',
@@ -747,9 +708,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  characterSlotSelected: {
-    // Additional styling for selected character slot
-  },
   characterAvatarContainer: {
     width: 80,
     height: 80,
@@ -758,28 +716,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#374151',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: 'transparent',
   },
-  emptyCharacterSlot: {
-    backgroundColor: '#374151',
-    borderColor: '#4B5563',
-    borderStyle: 'dashed',
-  },
   selectedCharacterAvatar: {
-    borderColor: '#8DD3C8',
+    borderColor: '#8DD3C8', // Mint green border for selected character
     borderStyle: 'solid',
   },
-  addCharacterText: {
-    fontSize: 32,
-    fontWeight: '300',
-    color: '#9CA3AF',
-    fontFamily: 'Inter',
-  },
   characterAvatar: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+    width: 74, // Slightly smaller to account for thicker border
+    height: 74,
+    borderRadius: 37,
   },
   characterName: {
     fontSize: 14,
@@ -788,28 +735,25 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     textAlign: 'center',
   },
-  characterNameEmpty: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: '#9CA3AF',
-  },
   characterNameSelected: {
-    color: '#8DD3C8',
+    color: '#8DD3C8', // Mint green text for selected character
     fontWeight: '600',
   },
   actionButtonsContainer: {
     gap: 16,
     marginTop: 20,
+    alignItems: 'center',
   },
   duplicateButton: {
     backgroundColor: 'rgba(139, 92, 246, 0.2)',
     borderRadius: 12,
     paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingHorizontal: 32,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(139, 92, 246, 0.4)',
+    minWidth: 160,
   },
   duplicateButtonText: {
     fontSize: 14,
@@ -817,36 +761,6 @@ const styles = StyleSheet.create({
     color: '#A78BFA',
     fontFamily: 'Inter',
     letterSpacing: 0.5,
-  },
-  saveNotificationButton: {
-    backgroundColor: '#F3CC95',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  saveNotificationButtonDisabled: {
-    backgroundColor: '#6B7280',
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  saveNotificationButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1C1830',
-    fontFamily: 'Inter',
-  },
-  saveNotificationButtonTextDisabled: {
-    color: '#9CA3AF',
   },
   modalOverlay: {
     flex: 1,
