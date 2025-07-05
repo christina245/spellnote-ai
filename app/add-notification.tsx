@@ -324,7 +324,7 @@ export default function AddNotification() {
             style={[styles.textInput, styles.textInputMultiline]}
             value={details}
             onChangeText={setDetails}
-            placeholder="What do you need to remember? E.g: study habits to try, a new store you want to visit, etiquette for a certain event you keep forgetting, etc."
+            placeholder="What do you need to remember? E.g: study habits to try, a new store you want to visit, etiquette for a certain event, etc."
             placeholderTextColor="rgba(255, 255, 255, 0.50)"
             multiline={true}
             numberOfLines={4}
