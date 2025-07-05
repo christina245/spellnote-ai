@@ -71,7 +71,7 @@ export default function HomeTab() {
     id: 'demo-muffin-1',
     name: 'Muffin the fluffy bunny',
     type: 'character',
-    avatarSource: require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+    avatarSource: require('../../assets/images/pink bunny.jpg'),
     description: 'A sweet and gentle bunny with a fluffy coat and caring personality. Muffin loves to help others stay organized and motivated with gentle reminders. Known for being encouraging, warm, and always ready with a kind word.',
     vibes: ['bubbly', 'gentle', 'caring'],
     tagline: 'Your fluffy friend for gentle reminders',

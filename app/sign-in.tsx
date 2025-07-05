@@ -60,7 +60,8 @@ export default function SignIn() {
     startDate: new Date().toISOString(),
     endDate: null,
     isRepeat: false,
-    isTextItToMe: false
+    isTextItToMe: false,
+    userAvatarUri: require('../assets/images/pink bunny.jpg')
   };
 
   const handleSignIn = async () => {
@@ -103,6 +104,7 @@ export default function SignIn() {
             characterName: mockUserData.characterName,
             characterDescription: mockUserData.characterDescription,
             characterVibes: JSON.stringify(mockUserData.characterVibes),
+            userAvatarUri: mockUserData.userAvatarUri,
             notificationHeader: mockUserData.notificationHeader,
             notificationDetails: mockUserData.notificationDetails,
             time: mockUserData.time,
