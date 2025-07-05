@@ -521,18 +521,19 @@ export default function HomeTab() {
     });
   };
 
-  const handleNotificationPress = () => {
-    // Navigate to edit notification screen with notification data
+  const handleNotificationPress = (notification: NotificationEntry) => {
+    // Navigate to edit notification screen with the actual notification data
     router.push({
       pathname: '/edit-notification',
       params: {
-        notificationHeader: 'Board game night prep',
-        notificationDetails: 'Need to brush up on how to play Catan at 6 pm this Wednesday before board game night at 8. Ping me at 5 and 5:30 pm.',
-        notificationTime: '6:30 PM',
-        startDate: new Date().toISOString(),
-        endDate: null,
+        notificationHeader: notification.header,
+        notificationDetails: notification.details,
+        notificationTime: notification.time,
+        startDate: notification.date, // Convert MM/DD/YYYY to ISO string
+        endDate: null, // We don't store end dates in notifications currently
         isRepeat: 'false',
-        isTextItToMe: 'false'
+        isTextItToMe: 'false',
+        sendWithoutAI: notification.sendWithoutAI?.toString() || 'false'
       }
     });
   };
@@ -825,7 +826,7 @@ export default function HomeTab() {
                   <TouchableOpacity
                     key={notification.id}
                     style={styles.notificationCard}
-                    onPress={handleNotificationPress}
+                    onPress={() => handleNotificationPress(notification)}
                     activeOpacity={0.8}
                   >
                     {/* Notification Content with Avatar and Text Side by Side */}
