@@ -1094,10 +1094,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: '300',
     color: '#FFFFFF',
     fontFamily: 'Montserrat_700Bold', // UPDATED: Changed from 'Inter' to 'Montserrat_700Bold'
-    marginBottom: 16,
+    marginBottom: 9.6,
   },
   // NEW: Date header styling with green mint color
   dateHeader: {
