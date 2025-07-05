@@ -70,7 +70,7 @@ export default function EditNotification() {
       setEndDate(new Date(params.endDate as string));
     }
     if (params.isRepeat) {
-      setIsRepeat(params.isRepeat === 'true');
+      setIsRepeat(false); // Always start unchecked
     }
     if (params.isTextItToMe) {
       setIsTextItToMe(params.isTextItToMe === 'true');
@@ -345,9 +345,6 @@ export default function EditNotification() {
                 )}
               </Svg>
               <Text style={styles.checkboxLabel}>Repeat</Text>
-              {isRepeat && (
-                <Text style={styles.repeatTimes}>8:45 PM, 9:00 PM</Text>
-              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -663,13 +660,6 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#FFFFFF',
     fontFamily: 'Inter',
-  },
-  repeatTimes: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: '#8DD3C8',
-    fontFamily: 'Inter',
-    marginLeft: 'auto',
   },
   toggleSection: {
     marginBottom: 32,
