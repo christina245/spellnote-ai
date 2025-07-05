@@ -7,7 +7,7 @@ import {
   Modal,
   Dimensions,
 } from 'react-native';
-import { ChevronLeft, ChevronRight, Edit3 } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, CreditCard as Edit3 } from 'lucide-react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
