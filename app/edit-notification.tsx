@@ -46,16 +46,16 @@ export default function EditNotification() {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
-  const [originalData, setOriginalData] = useState({
-    header: '',
-    details: '',
-    startDate: null as Date | null,
-    endDate: null as Date | null,
-    time: '',
-    isRepeat: false,
-    isTextItToMe: false,
-    selectedCharacterId: null as string | null
-  });
+  const [originalData, setOriginalData] = useState<{
+    header: string;
+    details: string;
+    startDate: number | null;
+    endDate: number | null;
+    time: string;
+    isRepeat: boolean;
+    isTextItToMe: boolean;
+    selectedCharacterId: string | null;
+  } | null>(null);
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -83,28 +83,32 @@ export default function EditNotification() {
     setIsTextItToMe(initialIsTextItToMe);
 
     // Store original data for change detection
-    setOriginalData({
+    const originalDataToStore = {
       header: initialHeader,
       details: initialDetails,
-      startDate: initialStartDate,
-      endDate: initialEndDate,
+      startDate: initialStartDate?.getTime() || null,
+      endDate: initialEndDate?.getTime() || null,
       time: initialTime,
       isRepeat: initialIsRepeat,
       isTextItToMe: initialIsTextItToMe,
       selectedCharacterId: 'muffin-2' // Default selected character
-    });
+    };
+    
+    setOriginalData(originalDataToStore);
 
     // Load user's characters
     loadUserCharacters();
   }, [params]);
 
   // Check for changes whenever any field updates
-  useEffect(() => {
+  const checkForChanges = () => {
+    if (!originalData) return;
+    
     const currentData = {
       header,
       details,
-      startDate,
-      endDate,
+      startDate: startDate?.getTime() || null,
+      endDate: endDate?.getTime() || null,
       time,
       isRepeat,
       isTextItToMe,
@@ -114,15 +118,20 @@ export default function EditNotification() {
     const hasAnyChanges = 
       currentData.header !== originalData.header ||
       currentData.details !== originalData.details ||
-      currentData.startDate?.getTime() !== originalData.startDate?.getTime() ||
-      currentData.endDate?.getTime() !== originalData.endDate?.getTime() ||
+      currentData.startDate !== originalData.startDate ||
+      currentData.endDate !== originalData.endDate ||
       currentData.time !== originalData.time ||
       currentData.isRepeat !== originalData.isRepeat ||
       currentData.isTextItToMe !== originalData.isTextItToMe ||
       currentData.selectedCharacterId !== originalData.selectedCharacterId;
 
     setHasChanges(hasAnyChanges);
-  }, [header, details, startDate, endDate, time, isRepeat, isTextItToMe, selectedCharacterId, originalData]);
+  };
+
+  // Use useEffect to check for changes, but with proper dependencies
+  useEffect(() => {
+    checkForChanges();
+  }, [header, details, startDate, endDate, time, isRepeat, isTextItToMe, selectedCharacterId]);
 
   const loadUserCharacters = () => {
     // Create characters with Muffin in the middle (selected), empty slots on left and right
