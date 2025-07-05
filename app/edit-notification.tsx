@@ -45,6 +45,17 @@ export default function EditNotification() {
   const [showSMSModal, setShowSMSModal] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [originalData, setOriginalData] = useState({
+    header: '',
+    details: '',
+    startDate: null as Date | null,
+    endDate: null as Date | null,
+    time: '',
+    isRepeat: false,
+    isTextItToMe: false,
+    selectedCharacterId: null as string | null
+  });
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -54,31 +65,77 @@ export default function EditNotification() {
 
   useEffect(() => {
     // Load notification data from params for editing
+    const initialHeader = (params.notificationHeader as string) || '';
+    const initialDetails = (params.notificationDetails as string) || '';
+    const initialTime = (params.notificationTime as string) || '';
+    const initialStartDate = params.startDate ? new Date(params.startDate as string) : null;
+    const initialEndDate = params.endDate ? new Date(params.endDate as string) : null;
+    const initialIsRepeat = false; // Always start unchecked
+    const initialIsTextItToMe = params.isTextItToMe === 'true';
+    
     if (params.notificationHeader) {
-      setHeader(params.notificationHeader as string);
+      setHeader(initialHeader);
     }
     if (params.notificationDetails) {
-      setDetails(params.notificationDetails as string);
+      setDetails(initialDetails);
     }
     if (params.notificationTime) {
-      setTime(params.notificationTime as string);
+      setTime(initialTime);
     }
     if (params.startDate) {
-      setStartDate(new Date(params.startDate as string));
+      setStartDate(initialStartDate);
     }
     if (params.endDate) {
-      setEndDate(new Date(params.endDate as string));
+      setEndDate(initialEndDate);
     }
     if (params.isRepeat) {
-      setIsRepeat(false); // Always start unchecked
+      setIsRepeat(initialIsRepeat);
     }
     if (params.isTextItToMe) {
-      setIsTextItToMe(params.isTextItToMe === 'true');
+      setIsTextItToMe(initialIsTextItToMe);
     }
+
+    // Store original data for change detection
+    setOriginalData({
+      header: initialHeader,
+      details: initialDetails,
+      startDate: initialStartDate,
+      endDate: initialEndDate,
+      time: initialTime,
+      isRepeat: initialIsRepeat,
+      isTextItToMe: initialIsTextItToMe,
+      selectedCharacterId: 'muffin-2' // Default selected character
+    });
 
     // Load user's characters
     loadUserCharacters();
   }, [params]);
+
+  // Check for changes whenever any field updates
+  useEffect(() => {
+    const currentData = {
+      header,
+      details,
+      startDate,
+      endDate,
+      time,
+      isRepeat,
+      isTextItToMe,
+      selectedCharacterId
+    };
+
+    const hasAnyChanges = 
+      currentData.header !== originalData.header ||
+      currentData.details !== originalData.details ||
+      currentData.startDate?.getTime() !== originalData.startDate?.getTime() ||
+      currentData.endDate?.getTime() !== originalData.endDate?.getTime() ||
+      currentData.time !== originalData.time ||
+      currentData.isRepeat !== originalData.isRepeat ||
+      currentData.isTextItToMe !== originalData.isTextItToMe ||
+      currentData.selectedCharacterId !== originalData.selectedCharacterId;
+
+    setHasChanges(hasAnyChanges);
+  }, [header, details, startDate, endDate, time, isRepeat, isTextItToMe, selectedCharacterId, originalData]);
 
   const loadUserCharacters = () => {
     // Create characters with Muffin in the middle (selected), empty slots on left and right
@@ -491,6 +548,19 @@ export default function EditNotification() {
           </View>
         </View>
       </Modal>
+
+      {/* Floating Save Changes Button - Only show when changes are made */}
+      {hasChanges && (
+        <View style={styles.floatingSaveContainer}>
+          <TouchableOpacity 
+            style={styles.floatingSaveButton}
+            onPress={handleSaveNotification}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.floatingSaveButtonText}>Save changes</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -598,7 +668,7 @@ const styles = StyleSheet.create({
   dateTimeLabel: {
     color: '#E1B8B2',
     fontFamily: 'Inter',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '400',
     lineHeight: 17.5,
     letterSpacing: 0.7,
@@ -779,6 +849,39 @@ const styles = StyleSheet.create({
     color: '#A78BFA',
     fontFamily: 'Inter',
     letterSpacing: 0.5,
+  },
+  // Floating Save Button Styles
+  floatingSaveContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    zIndex: 10,
+  },
+  floatingSaveButton: {
+    backgroundColor: '#F3CC95',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    minWidth: 200,
+  },
+  floatingSaveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1C1830',
+    fontFamily: 'Inter',
   },
   modalOverlay: {
     flex: 1,
