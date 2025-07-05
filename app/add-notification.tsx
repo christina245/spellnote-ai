@@ -501,7 +501,7 @@ export default function AddNotification() {
               <Text style={styles.aiCheckboxLabel}>Send without AI</Text>
             </TouchableOpacity>
             <Text style={styles.aiCheckboxDescription}>
-              Selecting this option will have your note delivered exactly as you've written it without AI modification. Your character's name and avatar will still be visible.
+              Selecting this option will have your note delivered exactly as you've written it without AI modification. Your character's name and avatar will be switched with the app name and logo.
             </Text>
           </View>
         </View>
