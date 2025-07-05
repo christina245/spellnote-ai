@@ -291,10 +291,6 @@ export default function AddNotification() {
         </TouchableOpacity>
         
         <Text style={styles.title}>New notification</Text>
-        
-        <Text style={styles.subtitle}>
-          What do you need to remember and when?
-        </Text>
       </View>
 
       {/* Scrollable Content */}
