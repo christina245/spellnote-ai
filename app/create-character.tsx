@@ -399,7 +399,7 @@ Give as much description as you can!"
             style={styles.textInput}
             value={characterTagline}
             onChangeText={setCharacterTagline}
-            placeholder="A brief tagline for your character"
+            placeholder="The character in a nutshell."
             placeholderTextColor="rgba(255, 255, 255, 0.5)"
             maxLength={75}
           />
