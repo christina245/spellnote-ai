@@ -268,12 +268,6 @@ const styles = StyleSheet.create({
   navButton: {
     padding: 8,
   },
-  monthYearText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#1C1B1F',
-    fontFamily: 'Inter',
-  },
   weekDaysContainer: {
     flexDirection: 'row',
     width: '100%',
@@ -304,7 +298,7 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   selectedDayCell: {
-    backgroundColor: '#6B46C1',
+    backgroundColor: '#4A3A7B',
     borderRadius: 20,
   },
   dayText: {
@@ -334,7 +328,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6B46C1',
+    color: '#4A3A7B',
     fontFamily: 'Inter',
   },
   rightButtons: {
@@ -348,7 +342,7 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6B46C1',
+    color: '#4A3A7B',
     fontFamily: 'Inter',
   },
   okButton: {
@@ -358,7 +352,13 @@ const styles = StyleSheet.create({
   okButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#6B46C1',
+    color: '#4A3A7B',
+    fontFamily: 'Inter',
+  },
+  monthYearText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1C1B1F',
     fontFamily: 'Inter',
   },
 });
