@@ -26,6 +26,7 @@ export default function RootLayout() {
         <Stack.Screen name="sms-integration" />
         <Stack.Screen name="switch-to-ai-free" />
         <Stack.Screen name="switch-to-ai-mode" />
+        <Stack.Screen name="edit-notification" />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>

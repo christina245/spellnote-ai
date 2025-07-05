@@ -1,0 +1,895 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Dimensions,
+  Platform,
+  Modal,
+  Image,
+  Alert
+} from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft, Calendar, Clock } from 'lucide-react-native';
+import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import Svg, { Circle, Path } from 'react-native-svg';
+import DatePickerModal from '@/components/DatePickerModal';
+import TimePickerModal from '@/components/TimePickerModal';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+interface Character {
+  id: string;
+  name: string;
+  type: 'character' | 'spellbot' | 'ai-free' | 'empty';
+  avatarSource: any;
+  isEmpty: boolean;
+  isSelected?: boolean;
+}
+
+export default function EditNotification() {
+  const [header, setHeader] = useState('');
+  const [details, setDetails] = useState('');
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [time, setTime] = useState('');
+  const [isRepeat, setIsRepeat] = useState(false);
+  const [isTextItToMe, setIsTextItToMe] = useState(false);
+  const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showSMSModal, setShowSMSModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const router = useRouter();
+  const params = useLocalSearchParams();
+
+  const [fontsLoaded] = useFonts({
+    Montserrat_700Bold,
+  });
+
+  useEffect(() => {
+    // Load notification data from params for editing
+    if (params.notificationHeader) {
+      setHeader(params.notificationHeader as string);
+    }
+    if (params.notificationDetails) {
+      setDetails(params.notificationDetails as string);
+    }
+    if (params.notificationTime) {
+      setTime(params.notificationTime as string);
+    }
+    if (params.startDate) {
+      setStartDate(new Date(params.startDate as string));
+    }
+    if (params.endDate) {
+      setEndDate(new Date(params.endDate as string));
+    }
+    if (params.isRepeat) {
+      setIsRepeat(params.isRepeat === 'true');
+    }
+    if (params.isTextItToMe) {
+      setIsTextItToMe(params.isTextItToMe === 'true');
+    }
+
+    // Load user's characters
+    loadUserCharacters();
+  }, [params]);
+
+  const loadUserCharacters = () => {
+    // Create demo characters based on the design
+    const userCharacters: Character[] = [
+      {
+        id: 'luciano-1',
+        name: 'Luciano Genovese',
+        type: 'character',
+        avatarSource: require('../assets/images/pink bunny.jpg'),
+        isEmpty: false,
+        isSelected: true // First character is selected by default
+      },
+      {
+        id: 'obnoxious-2',
+        name: 'Obnoxious Chicken',
+        type: 'character',
+        avatarSource: require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
+        isEmpty: false,
+        isSelected: false
+      },
+      {
+        id: 'empty-3',
+        name: 'Add character',
+        type: 'empty',
+        avatarSource: null,
+        isEmpty: true,
+        isSelected: false
+      }
+    ];
+
+    setCharacters(userCharacters);
+    setSelectedCharacterId('luciano-1'); // Set first character as selected
+  };
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  const handleDuplicate = () => {
+    setShowDuplicateModal(true);
+  };
+
+  const handleSaveNotification = () => {
+    // Check if form is complete before proceeding
+    if (!canSaveNotification()) {
+      Alert.alert('Required Fields', 'Please fill in all required fields before saving.');
+      return;
+    }
+
+    // Show success message and navigate back
+    Alert.alert(
+      'Notification Updated',
+      'Your notification has been updated successfully!',
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            router.back();
+          }
+        }
+      ]
+    );
+  };
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return 'MM/DD/YYYY';
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleStartDateConfirm = (date: Date) => {
+    setStartDate(date);
+    setShowStartDatePicker(false);
+  };
+
+  const handleEndDateConfirm = (date: Date) => {
+    setEndDate(date);
+    setShowEndDatePicker(false);
+  };
+
+  const handleTimeConfirm = (selectedTime: string) => {
+    setTime(selectedTime);
+    setShowTimePicker(false);
+  };
+
+  const handleTextItToMeToggle = () => {
+    if (!isTextItToMe) {
+      setShowSMSModal(true);
+    } else {
+      setIsTextItToMe(false);
+    }
+  };
+
+  const handleCharacterSelect = (characterId: string) => {
+    const character = characters.find(c => c.id === characterId);
+    if (character && !character.isEmpty) {
+      setSelectedCharacterId(characterId);
+      // Update character selection state
+      setCharacters(prev => prev.map(char => ({
+        ...char,
+        isSelected: char.id === characterId
+      })));
+    }
+  };
+
+  const closeSMSModal = () => {
+    setShowSMSModal(false);
+  };
+
+  const closeDuplicateModal = () => {
+    setShowDuplicateModal(false);
+  };
+
+  // Check if all required fields are filled for Save button
+  const canSaveNotification = () => {
+    return details.trim() !== '' && 
+           startDate !== null && 
+           time.trim() !== '' && 
+           selectedCharacterId !== null;
+  };
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Header with Back Button */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={handleBack}
+          activeOpacity={0.7}
+        >
+          <ArrowLeft size={20} color="#F3CC95" />
+          <Text style={styles.backText}>BACK</Text>
+        </TouchableOpacity>
+        
+        <Text style={styles.title}>Edit notification</Text>
+      </View>
+
+      {/* Scrollable Content */}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Field */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>HEADER</Text>
+          <TextInput
+            style={[
+              styles.headerInput,
+              header.length > 0 && styles.headerInputWithText
+            ]}
+            value={header}
+            onChangeText={setHeader}
+            placeholder="Notification header"
+            placeholderTextColor="rgba(255, 255, 255, 0.50)"
+            multiline={false}
+          />
+        </View>
+
+        {/* Details Field */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>
+            DETAILS<Text style={styles.asterisk}>*</Text>
+          </Text>
+          <TextInput
+            style={[styles.textInput, styles.textInputMultiline]}
+            value={details}
+            onChangeText={setDetails}
+            placeholder="What do you need to remember?"
+            placeholderTextColor="rgba(255, 255, 255, 0.50)"
+            multiline={true}
+            numberOfLines={4}
+            textAlignVertical="top"
+            maxLength={1000}
+          />
+        </View>
+
+        {/* Time to Send Section */}
+        <View style={styles.sectionGroup}>
+          <Text style={styles.sectionLabel}>
+            TIME TO SEND <Text style={styles.asterisk}>*</Text>
+          </Text>
+          
+          {/* Start Date */}
+          <View style={styles.dateTimeRow}>
+            <View style={styles.dateTimeField}>
+              <Text style={styles.dateTimeLabel}>
+                START DATE<Text style={styles.asterisk}>*</Text>
+              </Text>
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setShowStartDatePicker(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.datePickerText,
+                  !startDate && styles.placeholderDateText
+                ]}>
+                  {formatDate(startDate)}
+                </Text>
+                <Calendar size={16} color="#8DD3C8" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* End Date */}
+          <View style={styles.dateTimeRow}>
+            <View style={styles.dateTimeField}>
+              <Text style={styles.dateTimeLabel}>END DATE</Text>
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setShowEndDatePicker(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.datePickerText,
+                  !endDate && styles.placeholderDateText
+                ]}>
+                  {formatDate(endDate)}
+                </Text>
+                <Calendar size={16} color="#8DD3C8" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Time */}
+          <View style={styles.dateTimeRow}>
+            <View style={styles.dateTimeField}>
+              <Text style={styles.dateTimeLabel}>
+                TIME<Text style={styles.asterisk}>*</Text>
+              </Text>
+              <TouchableOpacity
+                style={styles.timePickerButton}
+                onPress={() => setShowTimePicker(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.timePickerText, !time && styles.placeholderText]}>
+                  {time || "8:30 PM"}
+                </Text>
+                <Clock size={16} color="#8DD3C8" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Repeat Checkbox with additional times */}
+          <View style={styles.checkboxSection}>
+            <TouchableOpacity 
+              style={styles.checkbox}
+              onPress={() => setIsRepeat(!isRepeat)}
+              activeOpacity={0.7}
+            >
+              <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <Circle cx="10" cy="10" r="10" fill="#F0F3FB"/>
+                {isRepeat && (
+                  <Path 
+                    d="M5.49994 9.5L8.99994 13L14.4999 7.5" 
+                    stroke="#4A3A7B" 
+                    strokeWidth="1.5"
+                  />
+                )}
+              </Svg>
+              <Text style={styles.checkboxLabel}>Repeat</Text>
+              {isRepeat && (
+                <Text style={styles.repeatTimes}>8:45 PM, 9:00 PM</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Text it to me Toggle */}
+        <View style={styles.toggleSection}>
+          <TouchableOpacity 
+            style={styles.toggleButton}
+            onPress={handleTextItToMeToggle}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.toggleTrack, isTextItToMe && styles.toggleTrackActive]}>
+              <View style={[styles.toggleThumb, isTextItToMe && styles.toggleThumbActive]} />
+            </View>
+            <Text style={styles.toggleLabel}>Text it to me!</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Character Selection Section */}
+        <View style={styles.characterSection}>
+          <Text style={styles.sectionLabel}>CHARACTER</Text>
+          
+          <View style={styles.characterSlots}>
+            {characters.map((character) => (
+              <TouchableOpacity
+                key={character.id}
+                style={[
+                  styles.characterSlot,
+                  character.isSelected && !character.isEmpty && styles.characterSlotSelected
+                ]}
+                onPress={() => handleCharacterSelect(character.id)}
+                activeOpacity={character.isEmpty ? 1 : 0.7}
+                disabled={character.isEmpty}
+              >
+                <View style={[
+                  styles.characterAvatarContainer,
+                  character.isEmpty && styles.emptyCharacterSlot,
+                  character.isSelected && !character.isEmpty && styles.selectedCharacterAvatar
+                ]}>
+                  {character.isEmpty ? (
+                    <Text style={styles.addCharacterText}>+</Text>
+                  ) : (
+                    <Image 
+                      source={character.avatarSource}
+                      style={styles.characterAvatar}
+                      resizeMode="cover"
+                    />
+                  )}
+                </View>
+                <Text style={[
+                  styles.characterName,
+                  character.isEmpty && styles.characterNameEmpty,
+                  character.isSelected && !character.isEmpty && styles.characterNameSelected
+                ]}>
+                  {character.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.actionButtonsContainer}>
+          {/* Duplicate Button */}
+          <TouchableOpacity 
+            style={styles.duplicateButton}
+            onPress={handleDuplicate}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.duplicateButtonText}>DUPLICATE</Text>
+          </TouchableOpacity>
+
+          {/* Save Notification Button */}
+          <TouchableOpacity 
+            style={[
+              styles.saveNotificationButton,
+              !canSaveNotification() && styles.saveNotificationButtonDisabled
+            ]}
+            onPress={handleSaveNotification}
+            disabled={!canSaveNotification()}
+            activeOpacity={canSaveNotification() ? 0.8 : 1}
+          >
+            <Text style={[
+              styles.saveNotificationButtonText,
+              !canSaveNotification() && styles.saveNotificationButtonTextDisabled
+            ]}>
+              Save notification
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* Custom Date Picker Modals */}
+      <DatePickerModal
+        visible={showStartDatePicker}
+        onClose={() => setShowStartDatePicker(false)}
+        onCancel={() => setShowStartDatePicker(false)}
+        onConfirm={handleStartDateConfirm}
+        initialDate={startDate || new Date()}
+        title="Select start date"
+      />
+
+      <DatePickerModal
+        visible={showEndDatePicker}
+        onClose={() => setShowEndDatePicker(false)}
+        onCancel={() => setShowEndDatePicker(false)}
+        onConfirm={handleEndDateConfirm}
+        initialDate={endDate || new Date()}
+        title="Select end date"
+      />
+
+      {/* Custom Time Picker Modal */}
+      <TimePickerModal
+        visible={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+        onCancel={() => setShowTimePicker(false)}
+        onConfirm={handleTimeConfirm}
+        initialTime={time || "8:30 PM"}
+        title="Select time"
+      />
+
+      {/* SMS Unavailable Modal */}
+      <Modal
+        visible={showSMSModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeSMSModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>SMS Mode Unavailable</Text>
+            <Text style={styles.modalMessage}>
+              SMS mode is currently unavailable in beta. We're working on it!
+            </Text>
+            <TouchableOpacity 
+              style={styles.modalButton}
+              onPress={closeSMSModal}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Duplicate Unavailable Modal */}
+      <Modal
+        visible={showDuplicateModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeDuplicateModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Duplicate Unavailable</Text>
+            <Text style={styles.modalMessage}>
+              Duplicate functionality is currently unavailable in beta. We're working on it!
+            </Text>
+            <TouchableOpacity 
+              style={styles.modalButton}
+              onPress={closeDuplicateModal}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1C1830',
+  },
+  header: {
+    paddingTop: 60,
+    paddingHorizontal: Math.max(38, screenWidth * 0.097),
+    paddingBottom: 20,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#F3CC95',
+    fontFamily: 'Inter',
+  },
+  title: {
+    fontSize: 28,
+    fontFamily: 'Montserrat_700Bold',
+    fontWeight: '700',
+    color: '#FFFFFF',
+    lineHeight: 36,
+    letterSpacing: -0.28,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: Math.max(38, screenWidth * 0.097),
+    paddingBottom: 40,
+  },
+  fieldGroup: {
+    marginBottom: 24,
+  },
+  fieldLabel: {
+    color: '#8DD3C8',
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 17.5,
+    letterSpacing: 0.7,
+    marginBottom: 8,
+  },
+  asterisk: {
+    color: '#E64646',
+  },
+  headerInput: {
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: Math.max(8, 12),
+    fontSize: 14,
+    fontFamily: 'Inter',
+    fontWeight: '600',
+    lineHeight: 17.5,
+    color: 'rgba(255, 255, 255, 0.50)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  headerInputWithText: {
+    color: '#FFFFFF',
+  },
+  textInput: {
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: Math.max(8, 12),
+    fontSize: 14,
+    fontFamily: 'Inter',
+    fontWeight: '400',
+    lineHeight: 17.5,
+    color: '#FFF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  textInputMultiline: {
+    minHeight: 80,
+    paddingTop: Math.max(8, 12),
+  },
+  sectionGroup: {
+    marginBottom: 32,
+  },
+  sectionLabel: {
+    color: '#8DD3C8',
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 17.5,
+    letterSpacing: 0.7,
+    marginBottom: 16,
+  },
+  dateTimeRow: {
+    marginBottom: 16,
+  },
+  dateTimeField: {
+    flex: 1,
+  },
+  dateTimeLabel: {
+    color: '#E1B8B2',
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: '400',
+    lineHeight: 17.5,
+    letterSpacing: 0.7,
+    marginBottom: 8,
+  },
+  datePickerButton: {
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: Math.max(8, 12),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.02)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  datePickerText: {
+    fontSize: 14,
+    fontFamily: 'Inter',
+    fontWeight: '400',
+    lineHeight: 17.5,
+    color: '#FFF',
+  },
+  placeholderDateText: {
+    color: 'rgba(255, 255, 255, 0.50)',
+  },
+  timePickerButton: {
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: Math.max(8, 12),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.02)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timePickerText: {
+    fontSize: 14,
+    fontFamily: 'Inter',
+    fontWeight: '400',
+    lineHeight: 17.5,
+    color: '#FFF',
+  },
+  placeholderText: {
+    color: 'rgba(255, 255, 255, 0.50)',
+  },
+  checkboxSection: {
+    marginTop: 8,
+  },
+  checkbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+  },
+  repeatTimes: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#8DD3C8',
+    fontFamily: 'Inter',
+    marginLeft: 'auto',
+  },
+  toggleSection: {
+    marginBottom: 32,
+    alignItems: 'center',
+  },
+  toggleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  toggleTrack: {
+    width: 50,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.50)',
+    justifyContent: 'center',
+    paddingHorizontal: 2,
+  },
+  toggleTrackActive: {
+    backgroundColor: '#8B5CF6',
+  },
+  toggleThumb: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#FFFFFF',
+    alignSelf: 'flex-start',
+  },
+  toggleThumbActive: {
+    alignSelf: 'flex-end',
+  },
+  toggleLabel: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+  },
+  characterSection: {
+    marginBottom: 32,
+  },
+  characterSlots: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 20,
+  },
+  characterSlot: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 8,
+  },
+  characterSlotSelected: {
+    // Additional styling for selected character slot
+  },
+  characterAvatarContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    overflow: 'hidden',
+    backgroundColor: '#374151',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  emptyCharacterSlot: {
+    backgroundColor: '#374151',
+    borderColor: '#4B5563',
+    borderStyle: 'dashed',
+  },
+  selectedCharacterAvatar: {
+    borderColor: '#8DD3C8',
+    borderStyle: 'solid',
+  },
+  addCharacterText: {
+    fontSize: 32,
+    fontWeight: '300',
+    color: '#9CA3AF',
+    fontFamily: 'Inter',
+  },
+  characterAvatar: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+  },
+  characterName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+  },
+  characterNameEmpty: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#9CA3AF',
+  },
+  characterNameSelected: {
+    color: '#8DD3C8',
+    fontWeight: '600',
+  },
+  actionButtonsContainer: {
+    gap: 16,
+    marginTop: 20,
+  },
+  duplicateButton: {
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.4)',
+  },
+  duplicateButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#A78BFA',
+    fontFamily: 'Inter',
+    letterSpacing: 0.5,
+  },
+  saveNotificationButton: {
+    backgroundColor: '#F3CC95',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  saveNotificationButtonDisabled: {
+    backgroundColor: '#6B7280',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  saveNotificationButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1C1830',
+    fontFamily: 'Inter',
+  },
+  saveNotificationButtonTextDisabled: {
+    color: '#9CA3AF',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 320,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F2937',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  modalMessage: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#6B7280',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  modalButton: {
+    backgroundColor: '#F3CC95',
+    borderRadius: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1C1830',
+    fontFamily: 'Inter',
+  },
+});

@@ -522,8 +522,19 @@ export default function HomeTab() {
   };
 
   const handleNotificationPress = () => {
-    // Navigate to notification details or edit screen
-    console.log('Notification pressed');
+    // Navigate to edit notification screen with notification data
+    router.push({
+      pathname: '/edit-notification',
+      params: {
+        notificationHeader: 'don\'t drink too much!!!',
+        notificationDetails: 'don\'t have more than 5 beers or Aunt Carol will put you on TikTok. after 3 beers, just stop and don\'t even drink wine',
+        notificationTime: '8:30 PM',
+        startDate: new Date('2025-04-07').toISOString(),
+        endDate: new Date('2025-04-07').toISOString(),
+        isRepeat: 'true',
+        isTextItToMe: 'false'
+      }
+    });
   };
 
   const handleAddNotification = () => {
