@@ -516,26 +516,31 @@ export default function AddNotification() {
           >
             <Text style={styles.duplicateButtonText}>DUPLICATE</Text>
           </TouchableOpacity>
-
-          {/* Save Notification Button - ALWAYS VISIBLE */}
-          <TouchableOpacity 
-            style={[
-              styles.saveNotificationButton,
-              !canSaveNotification() && styles.saveNotificationButtonDisabled
-            ]}
-            onPress={handleSaveNotification}
-            disabled={!canSaveNotification()}
-            activeOpacity={canSaveNotification() ? 0.8 : 1}
-          >
-            <Text style={[
-              styles.saveNotificationButtonText,
-              !canSaveNotification() && styles.saveNotificationButtonTextDisabled
-            ]}>
-              Save notification
-            </Text>
-          </TouchableOpacity>
         </View>
+
+        {/* Extra spacing for floating button */}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Floating Save Notification Button */}
+      <View style={styles.floatingSaveContainer}>
+        <TouchableOpacity 
+          style={[
+            styles.floatingSaveButton,
+            !canSaveNotification() && styles.floatingSaveButtonDisabled
+          ]}
+          onPress={handleSaveNotification}
+          disabled={!canSaveNotification()}
+          activeOpacity={canSaveNotification() ? 0.8 : 1}
+        >
+          <Text style={[
+            styles.floatingSaveButtonText,
+            !canSaveNotification() && styles.floatingSaveButtonTextDisabled
+          ]}>
+            Save notification
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Custom Date Picker Modals */}
       <DatePickerModal
@@ -932,7 +937,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(139, 92, 246, 0.2)',
     borderRadius: 12,
     paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingHorizontal: 5, // Reduced by 60% (12 * 0.4 = 4.8, rounded to 5)
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -945,11 +950,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     letterSpacing: 0.5,
   },
-  saveNotificationButton: {
+  bottomSpacing: {
+    height: 100, // Extra space for floating button
+  },
+  // Floating Save Button Styles
+  floatingSaveContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    zIndex: 10,
+  },
+  floatingSaveButton: {
     backgroundColor: '#F3CC95',
     borderRadius: 12,
     paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingHorizontal: 10, // Reduced by 60% (24 * 0.4 = 9.6, rounded to 10)
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000000',
@@ -960,19 +978,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+    minWidth: 200,
   },
-  saveNotificationButtonDisabled: {
+  floatingSaveButtonDisabled: {
     backgroundColor: '#6B7280',
     shadowOpacity: 0,
     elevation: 0,
   },
-  saveNotificationButtonText: {
+  floatingSaveButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#1C1830',
     fontFamily: 'Inter',
   },
-  saveNotificationButtonTextDisabled: {
+  floatingSaveButtonTextDisabled: {
     color: '#9CA3AF',
   },
   modalOverlay: {
