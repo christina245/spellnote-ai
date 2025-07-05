@@ -291,8 +291,10 @@ export default function EditNotification() {
             placeholder="Notification header"
             placeholderTextColor="rgba(255, 255, 255, 0.50)"
             multiline={false}
-            editable={true}
-            selectTextOnFocus={true}
+            autoFocus={false}
+            blurOnSubmit={false}
+            returnKeyType="done"
+            clearButtonMode="while-editing"
           />
         </View>
 
@@ -309,8 +311,9 @@ export default function EditNotification() {
             numberOfLines={4}
             textAlignVertical="top"
             maxLength={1000}
-            editable={true}
-            selectTextOnFocus={true}
+            autoFocus={false}
+            blurOnSubmit={false}
+            scrollEnabled={true}
           />
         </View>
 
@@ -614,12 +617,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontWeight: '600',
     lineHeight: 17.5,
-    color: 'rgba(255, 255, 255, 0.50)',
+    color: '#FFFFFF',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.02)',
-  },
-  headerInputWithText: {
-    color: '#FFFFFF',
+    outlineStyle: 'none', // Remove web outline
   },
   textInput: {
     backgroundColor: 'rgba(60, 60, 67, 0.30)',
@@ -633,10 +634,12 @@ const styles = StyleSheet.create({
     color: '#FFF',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.02)',
+    outlineStyle: 'none', // Remove web outline
   },
   textInputMultiline: {
     minHeight: 80,
     paddingTop: Math.max(8, 12),
+    textAlignVertical: 'top',
   },
   sectionGroup: {
     marginBottom: 32,
