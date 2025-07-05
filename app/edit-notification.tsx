@@ -65,35 +65,22 @@ export default function EditNotification() {
 
   useEffect(() => {
     // Load notification data from params for editing
-    const initialHeader = (params.notificationHeader as string) || '';
-    const initialDetails = (params.notificationDetails as string) || '';
-    const initialTime = (params.notificationTime as string) || '';
+    const initialHeader = (params.notificationHeader as string) || 'Board game night prep';
+    const initialDetails = (params.notificationDetails as string) || 'Need to brush up on how to play Catan at 6 pm this Wednesday before board game night at 8. Ping me at 5 and 5:30 pm.';
+    const initialTime = (params.notificationTime as string) || '6:30 PM';
     const initialStartDate = params.startDate ? new Date(params.startDate as string) : null;
     const initialEndDate = params.endDate ? new Date(params.endDate as string) : null;
     const initialIsRepeat = false; // Always start unchecked
     const initialIsTextItToMe = params.isTextItToMe === 'true';
     
-    if (params.notificationHeader) {
-      setHeader(initialHeader);
-    }
-    if (params.notificationDetails) {
-      setDetails(initialDetails);
-    }
-    if (params.notificationTime) {
-      setTime(initialTime);
-    }
-    if (params.startDate) {
-      setStartDate(initialStartDate);
-    }
-    if (params.endDate) {
-      setEndDate(initialEndDate);
-    }
-    if (params.isRepeat) {
-      setIsRepeat(initialIsRepeat);
-    }
-    if (params.isTextItToMe) {
-      setIsTextItToMe(initialIsTextItToMe);
-    }
+    // Always set the values (with fallbacks if params are empty)
+    setHeader(initialHeader);
+    setDetails(initialDetails);
+    setTime(initialTime);
+    setStartDate(initialStartDate);
+    setEndDate(initialEndDate);
+    setIsRepeat(initialIsRepeat);
+    setIsTextItToMe(initialIsTextItToMe);
 
     // Store original data for change detection
     setOriginalData({
@@ -304,6 +291,8 @@ export default function EditNotification() {
             placeholder="Notification header"
             placeholderTextColor="rgba(255, 255, 255, 0.50)"
             multiline={false}
+            editable={true}
+            selectTextOnFocus={true}
           />
         </View>
 
@@ -320,6 +309,8 @@ export default function EditNotification() {
             numberOfLines={4}
             textAlignVertical="top"
             maxLength={1000}
+            editable={true}
+            selectTextOnFocus={true}
           />
         </View>
 
