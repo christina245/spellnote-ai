@@ -739,7 +739,7 @@ const styles = StyleSheet.create({
   dateTimeLabel: {
     color: '#E1B8B2',
     fontFamily: 'Inter',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '400',
     lineHeight: 17.5,
     letterSpacing: 0.7,
