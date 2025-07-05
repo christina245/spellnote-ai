@@ -45,6 +45,7 @@ export default function EditNotification() {
   const [showSMSModal, setShowSMSModal] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [sendWithoutAI, setSendWithoutAI] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [originalData, setOriginalData] = useState<{
     header: string;
@@ -55,6 +56,7 @@ export default function EditNotification() {
     isRepeat: boolean;
     isTextItToMe: boolean;
     selectedCharacterId: string | null;
+    sendWithoutAI: boolean;
   } | null>(null);
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -91,7 +93,8 @@ export default function EditNotification() {
       time: initialTime,
       isRepeat: initialIsRepeat,
       isTextItToMe: initialIsTextItToMe,
-      selectedCharacterId: 'muffin-2' // Default selected character
+      selectedCharacterId: 'muffin-2', // Default selected character
+      sendWithoutAI: false // Always start unchecked
     };
     
     setOriginalData(originalDataToStore);
@@ -112,7 +115,8 @@ export default function EditNotification() {
       time,
       isRepeat,
       isTextItToMe,
-      selectedCharacterId
+      selectedCharacterId,
+      sendWithoutAI
     };
 
     const hasAnyChanges = 
@@ -123,7 +127,8 @@ export default function EditNotification() {
       currentData.time !== originalData.time ||
       currentData.isRepeat !== originalData.isRepeat ||
       currentData.isTextItToMe !== originalData.isTextItToMe ||
-      currentData.selectedCharacterId !== originalData.selectedCharacterId;
+      currentData.selectedCharacterId !== originalData.selectedCharacterId ||
+      currentData.sendWithoutAI !== originalData.sendWithoutAI;
 
     setHasChanges(hasAnyChanges);
   };
@@ -131,7 +136,7 @@ export default function EditNotification() {
   // Use useEffect to check for changes, but with proper dependencies
   useEffect(() => {
     checkForChanges();
-  }, [header, details, startDate, endDate, time, isRepeat, isTextItToMe, selectedCharacterId]);
+  }, [header, details, startDate, endDate, time, isRepeat, isTextItToMe, selectedCharacterId, sendWithoutAI]);
 
   const loadUserCharacters = () => {
     // Create characters with Muffin in the middle (selected), empty slots on left and right
@@ -460,6 +465,30 @@ export default function EditNotification() {
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+
+        {/* Send without AI Checkbox */}
+        <View style={styles.aiCheckboxSection}>
+          <TouchableOpacity 
+            style={styles.aiCheckbox}
+            onPress={() => setSendWithoutAI(!sendWithoutAI)}
+            activeOpacity={0.7}
+          >
+            <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <Circle cx="10" cy="10" r="10" fill="#F0F3FB"/>
+              {sendWithoutAI && (
+                <Path 
+                  d="M5.49994 9.5L8.99994 13L14.4999 7.5" 
+                  stroke="#4A3A7B" 
+                  strokeWidth="1.5"
+                />
+              )}
+            </Svg>
+            <Text style={styles.aiCheckboxLabel}>Send without AI</Text>
+          </TouchableOpacity>
+          <Text style={styles.aiCheckboxDescription}>
+            Selecting this option will have your note delivered exactly as you've written it without AI modification. Your character's name and avatar will be switched with the app name and logo.
+          </Text>
         </View>
 
         {/* Action Buttons */}
@@ -829,6 +858,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '400',
     color: '#9CA3AF',
+  },
+  aiCheckboxSection: {
+    alignItems: 'flex-start',
+    marginBottom: 32,
+  },
+  aiCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  aiCheckboxLabel: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+  },
+  aiCheckboxDescription: {
+    fontSize: 12,
+    fontWeight: '300',
+    color: 'rgba(255, 255, 255, 0.70)',
+    fontFamily: 'Inter',
+    lineHeight: 16,
+    paddingLeft: 32,
   },
   actionButtonsContainer: {
     gap: 16,
