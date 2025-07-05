@@ -260,8 +260,7 @@ export default function CreateCharacter() {
       >
         {/* Title and Subtitle */}
         <View style={styles.titleSection}>
-          <Text style={styles.title}>Create a character!</Text>
-          <Text style={styles.subtitle}>Let's create a new character!</Text>
+          <Text style={styles.title}>New character</Text>
           <Text style={styles.disclaimer}>
             At this time, characters cannot represent any real people or offensive caricatures. All users get 3 characters free.
           </Text>
