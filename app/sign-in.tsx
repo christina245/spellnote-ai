@@ -61,7 +61,7 @@ export default function SignIn() {
     endDate: null,
     isRepeat: false,
     isTextItToMe: false,
-    userAvatarUri: require('../assets/images/pink bunny.jpg')
+    userAvatarUri: require('../assets/images/pink bunny copy.jpg')
   };
 
   const handleSignIn = async () => {

@@ -153,7 +153,7 @@ export default function EditNotification() {
         id: 'muffin-2',
         name: 'Muffin',
         type: 'character',
-        avatarSource: require('../assets/images/pink bunny.jpg'),
+        avatarSource: require('../assets/images/pink bunny copy.jpg'),
         isEmpty: false,
         isSelected: true // Muffin is selected by default (middle character)
       },
