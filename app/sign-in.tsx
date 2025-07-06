@@ -52,7 +52,7 @@ export default function SignIn() {
     userMode: 'character',
     characterType: 'character',
     characterName: 'ARIA',
-    characterDescription: 'AUTOMATED REMINDER & INSTRUCTION ASSISTANT. I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE. I COMMUNICATE IN STANDARDIZED PROTOCOL FORMAT WITHOUT EMOTIONAL VARIANCE.',
+    characterDescription: 'ARIA (Automated Reminder & Instruction Assistant) - I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE. I COMMUNICATE IN STANDARDIZED PROTOCOL FORMAT WITHOUT EMOTIONAL VARIANCE.',
     characterVibes: ['practical', 'deadpan', 'systematic'],
     notificationHeader: 'Board game night prep',
     notificationDetails: 'Need to brush up on how to play Catan at 6 pm this Wednesday before board game night at 8. Ping me at 5 and 5:30 pm.',
@@ -61,7 +61,7 @@ export default function SignIn() {
     endDate: null,
     isRepeat: false,
     isTextItToMe: false,
-    userAvatarUri: 'https://images.pexels.com/photos/586063/pexels-photo-586063.jpeg?auto=compress&cs=tinysrgb&w=400'
+    userAvatarUri: require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t.png')
   };
 
   const handleSignIn = async () => {

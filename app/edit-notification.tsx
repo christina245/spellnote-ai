@@ -153,7 +153,7 @@ export default function EditNotification() {
         id: 'demo-aria-2',
         name: 'ARIA',
         type: 'character',
-        avatarSource: { uri: 'https://images.pexels.com/photos/586063/pexels-photo-586063.jpeg?auto=compress&cs=tinysrgb&w=400' },
+        avatarSource: require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t.png'),
         isEmpty: false,
         isSelected: true // Muffin is selected by default (middle character)
       },
