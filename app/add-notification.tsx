@@ -256,6 +256,9 @@ export default function AddNotification() {
   // Check if all required fields are filled for Save button
   const canSaveNotification = () => {
     return details.trim() !== '' && 
+           startDate !== null && 
+           time.trim() !== '' && 
+           selectedCharacterId !== null;
   };
 
   const closeSMSModal = () => {
