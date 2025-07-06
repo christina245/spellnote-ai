@@ -250,35 +250,24 @@ export default function AddNotification() {
     const character = characters.find(c => c.id === characterId);
     if (character && !character.isEmpty) {
       setSelectedCharacterId(characterId);
-      // Second slot - ARIA character
+    }
   };
-        id: 'demo-aria-2',
-        name: 'ARIA',
-        type: 'character',
-        avatarSource: { uri: 'https://images.pexels.com/photos/586063/pexels-photo-586063.jpeg?auto=compress&cs=tinysrgb&w=400' },
-  };
-        isLastUsed: false
+
   // Check if all required fields are filled for Save button
-      // Third slot - user's main character (last used)
+  const canSaveNotification = () => {
     return details.trim() !== '' && 
-        id: activeCharacterIdParam || 'character-1',
-        name: characterName || (characterType === 'spellbot' ? 'Spellbot' : 'Character Name'),
-        type: (characterType as 'character' | 'spellbot' | 'ai-free') || 'character',
-        avatarSource: userAvatarUri 
-          ? { uri: userAvatarUri }
-          : (characterType === 'spellbot' 
-            ? require('../assets/images/square logo 2.png')
-            : characterType === 'ai-free'
-            ? require('../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx 2.png')
-            : require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')
-          ),
-        isEmpty: false,
-        isLastUsed: true
+  };
+
+  const closeSMSModal = () => {
+    setShowSMSModal(false);
+  };
+
+  const closeDuplicateModal = () => {
+    setShowDuplicateModal(false);
+  };
+
   if (!fontsLoaded) {
     return null;
-  } else {
-    // If no last used character, default to ARIA
-    setSelectedCharacterId('demo-aria-2');
   }
 
   return (
