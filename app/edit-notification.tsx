@@ -142,18 +142,18 @@ export default function EditNotification() {
     // Create characters with Muffin in the middle (selected), empty slots on left and right
     const userCharacters: Character[] = [
       {
-        id: 'empty-1',
-        name: 'Add character',
-        type: 'empty',
-        avatarSource: null,
-        isEmpty: true,
-        isSelected: false
-      },
-      {
-        id: 'muffin-2',
+        id: 'demo-muffin-1',
         name: 'Muffin',
         type: 'character',
         avatarSource: require('../assets/images/pink bunny copy.jpg'),
+        isEmpty: false,
+        isSelected: false
+      },
+      {
+        id: 'demo-aria-2',
+        name: 'ARIA',
+        type: 'character',
+        avatarSource: { uri: 'https://images.pexels.com/photos/586063/pexels-photo-586063.jpeg?auto=compress&cs=tinysrgb&w=400' },
         isEmpty: false,
         isSelected: true // Muffin is selected by default (middle character)
       },
@@ -168,7 +168,7 @@ export default function EditNotification() {
     ];
 
     setCharacters(userCharacters);
-    setSelectedCharacterId('muffin-2'); // Set Muffin as selected
+    setSelectedCharacterId('demo-aria-2'); // Set ARIA as selected by default
   };
 
   const handleBack = () => {

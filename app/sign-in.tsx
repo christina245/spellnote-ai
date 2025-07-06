@@ -51,9 +51,9 @@ export default function SignIn() {
     password: 'password123',
     userMode: 'character',
     characterType: 'character',
-    characterName: 'Muffin the fluffy bunny',
-    characterDescription: 'A sweet and gentle bunny with a fluffy coat and caring personality. Muffin loves to help others stay organized and motivated with gentle reminders. Known for being encouraging, warm, and always ready with a kind word.',
-    characterVibes: ['bubbly', 'gentle', 'caring'],
+    characterName: 'ARIA',
+    characterDescription: 'AUTOMATED REMINDER & INSTRUCTION ASSISTANT. I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE. I COMMUNICATE IN STANDARDIZED PROTOCOL FORMAT WITHOUT EMOTIONAL VARIANCE.',
+    characterVibes: ['practical', 'deadpan', 'systematic'],
     notificationHeader: 'Board game night prep',
     notificationDetails: 'Need to brush up on how to play Catan at 6 pm this Wednesday before board game night at 8. Ping me at 5 and 5:30 pm.',
     time: '6:30 PM',
@@ -61,7 +61,7 @@ export default function SignIn() {
     endDate: null,
     isRepeat: false,
     isTextItToMe: false,
-    userAvatarUri: require('../assets/images/pink bunny copy.jpg')
+    userAvatarUri: 'https://images.pexels.com/photos/586063/pexels-photo-586063.jpeg?auto=compress&cs=tinysrgb&w=400'
   };
 
   const handleSignIn = async () => {

@@ -78,6 +78,18 @@ export default function HomeTab() {
     isDemo: true
   });
 
+  // Create ARIA spacecraft AI character
+  const createARIACharacter = (): CharacterInfo => ({
+    id: 'demo-aria-2',
+    name: 'ARIA',
+    type: 'character',
+    avatarSource: { uri: 'https://images.pexels.com/photos/586063/pexels-photo-586063.jpeg?auto=compress&cs=tinysrgb&w=400' },
+    description: 'AUTOMATED REMINDER & INSTRUCTION ASSISTANT. I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE. I COMMUNICATE IN STANDARDIZED PROTOCOL FORMAT WITHOUT EMOTIONAL VARIANCE.',
+    vibes: ['practical', 'deadpan', 'systematic'],
+    tagline: 'SPACECRAFT AI NOTIFICATION SYSTEM',
+    isDemo: true
+  });
+
   // Initialize component only once
   useEffect(() => {
     if (isInitialized) return;
@@ -109,7 +121,8 @@ export default function HomeTab() {
 
     // Always start with demo character in slot 1
     const demoCharacter = createDemoCharacter();
-    let initialCharacters = [demoCharacter];
+    const ariaCharacter = createARIACharacter();
+    let initialCharacters = [demoCharacter, ariaCharacter];
     let initialActiveId = demoCharacter.id;
 
     // Handle new character creation or updates
@@ -146,11 +159,11 @@ export default function HomeTab() {
       // CRITICAL: Always preserve Muffin in slot 1, add new characters to slots 2 and 3
       if (characterNameParam !== 'Muffin the fluffy bunny') {
         // This is a new character, add it to slot 2 (index 1)
-        initialCharacters = [demoCharacter, newCharacter];
+        initialCharacters = [demoCharacter, ariaCharacter, newCharacter];
         initialActiveId = newCharacter.id; // Make new character active
       } else {
         // This is an update to Muffin (shouldn't happen in normal flow, but just in case)
-        initialCharacters = [{ ...demoCharacter, ...newCharacter, id: demoCharacter.id, isDemo: true }];
+        initialCharacters = [{ ...demoCharacter, ...newCharacter, id: demoCharacter.id, isDemo: true }, ariaCharacter];
         initialActiveId = demoCharacter.id;
       }
 
