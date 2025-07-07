@@ -797,7 +797,7 @@ export default function HomeTab() {
                         </View>
                         <Text style={[
                           styles.characterName,
-                          !notification.sendWithoutAI && styles.notificationDetailsAIFree
+                          isActive && styles.activeCharacterName
                         ]}>
                           {character.name}
                         </Text>
