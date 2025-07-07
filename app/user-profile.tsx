@@ -130,7 +130,7 @@ export default function UserProfile() {
             style={styles.textInput}
             value={firstName}
             onChangeText={setFirstName}
-            placeholder="First Name"
+            placeholder="What name should we address you by?"
             placeholderTextColor="rgba(255, 255, 255, 0.5)"
           />
         </View>
@@ -138,6 +138,9 @@ export default function UserProfile() {
         {/* Bio Section */}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>BIO</Text>
+          <Text style={styles.bioHelperText}>
+            The more you write, the easier it'll be for us to identify the best characters for you.
+          </Text>
           <TextInput
             style={[styles.textInput, styles.textInputMultiline]}
             value={bio}
@@ -358,6 +361,14 @@ const styles = StyleSheet.create({
     lineHeight: 17.5,
     letterSpacing: 0.7,
     marginBottom: 8,
+  },
+  bioHelperText: {
+    fontSize: 10,
+    fontWeight: '400',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+    marginBottom: 8,
+    lineHeight: 12,
   },
   asterisk: {
     color: '#E64646',
