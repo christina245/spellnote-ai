@@ -229,7 +229,6 @@ export default function CharacterProfile() {
         {/* Title */}
         <View style={styles.titleSection}>
           <Text style={styles.title}>Character profile</Text>
-          <Text style={styles.subtitle}>Edit your character's details</Text>
         </View>
 
         {/* Avatar Section */}
@@ -258,13 +257,7 @@ export default function CharacterProfile() {
           <Text style={styles.inputLabel}>
             CHARACTER NAME<Text style={styles.asterisk}>*</Text>
           </Text>
-          <TextInput
-            style={styles.textInput}
-            value={characterName}
-            onChangeText={setCharacterName}
-            placeholder="e.g: Xaden the Destroyer"
-            placeholderTextColor="rgba(255, 255, 255, 0.5)"
-          />
+          <Text style={styles.readOnlyText}>{characterName}</Text>
         </View>
 
         {/* Character Description */}
@@ -272,29 +265,7 @@ export default function CharacterProfile() {
           <Text style={styles.inputLabel}>
             CHARACTER DESCRIPTION<Text style={styles.asterisk}>*</Text>
           </Text>
-          <TextInput
-            style={[styles.textInput, styles.textInputMultiline]}
-            value={characterDescription}
-            onChangeText={setCharacterDescription}
-            placeholder="Describe the character's personality, sense of humor, how they talk, backstory, age, motivations, quirks, etc.
-
-Give as much description as you can!"
-            placeholderTextColor="rgba(255, 255, 255, 0.5)"
-            multiline={true}
-            numberOfLines={6}
-            textAlignVertical="top"
-          />
-          <View style={styles.characterCounterContainer}>
-            <Text style={styles.characterCounter}>
-              <Text style={[
-                styles.characterCountNumber,
-                characterDescription.length >= 75 && styles.characterCountNumberValid
-              ]}>
-                {characterDescription.length}
-              </Text>
-              /75 characters minimum
-            </Text>
-          </View>
+          <Text style={styles.readOnlyTextDescription}>{characterDescription}</Text>
         </View>
 
         {/* Character Vibes */}
@@ -305,31 +276,31 @@ Give as much description as you can!"
               // Check if this is ARIA and add "serious" to selected vibes
               const isARIA = params.characterName === 'ARIA';
               const isSerious = vibe === 'serious';
-              const isSelected = selectedVibes.includes(vibe) || (isARIA && isSerious);
+              const isSelected = selectedVibes.includes(vibe);
               
               return (
-                <TouchableOpacity
+                <View
                   key={`${vibe}-${index}`}
                   style={[
-                    styles.vibeButton,
-                    isSelected && styles.vibeButtonSelected
+                    styles.vibeButtonSelected
                   ]}
-                  onPress={() => {
-                    // Don't allow deselecting "serious" for ARIA
-                    if (isARIA && isSerious) return;
-                    handleVibeSelect(vibe);
-                  }}
-                  activeOpacity={0.7}
                 >
                   <Text style={[
-                    styles.vibeButtonText,
-                    isSelected && styles.vibeButtonTextSelected
+                    styles.vibeButtonTextSelected
                   ]}>
                     {vibe}
                   </Text>
-                </TouchableOpacity>
+                </View>
               );
             })}
+            {/* Add "serious" vibe for ARIA */}
+            {params.characterName === 'ARIA' && (
+              <View style={styles.vibeButtonSelected}>
+                <Text style={styles.vibeButtonTextSelected}>
+                  serious
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -337,19 +308,11 @@ Give as much description as you can!"
         <View style={styles.inputSection}>
           <View style={styles.taglineHeader}>
             <Text style={styles.inputLabel}>CHARACTER TAGLINE</Text>
-            <Text style={styles.characterLimit}>75 characters max</Text>
           </View>
-          <TextInput
-            style={styles.textInput}
-            value={characterTagline}
-            onChangeText={setCharacterTagline}
-            placeholder="A brief tagline for your character"
-            placeholderTextColor="rgba(255, 255, 255, 0.5)"
-            maxLength={75}
-          />
+          <Text style={styles.readOnlyText}>{characterTagline || 'No tagline set'}</Text>
         </View>
 
-        {/* CRITICAL: Delete Character Button - ALWAYS positioned below all content */}
+        {/* Delete Character Button */}
         <View style={styles.deleteButtonContainer}>
           <TouchableOpacity 
             style={styles.deleteButton}
@@ -361,29 +324,9 @@ Give as much description as you can!"
           </TouchableOpacity>
         </View>
 
-        {/* Extra spacing to ensure delete button is never covered by floating save button */}
+        {/* Extra spacing for bottom padding */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
-
-      {/* CRITICAL: Floating Save Button - ALWAYS positioned above delete button */}
-      <View style={styles.floatingSaveContainer}>
-        <TouchableOpacity 
-          style={[
-            styles.floatingSaveButton,
-            !canSaveChanges() && styles.floatingSaveButtonDisabled
-          ]}
-          onPress={handleSaveChanges}
-          disabled={!canSaveChanges()}
-          activeOpacity={canSaveChanges() ? 0.8 : 1}
-        >
-          <Text style={[
-            styles.floatingSaveButtonText,
-            !canSaveChanges() && styles.floatingSaveButtonTextDisabled
-          ]}>
-            Save Changes
-          </Text>
-        </TouchableOpacity>
-      </View>
 
       {/* Photo Upload Modal */}
       <PhotoUploadModal
@@ -580,41 +523,21 @@ const styles = StyleSheet.create({
     letterSpacing: 0.7,
     marginBottom: 8,
   },
-  asterisk: {
-    color: '#E64646',
-  },
-  textInput: {
-    backgroundColor: 'rgba(60, 60, 67, 0.30)',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  readOnlyText: {
     fontSize: 14,
     fontFamily: 'Inter',
     fontWeight: '400',
     lineHeight: 17.5,
     color: '#FFF',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    marginBottom: 16,
   },
-  textInputMultiline: {
-    minHeight: 120,
-    paddingTop: 12,
-  },
-  characterCounterContainer: {
-    alignItems: 'flex-end',
-    marginTop: 4,
-  },
-  characterCounter: {
-    fontSize: 10,
+  readOnlyTextDescription: {
+    fontSize: 14,
     fontFamily: 'Inter',
     fontWeight: '400',
-    color: '#9CA3AF',
-  },
-  characterCountNumber: {
-    color: '#E64646',
-  },
-  characterCountNumberValid: {
-    color: '#9CA3AF',
+    lineHeight: 17.5,
+    color: '#FFF',
+    marginBottom: 16,
   },
   vibesSection: {
     marginBottom: 32,
@@ -624,8 +547,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 12,
   },
-  vibeButton: {
-    backgroundColor: '#BEC0ED',
+  vibeButtonSelected: {
+    backgroundColor: '#4A3A7B',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -634,18 +557,12 @@ const styles = StyleSheet.create({
     minHeight: 36,
     justifyContent: 'center',
   },
-  vibeButtonSelected: {
-    backgroundColor: '#4A3A7B',
-  },
-  vibeButtonText: {
+  vibeButtonTextSelected: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#1D1B20',
+    color: '#FFFFFF',
     fontFamily: 'Inter',
     textAlign: 'center',
-  },
-  vibeButtonTextSelected: {
-    color: '#FFFFFF',
   },
   taglineHeader: {
     flexDirection: 'row',
@@ -653,17 +570,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  characterLimit: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: 'rgba(255, 255, 255, 0.343)',
-    fontFamily: 'Inter',
-  },
-  // CRITICAL: Delete button container - positioned at the very bottom of content
   deleteButtonContainer: {
-    marginTop: 40, // Extra space above delete button
+    marginTop: 40,
     marginBottom: 32, // Space below delete button
-    paddingHorizontal: 40, // UPDATED: Maximum 40px padding on left and right
+    paddingHorizontal: 40,
   },
   deleteButton: {
     flexDirection: 'row',
@@ -676,7 +586,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.3)',
-    width: '100%', // Full width within the container (which now has 40px padding)
+    width: '100%',
   },
   deleteButtonText: {
     fontSize: 16,
@@ -684,50 +594,8 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     fontFamily: 'Inter',
   },
-  // CRITICAL: Extra spacing to ensure delete button is never covered by floating save
   bottomSpacing: {
-    height: 120, // Generous spacing to ensure delete button is always visible above floating save
-  },
-  // CRITICAL: Floating save container - positioned above delete button
-  floatingSaveContainer: {
-    position: 'absolute',
-    bottom: 40, // Fixed distance from bottom
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    zIndex: 10, // Ensure it floats above content
-  },
-  floatingSaveButton: {
-    backgroundColor: '#F3CC95',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    minWidth: 200,
-  },
-  floatingSaveButtonDisabled: {
-    backgroundColor: '#6B7280',
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  floatingSaveButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1C1830',
-    fontFamily: 'Inter',
-  },
-  floatingSaveButtonTextDisabled: {
-    color: '#9CA3AF',
+    height: 40,
   },
   modalOverlay: {
     flex: 1,
