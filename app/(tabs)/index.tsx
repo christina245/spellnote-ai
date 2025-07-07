@@ -665,7 +665,7 @@ export default function HomeTab() {
         Alert.alert('Account', 'Account page will be implemented');
         break;
       case 'browse-characters':
-        Alert.alert('Browse Characters', 'Browse characters page will be implemented');
+        router.push('/browse-characters');
         break;
       case 'my-reports':
         Alert.alert('My Reports', 'My reports page will be implemented');
@@ -674,7 +674,7 @@ export default function HomeTab() {
         Alert.alert('Help Center', 'Help center page will be implemented');
         break;
       case 'submit-feedback':
-        Alert.alert('Submit Feedback', 'Submit feedback page will be implemented');
+        router.push('/submit-feedback');
         break;
       case 'report-issue':
         Alert.alert('Report Issue', 'Report issue page will be implemented');
