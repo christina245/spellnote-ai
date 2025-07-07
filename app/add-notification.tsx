@@ -1,23 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput, ScrollView } from 'react-native';
-import { ArrowLeft, Calendar, Clock } from 'lucide-react-native';
-import { User } from 'lucide-react-native';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Image, 
+  TextInput, 
+  ScrollView,
+  SafeAreaView,
+  Dimensions 
+} from 'react-native';
+import { ArrowLeft, Calendar, Clock, User, Plus } from 'lucide-react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
-import Svg, { Circle, Path } from 'react-native-svg';
+import DatePickerModal from '@/components/DatePickerModal';
+import TimePickerModal from '@/components/TimePickerModal';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function AddNotification() {
+  const [header, setHeader] = useState('');
   const [details, setDetails] = useState('');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [time, setTime] = useState('');
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [sendWithoutAI, setSendWithoutAI] = useState(false);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [characters, setCharacters] = useState<any[]>([]);
+  
+  const router = useRouter();
+  const params = useLocalSearchParams();
 
-  // Mock characters data
-  const characters = [
-    { id: '1', name: 'Character 1', isEmpty: false, avatarSource: require('../assets/images/pink bunny.jpg') },
-    { id: '2', name: 'Character 2', isEmpty: false, avatarSource: require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy copy.png') },
-    { id: '3', name: 'Add Character', isEmpty: true, avatarSource: null },
-  ];
+  const [fontsLoaded] = useFonts({
+    Montserrat_700Bold,
+  });
+
+  useEffect(() => {
+    // Parse characters from params if available
+    if (params.characters) {
+      try {
+        const parsedCharacters = JSON.parse(params.characters as string);
+        setCharacters(parsedCharacters);
+        
+        // Set initial character selection
+        const activeCharacterId = params.activeCharacterId as string;
+        if (activeCharacterId && !sendWithoutAI) {
+          setSelectedCharacterId(activeCharacterId);
+        }
+      } catch (error) {
+        console.log('Error parsing characters:', error);
+        // Fallback characters
+        setCharacters([
+          { id: '1', name: 'Character 1', isEmpty: false, avatarSource: require('../assets/images/pink bunny copy.jpg') },
+          { id: '2', name: 'Character 2', isEmpty: false, avatarSource: require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy copy.png') },
+          { id: '3', name: 'Add Character', isEmpty: true, avatarSource: null },
+        ]);
+      }
+    }
+
+    // Set initial date if provided
+    if (params.selectedDate) {
+      try {
+        const date = new Date(params.selectedDate as string);
+        setStartDate(date);
+      } catch (error) {
+        console.log('Error parsing selected date:', error);
+      }
+    }
+  }, [params]);
+
+  const handleBack = () => {
+    router.back();
+  };
 
   const handleCharacterSelect = (characterId: string) => {
     const character = characters.find(c => c.id === characterId);
@@ -42,58 +97,164 @@ export default function AddNotification() {
     }
   };
 
+  const formatDate = (date: Date | null) => {
+    if (!date) return 'MM/DD/YYYY';
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
+  const handleStartDateConfirm = (date: Date) => {
+    setStartDate(date);
+    setShowStartDatePicker(false);
+  };
+
+  const handleTimeConfirm = (selectedTime: string) => {
+    setTime(selectedTime);
+    setShowTimePicker(false);
+  };
+
   // Check if all required fields are filled for Save button
   const canSaveNotification = () => {
     return details.trim() !== '' && 
            startDate !== null && 
            time.trim() !== '' && 
-           (selectedCharacterId !== null || sendWithoutAI); // Allow saving when AI-free is selected
+           (selectedCharacterId !== null || sendWithoutAI);
   };
 
+  const handleSaveNotification = () => {
+    if (!canSaveNotification()) return;
+
+    // Navigate back to home with notification data
+    router.push({
+      pathname: '/(tabs)',
+      params: {
+        newNotificationHeader: header.trim(),
+        newNotificationDetails: details.trim(),
+        newNotificationTime: time,
+        newNotificationDate: startDate?.toISOString(),
+        selectedCharacterId: selectedCharacterId || '',
+        sendWithoutAI: sendWithoutAI.toString(),
+        notificationTimestamp: Date.now().toString() // Add timestamp for uniqueness
+      }
+    });
+  };
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <ArrowLeft size={24} color="#000" />
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={handleBack}
+          activeOpacity={0.7}
+        >
+          <ArrowLeft size={20} color="#F3CC95" />
+          <Text style={styles.backText}>BACK</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Notification</Text>
+        <Text style={styles.headerTitle}>Add notification</Text>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Details</Text>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Field */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>HEADER</Text>
+          <Text style={styles.fieldNote}>
+            {header.trim() ? '' : 'Leave blank to auto-generate from details'}
+          </Text>
           <TextInput
-            style={styles.textInput}
-            value={details}
-            onChangeText={setDetails}
-            placeholder="Enter notification details..."
-            multiline
+            style={[
+              styles.headerInput,
+              header.length > 0 && styles.headerInputWithText
+            ]}
+            value={header}
+            onChangeText={setHeader}
+            placeholder="Board game night prep"
+            placeholderTextColor="rgba(255, 255, 255, 0.50)"
+            multiline={false}
+            maxLength={100}
           />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Date & Time</Text>
-          <View style={styles.dateTimeContainer}>
-            <TouchableOpacity style={styles.dateButton}>
-              <Calendar size={20} color="#666" />
-              <Text style={styles.dateButtonText}>
-                {startDate ? startDate.toDateString() : 'Select Date'}
+        {/* Details Field */}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>
+            DETAILS<Text style={styles.asterisk}>*</Text>
+          </Text>
+          <TextInput
+            style={[styles.textInput, styles.textInputMultiline]}
+            value={details}
+            onChangeText={setDetails}
+            placeholder="Enter notification details..."
+            placeholderTextColor="rgba(255, 255, 255, 0.50)"
+            multiline={true}
+            numberOfLines={4}
+            textAlignVertical="top"
+            maxLength={1000}
+          />
+        </View>
+
+        {/* Date & Time Section */}
+        <View style={styles.sectionGroup}>
+          <Text style={styles.sectionLabel}>DATE & TIME</Text>
+          
+          {/* Start Date */}
+          <View style={styles.dateTimeRow}>
+            <View style={styles.dateTimeField}>
+              <Text style={styles.dateTimeLabel}>
+                START DATE<Text style={styles.asterisk}>*</Text>
               </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.timeButton}>
-              <Clock size={20} color="#666" />
-              <Text style={styles.timeButtonText}>
-                {time || 'Select Time'}
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setShowStartDatePicker(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={[
+                  styles.datePickerText,
+                  !startDate && styles.placeholderDateText
+                ]}>
+                  {formatDate(startDate)}
+                </Text>
+                <Calendar size={16} color="#8DD3C8" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Time */}
+          <View style={styles.dateTimeRow}>
+            <View style={styles.dateTimeField}>
+              <Text style={styles.dateTimeLabel}>
+                TIME<Text style={styles.asterisk}>*</Text>
               </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.timePickerButton}
+                onPress={() => setShowTimePicker(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.timePickerText, !time && styles.placeholderText]}>
+                  {time || "6:00 PM"}
+                </Text>
+                <Clock size={16} color="#8DD3C8" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
+        {/* Character Selection */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Character Selection</Text>
+          <Text style={styles.sectionLabel}>CHARACTER SELECTION</Text>
           
           <View style={styles.characterSlots}>
-            {characters.map((character) => {
+            {characters.slice(0, 3).map((character) => {
               const showProfileIcon = sendWithoutAI;
               const isSelected = !sendWithoutAI && selectedCharacterId === character.id && !character.isEmpty;
               
@@ -117,7 +278,7 @@ export default function AddNotification() {
                     {showProfileIcon && !character.isEmpty ? (
                       <User size={32} color="#9CA3AF" />
                     ) : character.isEmpty ? (
-                      <Text style={styles.addCharacterText}>+</Text>
+                      <Plus size={24} color="#9CA3AF" />
                     ) : (
                       <Image 
                         source={character.avatarSource}
@@ -153,101 +314,221 @@ export default function AddNotification() {
           </TouchableOpacity>
         </View>
 
+        {/* Extra spacing for floating button */}
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
+
+      {/* Floating Save Button */}
+      <View style={styles.floatingButtonContainer}>
         <TouchableOpacity 
           style={[
             styles.saveButton,
             canSaveNotification() && styles.saveButtonEnabled
           ]}
+          onPress={handleSaveNotification}
           disabled={!canSaveNotification()}
+          activeOpacity={canSaveNotification() ? 0.8 : 1}
         >
           <Text style={[
             styles.saveButtonText,
             canSaveNotification() && styles.saveButtonTextEnabled
           ]}>
-            Save Notification
+            Save notification
           </Text>
         </TouchableOpacity>
       </View>
-    </ScrollView>
+
+      {/* Date Picker Modal */}
+      <DatePickerModal
+        visible={showStartDatePicker}
+        onClose={() => setShowStartDatePicker(false)}
+        onCancel={() => setShowStartDatePicker(false)}
+        onConfirm={handleStartDateConfirm}
+        initialDate={startDate || new Date()}
+        title="Select start date"
+      />
+
+      {/* Time Picker Modal */}
+      <TimePickerModal
+        visible={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+        onCancel={() => setShowTimePicker(false)}
+        onConfirm={handleTimeConfirm}
+        initialTime={time || "6:00 PM"}
+        title="Select time"
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#1C1830',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 16,
+    paddingTop: 16,
+    paddingHorizontal: 24,
+    paddingBottom: 20,
   },
   backButton: {
-    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#F3CC95',
+    fontFamily: 'Inter',
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginLeft: 16,
+    fontSize: 28,
+    fontFamily: 'Montserrat_700Bold',
+    fontWeight: '700',
+    color: '#FFFFFF',
+    lineHeight: 36,
+    letterSpacing: -0.28,
   },
-  content: {
-    padding: 16,
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingBottom: 40,
+  },
+  fieldGroup: {
+    marginBottom: 24,
+  },
+  fieldLabel: {
+    color: '#8DD3C8',
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 17.5,
+    letterSpacing: 0.7,
+    marginBottom: 4,
+  },
+  fieldNote: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontFamily: 'Inter',
+    marginBottom: 8,
+    minHeight: 15,
+  },
+  asterisk: {
+    color: '#E64646',
+  },
+  headerInput: {
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    fontFamily: 'Inter',
+    fontWeight: '600',
+    lineHeight: 17.5,
+    color: 'rgba(255, 255, 255, 0.50)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  headerInputWithText: {
+    color: '#FFFFFF',
+  },
+  textInput: {
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    fontFamily: 'Inter',
+    fontWeight: '400',
+    lineHeight: 17.5,
+    color: '#FFF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  textInputMultiline: {
+    minHeight: 80,
+    paddingTop: 12,
+  },
+  sectionGroup: {
+    marginBottom: 32,
+  },
+  sectionLabel: {
+    color: '#8DD3C8',
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: '500',
+    lineHeight: 17.5,
+    letterSpacing: 0.7,
+    marginBottom: 16,
+  },
+  dateTimeRow: {
+    marginBottom: 16,
+  },
+  dateTimeField: {
+    flex: 1,
+  },
+  dateTimeLabel: {
+    color: '#E1B8B2',
+    fontFamily: 'Inter',
+    fontSize: 14,
+    fontWeight: '400',
+    lineHeight: 17.5,
+    letterSpacing: 0.7,
+    marginBottom: 8,
+  },
+  datePickerButton: {
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.02)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  datePickerText: {
+    fontSize: 14,
+    fontFamily: 'Inter',
+    fontWeight: '400',
+    lineHeight: 17.5,
+    color: '#FFF',
+  },
+  placeholderDateText: {
+    color: 'rgba(255, 255, 255, 0.50)',
+  },
+  timePickerButton: {
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.02)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timePickerText: {
+    fontSize: 14,
+    fontFamily: 'Inter',
+    fontWeight: '400',
+    lineHeight: 17.5,
+    color: '#FFF',
+  },
+  placeholderText: {
+    color: 'rgba(255, 255, 255, 0.50)',
   },
   section: {
     marginBottom: 24,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-    color: '#333',
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  dateTimeContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  dateButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    gap: 8,
-  },
-  timeButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    gap: 8,
-  },
-  dateButtonText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  timeButtonText: {
-    fontSize: 16,
-    color: '#333',
-  },
   characterSlots: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 16,
     marginBottom: 16,
   },
   characterSlot: {
@@ -255,25 +536,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   characterSlotSelected: {
-    // Add selected styling if needed
+    // Additional styling for selected character slot
   },
   characterAvatarContainer: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#374151',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 8,
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   emptyCharacterSlot: {
-    borderWidth: 2,
-    borderColor: '#ddd',
+    backgroundColor: '#374151',
+    borderColor: '#4B5563',
     borderStyle: 'dashed',
   },
   selectedCharacterAvatar: {
-    borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: '#34A853',
   },
   aiFreeModeAvatar: {
     backgroundColor: '#374151',
@@ -285,19 +567,15 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
   },
-  addCharacterText: {
-    fontSize: 24,
-    color: '#999',
-    fontWeight: '300',
-  },
   characterName: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#333',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
     textAlign: 'center',
   },
   characterNameSelected: {
-    color: '#007AFF',
+    color: '#34A853',
     fontWeight: '600',
   },
   characterNameEmpty: {
@@ -321,14 +599,14 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxChecked: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: '#4A3A7B',
+    borderColor: '#4A3A7B',
   },
   checkmark: {
     color: '#fff',
@@ -337,24 +615,46 @@ const styles = StyleSheet.create({
   },
   checkboxLabel: {
     fontSize: 14,
-    color: '#333',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+  },
+  bottomSpacing: {
+    height: 100,
+  },
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingHorizontal: 24,
   },
   saveButton: {
-    backgroundColor: '#f0f0f0',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: '#6B7280',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 24,
+    minWidth: 200,
   },
   saveButtonEnabled: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#F3CC95',
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#999',
+    color: '#9CA3AF',
+    fontFamily: 'Inter',
   },
   saveButtonTextEnabled: {
-    color: '#fff',
+    color: '#1C1830',
   },
 });
