@@ -112,21 +112,17 @@ export default function OnboardingCharacterProfile() {
         {/* Character Name */}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>CHARACTER NAME</Text>
-          <View style={styles.readOnlyContainer}>
-            <Text style={styles.readOnlyText}>{characterName}</Text>
-          </View>
+          <Text style={styles.readOnlyText}>{characterName}</Text>
         </View>
 
         {/* Character Description */}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>CHARACTER DESCRIPTION</Text>
-          <View style={[styles.readOnlyContainer, styles.readOnlyContainerMultiline]}>
-            <Text style={styles.readOnlyTextDescription}>{characterDescription}</Text>
-          </View>
+          <Text style={styles.readOnlyTextDescription}>{characterDescription}</Text>
         </View>
 
-        {/* Character Vibes - Only show selected vibes */}
-        {characterVibes.length > 0 && (
+        {/* Character Vibes - Show selected vibes plus "serious" for ARIA */}
+        {(characterVibes.length > 0 || characterId === 'demo-aria-2') && (
           <View style={styles.vibesSection}>
             <Text style={styles.sectionLabel}>CHARACTER VIBES</Text>
             <View style={styles.vibesGrid}>
@@ -140,6 +136,14 @@ export default function OnboardingCharacterProfile() {
                   </Text>
                 </View>
               ))}
+              {/* Add "serious" vibe for ARIA */}
+              {characterId === 'demo-aria-2' && (
+                <View style={styles.vibeButtonSelected}>
+                  <Text style={styles.vibeButtonTextSelected}>
+                    serious
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
         )}
@@ -148,9 +152,7 @@ export default function OnboardingCharacterProfile() {
         {characterTagline && (
           <View style={styles.inputSection}>
             <Text style={styles.inputLabel}>CHARACTER TAGLINE</Text>
-            <View style={styles.readOnlyContainer}>
-              <Text style={styles.readOnlyText}>{characterTagline}</Text>
-            </View>
+            <Text style={styles.readOnlyText}>{characterTagline}</Text>
           </View>
         )}
 
@@ -258,24 +260,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.7,
     marginBottom: 8,
   },
-  readOnlyContainer: {
-    backgroundColor: 'rgba(60, 60, 67, 0.30)',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  readOnlyContainerMultiline: {
-    minHeight: 120,
-    paddingTop: 12,
-  },
   readOnlyText: {
     fontSize: 14,
     fontFamily: 'Inter',
     fontWeight: '400',
     lineHeight: 17.5,
     color: '#FFF',
+    marginBottom: 16,
   },
   readOnlyTextDescription: {
     fontSize: 14,
@@ -283,6 +274,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     lineHeight: 17.5,
     color: '#FFF',
+    marginBottom: 16,
   },
   vibesSection: {
     marginBottom: 32,
