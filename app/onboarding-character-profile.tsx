@@ -46,9 +46,9 @@ export default function OnboardingCharacterProfile() {
         characterVibes: JSON.stringify(characterVibes),
         characterTagline: characterTagline,
         userAvatarUri: avatarSource,
-        // Pass through any notification data if it exists
-        notificationHeader: params.notificationHeader || 'Daily Reminder',
-        notificationDetails: params.notificationDetails || 'Remember to drink water and take a short walk to stay healthy and energized throughout the day.',
+        // Pass through any notification data if it exists (empty strings if no notification)
+        notificationHeader: params.notificationHeader || '',
+        notificationDetails: params.notificationDetails || '',
         startDate: params.startDate || new Date().toISOString(),
         time: params.time || '2:00 PM'
       }
@@ -93,7 +93,6 @@ export default function OnboardingCharacterProfile() {
         {/* Title */}
         <View style={styles.titleSection}>
           <Text style={styles.title}>Character Profile</Text>
-          <Text style={styles.subtitle}>Learn about this character</Text>
         </View>
 
         {/* Avatar Section */}

@@ -47,6 +47,13 @@ export default function NotificationPreview() {
     return params.notificationDetails as string || '';
   };
 
+  // Check if user has created a notification
+  const hasUserNotification = () => {
+    const header = getNotificationHeader();
+    const details = getNotificationDetails();
+    return header.trim() !== '' || details.trim() !== '';
+  };
+
   // Function to get the appropriate avatar source
   const getAvatarSource = () => {
     // Check if user uploaded a custom avatar
@@ -85,55 +92,95 @@ export default function NotificationPreview() {
     // Simulate AI generation delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    if (notificationData.characterType === 'spellbot') {
-      // Generate neutral, ChatGPT-like content based on user input
-      const userHeader = notificationData.notificationHeader;
-      const userDetails = notificationData.notificationDetails;
-      
-      // Create Spellbot response based on actual user input
-      if (userHeader.toLowerCase().includes('board game') || userDetails.toLowerCase().includes('catan')) {
-        setCollapsedText('Time to prepare for board game night! 🎲');
-        setOpenText('Hi there! Just a friendly reminder that you wanted to brush up on Catan rules before tonight\'s game. You mentioned wanting to review at 5 and 5:30 PM, so here\'s your notification. Have a great game night!');
-      } else if (userHeader || userDetails) {
-        // Generic Spellbot response for other user content
-        setCollapsedText(`Reminder: ${userHeader || 'Your notification'}`);
-        setOpenText(`Hi! Here's your reminder about: ${userDetails}. Hope this helps you stay on track!`);
+    const hasUserNotification = notificationData.notificationHeader.trim() !== '' || notificationData.notificationDetails.trim() !== '';
+    
+    if (!hasUserNotification) {
+      // Show sample notification for "drink a bottle of water"
+      if (notificationData.characterType === 'spellbot') {
+        setCollapsedText('Hydration reminder! 💧');
+        setOpenText('Hi there! Just a friendly reminder to drink a bottle of water. Staying hydrated is important for your health and energy levels. Hope this helps you stay on track!');
+      } else if (notificationData.characterType === 'ai-free') {
+        setCollapsedText('Drink a bottle of water');
+        setOpenText('Drink a bottle of water');
       } else {
-        // Fallback if no user input (shouldn't happen with validation)
-        setCollapsedText('Reminder notification');
-        setOpenText('Hi! This is your scheduled reminder. Hope this helps you stay on track!');
+        // Generate character-specific content for water drinking
+        const vibes = notificationData.characterVibes || [];
+        const isDramatic = vibes.includes('dramatic');
+        const isWitty = vibes.includes('witty');
+        const isFiery = vibes.includes('fiery');
+        const isEnergetic = vibes.includes('energetic');
+        const isHealthConscious = vibes.includes('health-conscious');
+        
+        if (isDramatic && isFiery) {
+          setCollapsedText('⚔️ HYDRATION BATTLE AWAITS! ⚔️');
+          setOpenText('Listen up, mortal! The time has come to DRINK A BOTTLE OF WATER! Your body is a temple and it DEMANDS hydration! Failure is NOT an option! Victory through H2O! 🔥💧');
+        } else if (isWitty && isDramatic) {
+          setCollapsedText('🎭 Your dramatic hydration destiny');
+          setOpenText('Well, well, well... looks like someone needs a reminder to "drink a bottle of water." How very... ordinary. But hey, even the most mundane tasks deserve dramatic flair! 💧✨');
+        } else if (isEnergetic && isHealthConscious) {
+          setCollapsedText('💪 HYDRATION TIME! 💧');
+          setOpenText('Yo! Time to fuel that body with some H2O! Trust me, I\'ve been through enough festivals to know - staying hydrated is KEY! Drink that bottle of water and keep the energy flowing! 🌊⚡');
+        } else if (isWitty) {
+          setCollapsedText('🧠 Time for some "hydration" action 💧');
+          setOpenText('Oh, so you need a reminder to "drink a bottle of water"? What\'s next, reminding you to breathe? 😏 But seriously, this won\'t handle itself. Get to it! 💦');
+        } else {
+          // Default character response for water drinking
+          setCollapsedText('💧 Hydration time approaches!');
+          setOpenText('Hey there! Time for your reminder: drink a bottle of water. Your body will thank you for it! Stay healthy! 🏆');
+        }
       }
-    } else if (notificationData.characterType === 'ai-free') {
-      // Use exact user input without AI modification
-      setCollapsedText(notificationData.notificationHeader || 'Reminder');
-      setOpenText(notificationData.notificationDetails || 'Your reminder details will appear here.');
     } else {
-      // Generate character-specific content based on vibes and description
-      const vibes = notificationData.characterVibes || [];
-      const isDramatic = vibes.includes('dramatic');
-      const isWitty = vibes.includes('witty');
-      const isFiery = vibes.includes('fiery');
-      const userHeader = notificationData.notificationHeader;
-      const userDetails = notificationData.notificationDetails;
-      
-      // Generate character responses based on actual user input and character vibes
-      if (isDramatic && isFiery && userHeader && userDetails) {
-        setCollapsedText(`⚔️ ${userHeader.toUpperCase()} AWAITS! ⚔️`);
-        setOpenText(`Listen up, mortal! The time has come for: ${userDetails}. You WILL conquer this task with the fury of a thousand suns! Failure is NOT an option! Victory awaits! 🔥⚔️`);
-      } else if (isWitty && isDramatic && userHeader && userDetails) {
-        setCollapsedText(`🎭 Your dramatic destiny: ${userHeader}`);
-        setOpenText(`Well, well, well... looks like someone needs a reminder about "${userDetails}." Don't worry, I'll make sure you handle this with all the dramatic flair it deserves. Try not to overthink it! 🎲✨`);
-      } else if (isWitty && userHeader && userDetails) {
-        setCollapsedText(`🧠 Time for some "${userHeader}" action 📚`);
-        setOpenText(`Oh, so you need a reminder about "${userDetails}"? What's next, reminding you to breathe? 😏 But seriously, this won't handle itself. Get to it! 🎯`);
-      } else if (userHeader && userDetails) {
-        // Default character response using user input
-        setCollapsedText(`🎯 ${userHeader} time approaches!`);
-        setOpenText(`Hey there! Time for your reminder: ${userDetails}. You've got this! 🏆`);
+      // Use actual user notification data
+      if (notificationData.characterType === 'spellbot') {
+        // Generate neutral, ChatGPT-like content based on user input
+        const userHeader = notificationData.notificationHeader;
+        const userDetails = notificationData.notificationDetails;
+        
+        // Create Spellbot response based on actual user input
+        if (userHeader.toLowerCase().includes('board game') || userDetails.toLowerCase().includes('catan')) {
+          setCollapsedText('Time to prepare for board game night! 🎲');
+          setOpenText('Hi there! Just a friendly reminder that you wanted to brush up on Catan rules before tonight\'s game. You mentioned wanting to review at 5 and 5:30 PM, so here\'s your notification. Have a great game night!');
+        } else if (userHeader || userDetails) {
+          // Generic Spellbot response for other user content
+          setCollapsedText(`Reminder: ${userHeader || 'Your notification'}`);
+          setOpenText(`Hi! Here's your reminder about: ${userDetails}. Hope this helps you stay on track!`);
+        } else {
+          // Fallback if no user input (shouldn't happen with validation)
+          setCollapsedText('Reminder notification');
+          setOpenText('Hi! This is your scheduled reminder. Hope this helps you stay on track!');
+        }
+      } else if (notificationData.characterType === 'ai-free') {
+        // Use exact user input without AI modification
+        setCollapsedText(notificationData.notificationHeader || 'Reminder');
+        setOpenText(notificationData.notificationDetails || 'Your reminder details will appear here.');
       } else {
-        // Fallback if no user input (shouldn't happen with validation)
-        setCollapsedText('🎯 Reminder time!');
-        setOpenText('Hey there! This is your scheduled reminder. You\'ve got this! 🏆');
+        // Generate character-specific content based on vibes and description
+        const vibes = notificationData.characterVibes || [];
+        const isDramatic = vibes.includes('dramatic');
+        const isWitty = vibes.includes('witty');
+        const isFiery = vibes.includes('fiery');
+        const userHeader = notificationData.notificationHeader;
+        const userDetails = notificationData.notificationDetails;
+        
+        // Generate character responses based on actual user input and character vibes
+        if (isDramatic && isFiery && userHeader && userDetails) {
+          setCollapsedText(`⚔️ ${userHeader.toUpperCase()} AWAITS! ⚔️`);
+          setOpenText(`Listen up, mortal! The time has come for: ${userDetails}. You WILL conquer this task with the fury of a thousand suns! Failure is NOT an option! Victory awaits! 🔥⚔️`);
+        } else if (isWitty && isDramatic && userHeader && userDetails) {
+          setCollapsedText(`🎭 Your dramatic destiny: ${userHeader}`);
+          setOpenText(`Well, well, well... looks like someone needs a reminder about "${userDetails}." Don't worry, I'll make sure you handle this with all the dramatic flair it deserves. Try not to overthink it! 🎲✨`);
+        } else if (isWitty && userHeader && userDetails) {
+          setCollapsedText(`🧠 Time for some "${userHeader}" action 📚`);
+          setOpenText(`Oh, so you need a reminder about "${userDetails}"? What's next, reminding you to breathe? 😏 But seriously, this won't handle itself. Get to it! 🎯`);
+        } else if (userHeader && userDetails) {
+          // Default character response using user input
+          setCollapsedText(`🎯 ${userHeader} time approaches!`);
+          setOpenText(`Hey there! Time for your reminder: ${userDetails}. You've got this! 🏆`);
+        } else {
+          // Fallback if no user input (shouldn't happen with validation)
+          setCollapsedText('🎯 Reminder time!');
+          setOpenText('Hey there! This is your scheduled reminder. You\'ve got this! 🏆');
+        }
       }
     }
     
@@ -219,12 +266,20 @@ export default function NotificationPreview() {
             Here's how your{'\n'}
             notification will look.
           </Text>
-          <Text style={styles.subtitle}>
-            Remember, this is all AI and not a real person.
-          </Text>
-          <Text style={styles.description}>
-            Not satisfied with your character's tone? You can always modify it at any time by entering directions like "slightly less obnoxious" or "don't ever scream at me or use all caps" on the character's profile page.
-          </Text>
+          {hasUserNotification() ? (
+            <>
+              <Text style={styles.subtitle}>
+                Remember, this is all AI and not a real person.
+              </Text>
+              <Text style={styles.description}>
+                Not satisfied with your character's tone? You can always modify it at any time by entering directions like "slightly less obnoxious" or "don't ever scream at me or use all caps" on the character's profile page.
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.subtitle}>
+              Here's what your notifications would look like for an entry that says "drink a bottle of water".
+            </Text>
+          )}
         </View>
 
         {/* Collapsed Notification Section */}
