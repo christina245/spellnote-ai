@@ -113,12 +113,12 @@ export default function SubmitFeedback() {
             <Text style={styles.reportIssueIcon}>✋</Text>
             <Text style={styles.reportIssueText}>
               <Text style={styles.reportIssueLabel}>Need to report an issue?</Text>{' '}
-              <TouchableOpacity 
+              <Text 
+                style={styles.reportIssueLink}
                 onPress={() => router.push('/report-issue')}
-                activeOpacity={0.7}
               >
-                <Text style={styles.reportIssueLink}>Go to Report Issue</Text>
-              </TouchableOpacity>
+                Go to Report Issue
+              </Text>
               {' '}instead!
             </Text>
           </View>
