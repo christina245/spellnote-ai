@@ -118,7 +118,12 @@ export default function OnboardingCharacterProfile() {
         {/* Character Description */}
         <View style={styles.inputSection}>
           <Text style={styles.inputLabel}>CHARACTER DESCRIPTION</Text>
-          <Text style={styles.readOnlyTextDescription}>{characterDescription}</Text>
+          <Text style={styles.readOnlyTextDescription}>
+            {characterId === 'demo-aria-2' 
+              ? 'ARIA (Automated Reminder & Instruction Assistant) - I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE.'
+              : characterDescription
+            }
+          </Text>
         </View>
 
         {/* Character Vibes - Show selected vibes plus "serious" for ARIA */}
@@ -136,13 +141,20 @@ export default function OnboardingCharacterProfile() {
                   </Text>
                 </View>
               ))}
-              {/* Add "serious" vibe for ARIA */}
+              {/* Add "serious" and "robotic" vibes for ARIA */}
               {characterId === 'demo-aria-2' && (
-                <View style={styles.vibeButtonSelected}>
-                  <Text style={styles.vibeButtonTextSelected}>
-                    serious
-                  </Text>
-                </View>
+                <>
+                  <View style={styles.vibeButtonSelected}>
+                    <Text style={styles.vibeButtonTextSelected}>
+                      serious
+                    </Text>
+                  </View>
+                  <View style={styles.vibeButtonSelected}>
+                    <Text style={styles.vibeButtonTextSelected}>
+                      robotic
+                    </Text>
+                  </View>
+                </>
               )}
             </View>
           </View>

@@ -227,22 +227,6 @@ export default function CharacterProfile() {
           <ArrowLeft size={20} color="#F3CC95" />
           <Text style={styles.backText}>BACK</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[
-            styles.privacyButton,
-            isPublic && styles.privacyButtonPublic
-          ]}
-          onPress={togglePublicPrivate}
-          activeOpacity={0.7}
-        >
-          <Text style={[
-            styles.privacyButtonText,
-            isPublic && styles.privacyButtonTextPublic
-          ]}>
-            {isPublic ? 'Public' : 'Private'}
-          </Text>
-        </TouchableOpacity>
       </View>
 
       {/* Scrollable Content */}
@@ -267,29 +251,18 @@ export default function CharacterProfile() {
                 resizeMode="cover"
               />
             </View>
-            <TouchableOpacity 
-              style={styles.cameraIcon}
-              onPress={handleAvatarUpload}
-              activeOpacity={0.7}
-            >
-              <Camera size={20} color="#FFFFFF" />
-            </TouchableOpacity>
           </View>
         </View>
 
         {/* Character Name */}
         <View style={styles.inputSection}>
-          <Text style={styles.inputLabel}>
-            CHARACTER NAME<Text style={styles.asterisk}>*</Text>
-          </Text>
+          <Text style={styles.inputLabel}>CHARACTER NAME</Text>
           <Text style={styles.readOnlyText}>{characterName}</Text>
         </View>
 
         {/* Character Description */}
         <View style={styles.inputSection}>
-          <Text style={styles.inputLabel}>
-            CHARACTER DESCRIPTION<Text style={styles.asterisk}>*</Text>
-          </Text>
+          <Text style={styles.inputLabel}>CHARACTER DESCRIPTION</Text>
           <Text style={styles.readOnlyTextDescription}>{characterDescription}</Text>
         </View>
 
@@ -312,6 +285,14 @@ export default function CharacterProfile() {
               </View>
             ))}
           </View>
+              {/* Add "robotic" vibe for ARIA */}
+              {params.characterName === 'ARIA' && (
+                <View style={styles.vibeButtonSelected}>
+                  <Text style={styles.vibeButtonTextSelected}>
+                    robotic
+                  </Text>
+                </View>
+              )}
         </View>
 
         {/* Character Tagline */}
@@ -494,7 +475,6 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     alignItems: 'center',
-    position: 'relative',
   },
   avatarImageContainer: {
     width: 120,
@@ -507,19 +487,6 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-  },
-  cameraIcon: {
-    position: 'absolute',
-    right: screenWidth / 2 - 60 - 16,
-    bottom: 0,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#4B5563',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#19162A',
   },
   inputSection: {
     marginBottom: 24,
@@ -682,7 +649,4 @@ const styles = StyleSheet.create({
     color: '#1C1830',
     fontFamily: 'Inter',
   },
-  asterisk: {
-    color: '#EF4444',
-  }
 });

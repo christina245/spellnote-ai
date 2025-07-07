@@ -84,8 +84,8 @@ export default function HomeTab() {
     name: 'ARIA',
     type: 'character',
     avatarSource: require('../../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy copy.png'),
-    description: 'ARIA (Automated Reminder & Instruction Assistant) - I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE. I COMMUNICATE IN STANDARDIZED PROTOCOL FORMAT WITHOUT EMOTIONAL VARIANCE.',
-    vibes: ['practical', 'deadpan', 'systematic', 'serious'],
+    description: 'ARIA (Automated Reminder & Instruction Assistant) - I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE.',
+    vibes: ['practical', 'deadpan', 'systematic', 'serious', 'robotic'],
     tagline: 'SPACECRAFT AI NOTIFICATION SYSTEM',
     isDemo: true
   });
