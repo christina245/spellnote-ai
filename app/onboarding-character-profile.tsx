@@ -57,9 +57,9 @@ export default function OnboardingCharacterProfile() {
 
   const getAvatarSource = () => {
     if (characterId === 'demo-muffin-1') {
-      return require('../assets/images/pink bunny copy.jpg');
+      return require('../assets/images/pink bunny copy copy.jpg');
     } else if (characterId === 'demo-aria-2') {
-      return require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t.png');
+      return require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy.png');
     }
     return require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
   };
