@@ -80,7 +80,7 @@ export default function UserProfile() {
       return { uri: avatarUri };
     }
     // Default avatar placeholder
-    return require('../assets/images/placeholder-profile-icon-8qmjk1094ijhbem9.png');
+    return require('../assets/images/placeholder-profile-icon-8qmjk1094ijhbem9 copy.png');
   };
 
   if (!fontsLoaded) {
@@ -120,13 +120,6 @@ export default function UserProfile() {
                 resizeMode="cover"
               />
             </View>
-            <TouchableOpacity 
-              style={styles.cameraIcon}
-              onPress={handleAvatarUpload}
-              activeOpacity={0.7}
-            >
-              <Camera size={20} color="#FFFFFF" />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -353,19 +346,6 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-  },
-  cameraIcon: {
-    position: 'absolute',
-    right: screenWidth / 2 - 60 - 16,
-    bottom: 0,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#4B5563',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#1C1830',
   },
   inputSection: {
     marginBottom: 24,
