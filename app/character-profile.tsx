@@ -56,6 +56,19 @@ export default function CharacterProfile() {
         setSelectedVibes(vibes);
       } catch (error) {
         console.log('Error parsing character vibes:', error);
+        // Set default vibes based on character name if parsing fails
+        if (params.characterName === 'ARIA') {
+          setSelectedVibes(['practical', 'deadpan', 'systematic']);
+        } else if (params.characterName === 'Muffin the fluffy bunny') {
+          setSelectedVibes(['bubbly', 'gentle', 'caring']);
+        }
+      }
+    } else {
+      // Set default vibes based on character name if no vibes provided
+      if (params.characterName === 'ARIA') {
+        setSelectedVibes(['practical', 'deadpan', 'systematic']);
+      } else if (params.characterName === 'Muffin the fluffy bunny') {
+        setSelectedVibes(['bubbly', 'gentle', 'caring']);
       }
     }
 
@@ -173,9 +186,21 @@ export default function CharacterProfile() {
     if (avatarUri) {
       return { uri: avatarUri };
     }
+    
+    // Handle specific character names with their correct avatars
+    const characterName = params.characterName as string;
+    if (characterName === 'ARIA') {
+      return require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy copy.png');
+    } else if (characterName === 'Muffin the fluffy bunny') {
+      return require('../assets/images/pink bunny copy.jpg');
+    }
+    
+    // Check if user has uploaded avatar from params
     if (params.userAvatarUri) {
       return { uri: params.userAvatarUri as string };
     }
+    
+    // Default fallback
     return require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
   };
 
@@ -274,11 +299,11 @@ export default function CharacterProfile() {
           <View style={styles.vibesGrid}>
             {allVibeOptions.map((vibe, index) => {
               // Check if this is ARIA and add "serious" to selected vibes
-              const isARIA = params.characterName === 'ARIA';
+        {selectedVibes.length > 0 && (
               const isSerious = vibe === 'serious';
               const isSelected = selectedVibes.includes(vibe);
               
-              return (
+              {selectedVibes.map((vibe: string, index: number) => (
                 <View
                   key={`${vibe}-${index}`}
                   style={[
@@ -292,14 +317,6 @@ export default function CharacterProfile() {
                   </Text>
                 </View>
               );
-            })}
-            {/* Add "serious" vibe for ARIA */}
-            {params.characterName === 'ARIA' && (
-              <View style={styles.vibeButtonSelected}>
-                <Text style={styles.vibeButtonTextSelected}>
-                  serious
-                </Text>
-              </View>
             )}
           </View>
         </View>

@@ -85,7 +85,7 @@ export default function HomeTab() {
     type: 'character',
     avatarSource: require('../../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy copy.png'),
     description: 'ARIA (Automated Reminder & Instruction Assistant) - I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE. I COMMUNICATE IN STANDARDIZED PROTOCOL FORMAT WITHOUT EMOTIONAL VARIANCE.',
-    vibes: ['practical', 'deadpan', 'systematic'],
+    vibes: ['practical', 'deadpan', 'systematic', 'serious'],
     tagline: 'SPACECRAFT AI NOTIFICATION SYSTEM',
     isDemo: true
   });
@@ -613,7 +613,7 @@ export default function HomeTab() {
           characterName: character.name,
           characterType: character.type,
           characterDescription: character.description || '',
-          characterVibes: character.vibes ? JSON.stringify(character.vibes) : '[]',
+          characterVibes: JSON.stringify(character.vibes || []),
           characterTagline: character.tagline || '',
           userAvatarUri: character.avatarSource?.uri || undefined
         }
