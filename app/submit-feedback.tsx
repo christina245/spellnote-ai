@@ -106,9 +106,7 @@ export default function SubmitFeedback() {
         <View style={styles.titleSection}>
           <Text style={styles.title}>Submit feedback</Text>
           <Text style={styles.description}>
-            Spellnote.ai is still newly developed and in beta mode.{'\n'}
-            We know there are plenty of ways we can improve, so{'\n'}
-            we're committed to doing so with your thoughts in mind.
+            Spellnote.ai is still newly developed and in beta mode. We know there are plenty of ways we can improve, so we're committed to doing so with your thoughts in mind.
           </Text>
           
           <View style={styles.reportIssueContainer}>
