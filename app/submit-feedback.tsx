@@ -302,7 +302,6 @@ const styles = StyleSheet.create({
     color: '#F3CC95',
     textDecorationLine: 'underline',
     fontFamily: 'Inter',
-    lineHeight: 20,
   },
   fieldGroup: {
     marginBottom: 24,
