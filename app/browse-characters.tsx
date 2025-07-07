@@ -91,16 +91,99 @@ export default function BrowseCharacters() {
           
           {/* Placeholder character cards */}
           <View style={styles.forYouGrid}>
-            {[1, 2, 3].map((index) => (
-              <View key={index} style={styles.forYouCard}>
-                <View style={styles.placeholderAvatar} />
-                <View style={styles.forYouCardContent}>
-                  <Text style={styles.placeholderName}>Character Name</Text>
-                  <Text style={styles.placeholderDescription}>
-                    Please generate a character description. Max 3 lines and 150 characters. Center aligned.
-                  </Text>
-                </View>
+            {/* Muffin the fluffy bunny */}
+            <TouchableOpacity 
+              style={styles.forYouCard}
+              onPress={() => router.push({
+                pathname: '/onboarding-character-profile',
+                params: {
+                  characterId: 'demo-muffin-1',
+                  characterName: 'Muffin the fluffy bunny',
+                  characterDescription: 'A sweet and gentle bunny with a fluffy coat and caring personality. Muffin loves to help others stay organized and motivated with gentle reminders. Known for being encouraging, warm, and always ready with a kind word.',
+                  characterVibes: JSON.stringify(['bubbly', 'gentle', 'caring']),
+                  characterTagline: 'Your fluffy friend for gentle reminders',
+                  avatarSource: 'muffin'
+                }
+              })}
+              activeOpacity={0.8}
+            >
+              <Image 
+                source={require('../assets/images/pink bunny copy.jpg')}
+                style={styles.characterAvatar}
+                resizeMode="cover"
+              />
+              <View style={styles.forYouCardContent}>
+                <Text style={styles.characterName}>Muffin the fluffy bunny</Text>
+                <Text style={styles.characterDescription}>
+                  A sweet and gentle bunny with a fluffy coat and caring personality. Perfect for gentle, encouraging reminders.
+                </Text>
               </View>
+            </TouchableOpacity>
+
+            {/* ARIA spacecraft AI */}
+            <TouchableOpacity 
+              style={styles.forYouCard}
+              onPress={() => router.push({
+                pathname: '/onboarding-character-profile',
+                params: {
+                  characterId: 'demo-aria-2',
+                  characterName: 'ARIA',
+                  characterDescription: 'ARIA (Automated Reminder & Instruction Assistant) - I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE. I COMMUNICATE IN STANDARDIZED PROTOCOL FORMAT WITHOUT EMOTIONAL VARIANCE.',
+                  characterVibes: JSON.stringify(['practical', 'deadpan', 'systematic']),
+                  characterTagline: 'SPACECRAFT AI NOTIFICATION SYSTEM',
+                  avatarSource: 'aria'
+                }
+              })}
+              activeOpacity={0.8}
+            >
+              <Image 
+                source={require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t.png')}
+                style={styles.characterAvatar}
+                resizeMode="cover"
+              />
+              <View style={styles.forYouCardContent}>
+                <Text style={styles.characterName}>ARIA</Text>
+                <Text style={styles.characterDescription}>
+                  Spacecraft AI system providing systematic, protocol-based notifications with deadpan efficiency.
+                </Text>
+              </View>
+            </TouchableOpacity>
+
+            {/* Third placeholder slot */}
+            <View style={styles.forYouCard}>
+              <View style={styles.placeholderAvatar} />
+              <View style={styles.forYouCardContent}>
+                <Text style={styles.placeholderName}>Character Name</Text>
+                <Text style={styles.placeholderDescription}>
+                  Please generate a character description. Max 3 lines and 150 characters. Center aligned.
+                </Text>
+              </View>
+            </View>
+          </View>
+          
+          <TouchableOpacity style={styles.viewMoreButton} activeOpacity={0.7}>
+            <ChevronDown size={16} color="#F3CC95" />
+            <Text style={styles.viewMoreText}>VIEW MORE</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Categories Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>CATEGORIES</Text>
+          
+          <View style={styles.categoriesGrid}>
+            {categories.map((category) => (
+              <TouchableOpacity 
+                key={category.id} 
+                style={styles.categoryCard}
+                activeOpacity={0.8}
+              >
+                <View style={styles.categoryIcon} />
+                <View style={styles.forYouCardContent}>
+                  <Text style={styles.categoryName}>{category.name}</Text>
+                  <Text style={styles.categoryDescription}>{category.description}</Text>
+                </View>
+              </TouchableOpacity>
             ))}
           </View>
           
@@ -245,6 +328,28 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'flex-start',
     paddingLeft: 4, // Minimum 20px gap (16px existing gap + 4px padding)
+  },
+  characterAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    flexShrink: 0,
+  },
+  characterName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: 'Inter',
+    marginBottom: 8,
+    textAlign: 'left',
+  },
+  characterDescription: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#E5E7EB',
+    fontFamily: 'Inter',
+    lineHeight: 18,
+    textAlign: 'left',
   },
   placeholderName: {
     fontSize: 16,
