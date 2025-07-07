@@ -47,6 +47,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
   };
 
   const closeSMSModal = () => {
+  };
 
   // Check if all required fields are filled for Save button
   const canSaveNotification = () => {
@@ -105,6 +106,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
             onPress={handleSendWithoutAIToggle}
             activeOpacity={0.7}
           >
+          </TouchableOpacity>
 
   characterNameEmpty: {
     fontSize: 12,
@@ -121,3 +123,4 @@ import Svg, { Circle, Path } from 'react-native-svg';
     fontWeight: '400',
   },
   aiCheckboxSection: {
+  }
