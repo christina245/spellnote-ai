@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 16,
     padding: 16,
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 16,
   },
   placeholderAvatar: {
@@ -220,10 +220,12 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     backgroundColor: '#6B7280',
+    flexShrink: 0,
   },
   forYouCardContent: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    paddingLeft: 4, // Minimum 20px gap (16px existing gap + 4px padding)
   },
   placeholderName: {
     fontSize: 16,
@@ -231,7 +233,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.5)',
     fontFamily: 'Inter',
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   placeholderDescription: {
     fontSize: 14,
@@ -239,7 +241,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.5)',
     fontFamily: 'Inter',
     lineHeight: 18,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   viewMoreButton: {
     flexDirection: 'row',
@@ -252,7 +254,7 @@ const styles = StyleSheet.create({
   viewMoreText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#8DD3C8',
+    color: '#F3CC95',
     fontFamily: 'Inter',
     letterSpacing: 0.5,
   },
@@ -265,7 +267,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 16,
     padding: 16,
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 16,
   },
   categoryIcon: {
