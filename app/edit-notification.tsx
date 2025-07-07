@@ -100,7 +100,6 @@ import Svg, { Circle, Path } from 'react-native-svg';
             })}
           </View>
 
-        <View style={styles.aiCheckboxSection}>
           <TouchableOpacity 
             style={styles.aiCheckbox}
             onPress={handleSendWithoutAIToggle}
