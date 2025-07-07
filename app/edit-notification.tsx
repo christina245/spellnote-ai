@@ -8,7 +8,8 @@ import {
   ScrollView,
   SafeAreaView,
   Dimensions,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 import { ArrowLeft, Calendar, Clock, User, Plus, Trash2 } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -191,7 +192,9 @@ export default function EditNotification() {
           </TouchableOpacity>
         </View>
         
-        <Text style={styles.headerTitle}>Edit notification</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.headerTitle}>Edit notification</Text>
+        </View>
       </View>
 
       <ScrollView 
@@ -314,12 +317,11 @@ export default function EditNotification() {
                     ) : character.isEmpty ? (
                       <Plus size={24} color="#9CA3AF" />
                     ) : (
-                      <View style={styles.characterAvatar}>
-                        {/* Placeholder for character avatar */}
-                        <Text style={styles.characterInitial}>
-                          {character.name.charAt(0)}
-                        </Text>
-                      </View>
+                      <Image 
+                        source={character.avatarSource}
+                        style={styles.characterAvatar}
+                        resizeMode="cover"
+                      />
                     )}
                   </View>
                   <Text style={[
@@ -430,6 +432,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     lineHeight: 36,
     letterSpacing: -0.28,
+    flexShrink: 1, // Allow text to shrink if needed
+  },
+  titleRow: {
+    width: '100%', // Ensure full width for proper text layout
   },
   deleteButton: {
     padding: 8,
@@ -609,15 +615,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#F3CC95',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  characterInitial: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#1C1830',
-    fontFamily: 'Inter',
   },
   characterName: {
     fontSize: 12,
