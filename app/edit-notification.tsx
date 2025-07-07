@@ -172,23 +172,26 @@ export default function EditNotification() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={handleBack}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft size={20} color="#F3CC95" />
-          <Text style={styles.backText}>BACK</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit notification</Text>
+        <View style={styles.topRow}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={handleBack}
+            activeOpacity={0.7}
+          >
+            <ArrowLeft size={20} color="#F3CC95" />
+            <Text style={styles.backText}>BACK</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.deleteButton}
+            onPress={handleDeleteNotification}
+            activeOpacity={0.7}
+          >
+            <Trash2 size={20} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
         
-        <TouchableOpacity 
-          style={styles.deleteButton}
-          onPress={handleDeleteNotification}
-          activeOpacity={0.7}
-        >
-          <Trash2 size={20} color="#EF4444" />
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Edit notification</Text>
       </View>
 
       <ScrollView 
@@ -402,9 +405,12 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: 24,
     paddingBottom: 20,
+  },
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 15, // 15px gap as requested
   },
   backButton: {
     flexDirection: 'row',
@@ -424,9 +430,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     lineHeight: 36,
     letterSpacing: -0.28,
-    flex: 1,
-    textAlign: 'center',
-    marginHorizontal: 20,
   },
   deleteButton: {
     padding: 8,
