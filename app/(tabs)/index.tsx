@@ -677,7 +677,7 @@ export default function HomeTab() {
         router.push('/submit-feedback');
         break;
       case 'report-issue':
-        Alert.alert('Report Issue', 'Report issue page will be implemented');
+        router.push('/report-issue');
         break;
       case 'contact-support':
         Alert.alert('Contact Support', 'Contact support page will be implemented');
