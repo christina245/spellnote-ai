@@ -15,7 +15,7 @@ export default function AddNotification() {
   // Mock characters data
   const characters = [
     { id: '1', name: 'Character 1', isEmpty: false, avatarSource: require('../assets/images/pink bunny.jpg') },
-    { id: '2', name: 'Character 2', isEmpty: false, avatarSource: require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t.png') },
+    { id: '2', name: 'Character 2', isEmpty: false, avatarSource: require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy copy.png') },
     { id: '3', name: 'Add Character', isEmpty: true, avatarSource: null },
   ];
 

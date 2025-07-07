@@ -138,7 +138,7 @@ export default function BrowseCharacters() {
               activeOpacity={0.8}
             >
               <Image 
-                source={require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy.png')}
+                source={require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy copy.png')}
                 style={styles.characterAvatar}
                 resizeMode="cover"
               />

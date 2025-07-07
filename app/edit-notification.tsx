@@ -19,7 +19,7 @@ export default function EditNotification() {
   const [sendWithoutAI, setSendWithoutAI] = useState(false);
   const [characters, setCharacters] = useState([
     { id: '1', name: 'Character 1', isEmpty: false, isSelected: false, avatarSource: require('../assets/images/pink bunny.jpg') },
-    { id: '2', name: 'Character 2', isEmpty: false, isSelected: false, avatarSource: require('../assets/images/spacecraft-ai.jpg') },
+    { id: '2', name: 'Character 2', isEmpty: false, isSelected: false, avatarSource: require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy copy.png') },
     { id: '3', name: 'Add Character', isEmpty: true, isSelected: false, avatarSource: null },
   ]);
 
