@@ -51,7 +51,7 @@ export default function NotificationPreview() {
   const hasUserNotification = () => {
     const header = getNotificationHeader();
     const details = getNotificationDetails();
-    return header.trim() !== '' && details.trim() !== '';
+    return header.trim() !== '' || details.trim() !== '';
   };
 
   // Function to get the appropriate avatar source
@@ -102,9 +102,9 @@ export default function NotificationPreview() {
     // Simulate AI generation delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const hasUserNotification = notificationData.notificationHeader.trim() !== '' || notificationData.notificationDetails.trim() !== '';
+    const hasUserInput = notificationData.notificationHeader.trim() !== '' || notificationData.notificationDetails.trim() !== '';
     
-    if (!hasUserNotification) {
+    if (!hasUserInput) {
       // Show sample notification for "drink a bottle of water"
       if (notificationData.characterType === 'spellbot') {
         setCollapsedText('Hydration reminder! 💧');
@@ -140,20 +140,20 @@ export default function NotificationPreview() {
         }
       }
     } else {
-      // Use actual user notification data
+      // CRITICAL: Use actual user notification data when available
       if (notificationData.characterType === 'spellbot') {
         // Generate neutral, ChatGPT-like content based on user input
         const userHeader = notificationData.notificationHeader;
         const userDetails = notificationData.notificationDetails;
         
         // Create Spellbot response based on actual user input
-        if (userHeader.toLowerCase().includes('board game') || userDetails.toLowerCase().includes('catan')) {
+        if (userHeader.toLowerCase().includes('board game') || userDetails.toLowerCase().includes('catan') || userDetails.toLowerCase().includes('board game')) {
           setCollapsedText('Time to prepare for board game night! 🎲');
           setOpenText('Hi there! Just a friendly reminder that you wanted to brush up on Catan rules before tonight\'s game. You mentioned wanting to review at 5 and 5:30 PM, so here\'s your notification. Have a great game night!');
         } else if (userHeader || userDetails) {
           // Generic Spellbot response for other user content
-          setCollapsedText(`Reminder: ${userHeader || 'Your notification'}`);
-          setOpenText(`Hi! Here's your reminder about: ${userDetails}. Hope this helps you stay on track!`);
+          setCollapsedText(userHeader || 'Reminder notification');
+          setOpenText(`Hi! Here's your reminder: ${userDetails || userHeader}. Hope this helps you stay on track!`);
         } else {
           // Fallback if no user input (shouldn't happen with validation)
           setCollapsedText('Reminder notification');
@@ -161,8 +161,8 @@ export default function NotificationPreview() {
         }
       } else if (notificationData.characterType === 'ai-free') {
         // Use exact user input without AI modification
-        setCollapsedText(notificationData.notificationHeader || 'Reminder');
-        setOpenText(notificationData.notificationDetails || 'Your reminder details will appear here.');
+        setCollapsedText(notificationData.notificationHeader || (notificationData.notificationDetails ? 'Reminder' : 'Reminder'));
+        setOpenText(notificationData.notificationDetails || notificationData.notificationHeader || 'Your reminder details will appear here.');
       } else {
         // Generate character-specific content based on vibes and description
         const vibes = notificationData.characterVibes || [];
@@ -173,19 +173,22 @@ export default function NotificationPreview() {
         const userDetails = notificationData.notificationDetails;
         
         // Generate character responses based on actual user input and character vibes
-        if (isDramatic && isFiery && userHeader && userDetails) {
-          setCollapsedText(`⚔️ ${userHeader.toUpperCase()} AWAITS! ⚔️`);
-          setOpenText(`Listen up, mortal! The time has come for: ${userDetails}. You WILL conquer this task with the fury of a thousand suns! Failure is NOT an option! Victory awaits! 🔥⚔️`);
-        } else if (isWitty && isDramatic && userHeader && userDetails) {
-          setCollapsedText(`🎭 Your dramatic destiny: ${userHeader}`);
-          setOpenText(`Well, well, well... looks like someone needs a reminder about "${userDetails}." Don't worry, I'll make sure you handle this with all the dramatic flair it deserves. Try not to overthink it! 🎲✨`);
-        } else if (isWitty && userHeader && userDetails) {
-          setCollapsedText(`🧠 Time for some "${userHeader}" action 📚`);
-          setOpenText(`Oh, so you need a reminder about "${userDetails}"? What's next, reminding you to breathe? 😏 But seriously, this won't handle itself. Get to it! 🎯`);
-        } else if (userHeader && userDetails) {
+        const mainContent = userDetails || userHeader;
+        const headerContent = userHeader || 'Reminder';
+        
+        if (isDramatic && isFiery && mainContent) {
+          setCollapsedText(`⚔️ ${headerContent.toUpperCase()} AWAITS! ⚔️`);
+          setOpenText(`Listen up, mortal! The time has come for: ${mainContent}. You WILL conquer this task with the fury of a thousand suns! Failure is NOT an option! Victory awaits! 🔥⚔️`);
+        } else if (isWitty && isDramatic && mainContent) {
+          setCollapsedText(`🎭 Your dramatic destiny: ${headerContent}`);
+          setOpenText(`Well, well, well... looks like someone needs a reminder about "${mainContent}." Don't worry, I'll make sure you handle this with all the dramatic flair it deserves. Try not to overthink it! 🎲✨`);
+        } else if (isWitty && mainContent) {
+          setCollapsedText(`🧠 Time for some "${headerContent}" action 📚`);
+          setOpenText(`Oh, so you need a reminder about "${mainContent}"? What's next, reminding you to breathe? 😏 But seriously, this won't handle itself. Get to it! 🎯`);
+        } else if (mainContent) {
           // Default character response using user input
-          setCollapsedText(`🎯 ${userHeader} time approaches!`);
-          setOpenText(`Hey there! Time for your reminder: ${userDetails}. You've got this! 🏆`);
+          setCollapsedText(`🎯 ${headerContent} time approaches!`);
+          setOpenText(`Hey there! Time for your reminder: ${mainContent}. You've got this! 🏆`);
         } else {
           // Fallback if no user input (shouldn't happen with validation)
           setCollapsedText('🎯 Reminder time!');
@@ -214,9 +217,9 @@ export default function NotificationPreview() {
           // CRITICAL: Pass through ALL notification data
           notificationHeader: params.notificationHeader,
           notificationDetails: params.notificationDetails,
+          time: params.time,
           startDate: params.startDate,
           endDate: params.endDate,
-          time: params.time,
           isRepeat: params.isRepeat,
           isTextItToMe: params.isTextItToMe,
           // Also pass character creation data if available
@@ -236,9 +239,9 @@ export default function NotificationPreview() {
           // Pass through notification data to homepage
           notificationHeader: params.notificationHeader,
           notificationDetails: params.notificationDetails,
+          time: params.time,
           startDate: params.startDate,
           endDate: params.endDate,
-          time: params.time,
           isRepeat: params.isRepeat,
           isTextItToMe: params.isTextItToMe
         }

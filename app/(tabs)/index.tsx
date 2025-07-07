@@ -232,27 +232,43 @@ export default function HomeTab() {
     // CRITICAL: Start with existing global notifications to preserve them
     let loadedNotifications: NotificationEntry[] = [...globalNotifications];
 
-    // 1. Load the original onboarding notification (if exists and not already loaded)
+    // 1. Load the original onboarding notification from first-notification.tsx (if exists and not already loaded)
     const originalHeader = params.notificationHeader as string;
     const originalDetails = params.notificationDetails as string;
     const originalTime = params.time as string;
+    const originalStartDate = params.startDate as string;
     const originalId = 'original-1';
 
-    if ((originalHeader?.trim() || originalDetails?.trim() || originalTime?.trim()) && 
+    // CRITICAL: Check if we have actual user input from first-notification.tsx
+    if ((originalHeader?.trim() || originalDetails?.trim()) && 
         !globalProcessedIds.has(originalId)) {
       // Get active character info for notification
       const activeCharacter = characters.find(char => char.id === activeCharacterId);
       
+      // Parse the start date if available
+      let notificationDate = formatDate(new Date());
+      if (originalStartDate) {
+        try {
+          const parsedDate = new Date(originalStartDate);
+          if (!isNaN(parsedDate.getTime())) {
+            notificationDate = formatDate(parsedDate);
+          }
+        } catch (error) {
+          console.log('Error parsing start date:', error);
+        }
+      }
+      
       const originalNotification: NotificationEntry = {
         id: originalId,
-        header: originalHeader?.trim() || 'Reminder',
-        details: originalDetails?.trim() || 'Your reminder details',
-        date: formatDate(new Date()),
+        header: originalHeader?.trim() || (originalDetails?.trim() ? 'Reminder' : 'Board game night prep'),
+        details: originalDetails?.trim() || originalHeader?.trim() || 'Need to brush up on how to play Catan at 6 pm this Wednesday before board game night at 8. Ping me at 5 and 5:30 pm.',
+        date: notificationDate,
         time: originalTime?.trim() || '6:30 PM',
         characterName: activeCharacter?.name || 'Character Name',
         characterType: activeCharacter?.type || userMode,
         avatarSource: activeCharacter?.avatarSource || require('../../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png'),
         isFirst: true,
+        sendWithoutAI: false, // Default to false for original notification
         createdAt: Date.now() - 1000 // Slightly older to ensure it appears first
       };
 
