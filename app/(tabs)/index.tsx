@@ -667,8 +667,8 @@ export default function HomeTab() {
       case 'browse-characters':
         router.push('/browse-characters');
         break;
-      case 'my-reports':
-        Alert.alert('My Reports', 'My reports page will be implemented');
+      case 'resources':
+        router.push('/resources');
         break;
       case 'help-center':
         Alert.alert('Help Center', 'Help center page will be implemented');
