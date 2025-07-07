@@ -42,7 +42,8 @@ export default function CharacterSelection() {
             endDate: params.endDate,
             time: params.time,
             isRepeat: params.isRepeat,
-            isTextItToMe: params.isTextItToMe
+            isTextItToMe: params.isTextItToMe,
+            notificationTimestamp: params.notificationTimestamp
           }
         });
       } else if (option === 'character') {
@@ -56,7 +57,8 @@ export default function CharacterSelection() {
             endDate: params.endDate,
             time: params.time,
             isRepeat: params.isRepeat,
-            isTextItToMe: params.isTextItToMe
+            isTextItToMe: params.isTextItToMe,
+            notificationTimestamp: params.notificationTimestamp
           }
         });
       } else if (option === 'spellbot') {
@@ -70,7 +72,8 @@ export default function CharacterSelection() {
             endDate: params.endDate,
             time: params.time,
             isRepeat: params.isRepeat,
-            isTextItToMe: params.isTextItToMe
+            isTextItToMe: params.isTextItToMe,
+            notificationTimestamp: params.notificationTimestamp
           }
         });
       } else {

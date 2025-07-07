@@ -40,7 +40,8 @@ export default function SpellbotScreen() {
         endDate: params.endDate,
         time: params.time,
         isRepeat: params.isRepeat,
-        isTextItToMe: params.isTextItToMe
+        isTextItToMe: params.isTextItToMe,
+        notificationTimestamp: params.notificationTimestamp
       }
     });
   };

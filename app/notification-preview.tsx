@@ -315,7 +315,8 @@ export default function NotificationPreview() {
           startDate: params.startDate,
           endDate: params.endDate,
           isRepeat: params.isRepeat,
-          isTextItToMe: params.isTextItToMe
+          isTextItToMe: params.isTextItToMe,
+          notificationTimestamp: params.notificationTimestamp
         }
       });
     }

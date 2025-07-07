@@ -195,7 +195,8 @@ export default function CharacterCreation() {
           time: params.time,
           isRepeat: params.isRepeat,
           isTextItToMe: params.isTextItToMe
-        }
+        isTextItToMe: params.isTextItToMe,
+        notificationTimestamp: params.notificationTimestamp
       });
     } else {
       // User skipped notification creation, go directly to dashboard
@@ -208,7 +209,16 @@ export default function CharacterCreation() {
           characterDescription: characterDescription,
           characterVibes: JSON.stringify(selectedVibes),
           characterTagline: characterTagline,
-          userAvatarUri: avatarUri || undefined
+          userAvatarUri: avatarUri || undefined,
+          // Pass notification data if available
+          notificationHeader: params.notificationHeader,
+          notificationDetails: params.notificationDetails,
+          time: params.time,
+          startDate: params.startDate,
+          endDate: params.endDate,
+          isRepeat: params.isRepeat,
+          isTextItToMe: params.isTextItToMe,
+          notificationTimestamp: params.notificationTimestamp
         }
       });
     }

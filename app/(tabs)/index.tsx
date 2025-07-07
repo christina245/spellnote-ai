@@ -214,6 +214,10 @@ export default function HomeTab() {
     params.selectedCharacterId,
     params.sendWithoutAI,
     params.notificationTimestamp, // Add this to detect new notifications
+    params.notificationHeader, // Add original notification params
+    params.notificationDetails,
+    params.time,
+    params.startDate,
     characters,
     activeCharacterId,
     isInitialized

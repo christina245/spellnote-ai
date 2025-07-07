@@ -163,7 +163,8 @@ export default function FirstNotification() {
         endDate: endDate?.toISOString(),
         time: time,
         isRepeat: isRepeat.toString(),
-        isTextItToMe: isTextItToMe.toString()
+        isTextItToMe: isTextItToMe.toString(),
+        notificationTimestamp: Date.now().toString() // Add timestamp for uniqueness
       }
     });
   };
