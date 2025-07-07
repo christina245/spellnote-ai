@@ -99,7 +99,7 @@ export default function BrowseCharacters() {
           </View>
           
           <TouchableOpacity style={styles.viewMoreButton} activeOpacity={0.7}>
-            <ChevronDown size={16} color="#8DD3C8" />
+            <ChevronDown size={16} color="#F3CC95" />
             <Text style={styles.viewMoreText}>VIEW MORE</Text>
           </TouchableOpacity>
         </View>
@@ -125,7 +125,7 @@ export default function BrowseCharacters() {
           </View>
           
           <TouchableOpacity style={styles.viewMoreButton} activeOpacity={0.7}>
-            <ChevronDown size={16} color="#8DD3C8" />
+            <ChevronDown size={16} color="#F3CC95" />
             <Text style={styles.viewMoreText}>VIEW MORE</Text>
           </TouchableOpacity>
         </View>
