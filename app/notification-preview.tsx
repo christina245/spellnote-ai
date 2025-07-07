@@ -62,6 +62,16 @@ export default function NotificationPreview() {
       return { uri: userAvatarUri };
     }
     
+    // Handle specific character IDs from browse-characters
+    const characterId = params.characterId as string;
+    if (characterId === 'demo-muffin-1') {
+      return require('../assets/images/pink bunny copy copy.jpg');
+    } else if (characterId === 'demo-aria-2') {
+      return require('../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy.png');
+    } else if (characterId === 'demo-rave-addict-3') {
+      return require('../assets/images/20250706_2138_Festival Fun_remix_01jzhjrj5xejnvemxvax2k067h.png');
+    }
+    
     // Fall back to default avatars based on character type
     if (params.characterType === 'spellbot') {
       return require('../assets/images/square logo 2.png');
