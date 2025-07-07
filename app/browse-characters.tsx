@@ -143,7 +143,7 @@ export default function BrowseCharacters() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2D2B4A',
+    backgroundColor: '#1C1830',
   },
   header: {
     paddingHorizontal: 24,
@@ -279,6 +279,7 @@ const styles = StyleSheet.create({
   },
   categoriesGrid: {
     paddingHorizontal: 24,
+    paddingTop: 15, // Minimum 15px space between header and first category
     gap: 16,
   },
   categoryCard: {
