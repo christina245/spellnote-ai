@@ -276,7 +276,11 @@ export default function AddNotification() {
                     sendWithoutAI && !character.isEmpty && styles.aiFreeModeAvatar
                   ]}>
                     {showProfileIcon && !character.isEmpty ? (
-                      <User size={32} color="#9CA3AF" />
+                      <Image 
+                        source={require('../assets/images/placeholder-profile-icon-8qmjk1094ijhbem9 copy copy.png')}
+                        style={styles.characterAvatar}
+                        resizeMode="cover"
+                      />
                     ) : character.isEmpty ? (
                       <Plus size={24} color="#9CA3AF" />
                     ) : (
