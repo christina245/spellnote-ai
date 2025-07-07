@@ -297,27 +297,20 @@ export default function CharacterProfile() {
         <View style={styles.vibesSection}>
           <Text style={styles.sectionLabel}>CHARACTER VIBES</Text>
           <View style={styles.vibesGrid}>
-            {allVibeOptions.map((vibe, index) => {
-              // Check if this is ARIA and add "serious" to selected vibes
-        {selectedVibes.length > 0 && (
-              const isSerious = vibe === 'serious';
-              const isSelected = selectedVibes.includes(vibe);
-              
-              {selectedVibes.map((vibe: string, index: number) => (
-                <View
-                  key={`${vibe}-${index}`}
-                  style={[
-                    styles.vibeButtonSelected
-                  ]}
-                >
-                  <Text style={[
-                    styles.vibeButtonTextSelected
-                  ]}>
-                    {vibe}
-                  </Text>
-                </View>
-              );
-            )}
+            {selectedVibes.length > 0 && selectedVibes.map((vibe: string, index: number) => (
+              <View
+                key={`${vibe}-${index}`}
+                style={[
+                  styles.vibeButtonSelected
+                ]}
+              >
+                <Text style={[
+                  styles.vibeButtonTextSelected
+                ]}>
+                  {vibe}
+                </Text>
+              </View>
+            ))}
           </View>
         </View>
 
@@ -589,7 +582,7 @@ const styles = StyleSheet.create({
   },
   deleteButtonContainer: {
     marginTop: 40,
-    marginBottom: 32, // Space below delete button
+    marginBottom: 32,
     paddingHorizontal: 40,
   },
   deleteButton: {
@@ -689,4 +682,7 @@ const styles = StyleSheet.create({
     color: '#1C1830',
     fontFamily: 'Inter',
   },
+  asterisk: {
+    color: '#EF4444',
+  }
 });
