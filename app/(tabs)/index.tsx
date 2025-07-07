@@ -134,8 +134,7 @@ export default function HomeTab() {
     // Always start with demo character in slot 1
     const demoCharacter = createDemoCharacter();
     const ariaCharacter = createARIACharacter();
-    const raveAddictCharacter = createRaveAddictCharacter();
-    let initialCharacters = [demoCharacter, ariaCharacter, raveAddictCharacter]; // All three demo characters
+    let initialCharacters = [demoCharacter, ariaCharacter]; // Only Muffin and ARIA, leave slot 3 empty
     let initialActiveId = demoCharacter.id;
 
     // Handle new character creation or updates
@@ -171,12 +170,12 @@ export default function HomeTab() {
 
       // CRITICAL: Always preserve Muffin in slot 1, add new characters to slots 2 and 3
       if (characterNameParam !== 'Muffin the fluffy bunny') {
-        // This is a new character, replace The Rave Addict in slot 3
+        // This is a new character, add to slot 3 (or replace ARIA if slot 2 is targeted)
         initialCharacters = [demoCharacter, ariaCharacter, newCharacter];
         initialActiveId = newCharacter.id; // Make new character active
       } else {
         // This is an update to Muffin (shouldn't happen in normal flow, but just in case)
-        initialCharacters = [{ ...demoCharacter, ...newCharacter, id: demoCharacter.id, isDemo: true }, ariaCharacter, raveAddictCharacter];
+        initialCharacters = [{ ...demoCharacter, ...newCharacter, id: demoCharacter.id, isDemo: true }, ariaCharacter];
         initialActiveId = demoCharacter.id;
       }
 
