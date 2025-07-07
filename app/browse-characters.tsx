@@ -22,44 +22,6 @@ export default function BrowseCharacters() {
   const [fontsLoaded] = useFonts({
     Montserrat_700Bold,
   });
-
-  // Mock user data - in a real app, this would come from user state/context
-  const mockUserData = {
-    hasProfile: false, // Set to true to test when user has profile
-    notificationCount: 3, // Change this number to test different scenarios
-  };
-
-  // Determine what suggestion text to show
-  const getSuggestionText = () => {
-    const needsProfile = !mockUserData.hasProfile;
-    const needsMoreNotifications = mockUserData.notificationCount < 10;
-    
-    if (!needsProfile && !needsMoreNotifications) {
-      return null; // Don't show any suggestion text
-    }
-    
-    let text = "For the best suggestions, ";
-    const parts = [];
-    
-    if (needsProfile) {
-      parts.push("add your bio");
-    }
-    
-    if (needsMoreNotifications) {
-      parts.push("more notifications");
-    }
-    
-    return {
-      prefix: text,
-      parts: parts,
-      needsProfile: needsProfile
-    };
-  };
-
-  const handleProfilePress = () => {
-    // Navigate to profile page (to be created later)
-    console.log('Navigate to profile page');
-  };
   const handleBack = () => {
     router.back();
   };
@@ -120,28 +82,11 @@ export default function BrowseCharacters() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>FOR YOU</Text>
-            {getSuggestionText() && (
-              <View style={styles.suggestionContainer}>
-                <Text style={styles.suggestionText}>
-                  {getSuggestionText()?.prefix}
-                  {getSuggestionText()?.parts.map((part, index) => (
-                    <React.Fragment key={part}>
-                      {part === "add your bio" ? (
-                        <TouchableOpacity onPress={handleProfilePress} activeOpacity={0.7}>
-                          <Text style={styles.suggestionLinkText}>{part}</Text>
-                        </TouchableOpacity>
-                      ) : (
-                        <Text style={styles.suggestionText}>{part}</Text>
-                      )}
-                      {index < getSuggestionText()!.parts.length - 1 && (
-                        <Text style={styles.suggestionText}> and </Text>
-                      )}
-                    </React.Fragment>
-                  ))}
-                  <Text style={styles.suggestionText}>.</Text>
-                </Text>
-              </View>
-            )}
+            <View style={styles.suggestionContainer}>
+              <Text style={styles.suggestionText}>
+                Based on your current characters, notifications, and profile.
+              </Text>
+            </View>
           </View>
           
           {/* Placeholder character cards */}
@@ -275,14 +220,6 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#FFFFFF',
     fontFamily: 'Inter',
-    lineHeight: 12,
-  },
-  suggestionLinkText: {
-    fontSize: 10,
-    fontWeight: '400',
-    color: '#F3CC95',
-    fontFamily: 'Inter',
-    textDecorationLine: 'underline',
     lineHeight: 12,
   },
   forYouGrid: {
