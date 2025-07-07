@@ -287,7 +287,7 @@ export default function NotificationPreview() {
             </>
           ) : (
             <Text style={styles.subtitle}>
-              Here's what your notifications would look like for an entry that says "drink a bottle of water".
+              If you set a reminder to drink a bottle of water with this character, here's what they might say:
             </Text>
           )}
         </View>
