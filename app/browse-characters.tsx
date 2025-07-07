@@ -103,7 +103,8 @@ export default function BrowseCharacters() {
                   characterDescription: 'A sweet and gentle bunny with a fluffy coat and caring personality. Muffin loves to help others stay organized and motivated with gentle reminders. Known for being encouraging, warm, and always ready with a kind word.',
                   characterVibes: JSON.stringify(['bubbly', 'gentle', 'caring']),
                   characterTagline: 'Your fluffy friend for gentle reminders',
-                  avatarSource: 'muffin'
+                  avatarSource: 'muffin',
+                  userAvatarUri: undefined // Will use default image
                 }
               })}
               activeOpacity={0.8}
@@ -132,7 +133,8 @@ export default function BrowseCharacters() {
                   characterDescription: 'ARIA (Automated Reminder & Instruction Assistant) - I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE. I COMMUNICATE IN STANDARDIZED PROTOCOL FORMAT WITHOUT EMOTIONAL VARIANCE.',
                   characterVibes: JSON.stringify(['practical', 'deadpan', 'systematic']),
                   characterTagline: 'SPACECRAFT AI NOTIFICATION SYSTEM',
-                  avatarSource: 'aria'
+                  avatarSource: 'aria',
+                  userAvatarUri: undefined // Will use default image
                 }
               })}
               activeOpacity={0.8}
@@ -161,7 +163,8 @@ export default function BrowseCharacters() {
                   characterDescription: 'Lives for the drop, sleeps under the stars, and has collected more wristbands than most people have socks. This seasoned festival-goer has navigated everything from muddy fields to desert heat waves, always emerging with stories and a slightly hoarse voice. His phone camera roll is 90% stage shots and 10% blurry group pics at 3 AM.',
                   characterVibes: JSON.stringify(['energetic', 'health-conscious', 'street smart']),
                   characterTagline: 'A seasoned raver who knows that a healthy lifestyle = more fun at the festivals.',
-                  avatarSource: 'rave-addict'
+                  avatarSource: 'rave-addict',
+                  userAvatarUri: undefined // Will use default image
                 }
               })}
               activeOpacity={0.8}

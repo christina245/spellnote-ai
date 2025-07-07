@@ -45,7 +45,7 @@ export default function OnboardingCharacterProfile() {
         characterDescription: characterDescription,
         characterVibes: JSON.stringify(characterVibes),
         characterTagline: characterTagline,
-        userAvatarUri: avatarSource,
+        characterId: characterId, // Pass character ID for proper avatar handling
         // Pass through any notification data if it exists (empty strings if no notification)
         notificationHeader: params.notificationHeader || '',
         notificationDetails: params.notificationDetails || '',
