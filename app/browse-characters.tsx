@@ -116,7 +116,7 @@ export default function BrowseCharacters() {
               <View style={styles.forYouCardContent}>
                 <Text style={styles.characterName}>Muffin the fluffy bunny</Text>
                 <Text style={styles.characterDescription}>
-                  A sweet and gentle bunny with a fluffy coat and caring personality. Perfect for gentle, encouraging reminders.
+                  Your fluffy friend for gentle reminders
                 </Text>
               </View>
             </TouchableOpacity>
@@ -145,7 +145,7 @@ export default function BrowseCharacters() {
               <View style={styles.forYouCardContent}>
                 <Text style={styles.characterName}>ARIA</Text>
                 <Text style={styles.characterDescription}>
-                  Spacecraft AI system providing systematic, protocol-based notifications with deadpan efficiency.
+                  SPACECRAFT AI NOTIFICATION SYSTEM
                 </Text>
               </View>
             </TouchableOpacity>
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 16,
     padding: 16,
-    alignItems: 'flex-start',
+    alignItems: 'center', // Center avatars vertically
     gap: 16,
   },
   placeholderAvatar: {
