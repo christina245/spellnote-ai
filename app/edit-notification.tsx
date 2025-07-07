@@ -15,6 +15,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Calendar, Clock } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import { User } from 'lucide-react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import DatePickerModal from '@/components/DatePickerModal';
 import TimePickerModal from '@/components/TimePickerModal';
@@ -250,6 +251,30 @@ export default function EditNotification() {
     }
   };
 
+  // Handle AI-free checkbox toggle
+  const handleSendWithoutAIToggle = () => {
+    const newValue = !sendWithoutAI;
+    setSendWithoutAI(newValue);
+    
+    // If enabling AI-free mode, deselect all characters
+    if (newValue) {
+      setSelectedCharacterId(null);
+      setCharacters(prev => prev.map(char => ({
+        ...char,
+        isSelected: false
+      })));
+    } else {
+      // If disabling AI-free mode, select the first available character
+      const firstAvailableCharacter = characters.find(char => !char.isEmpty);
+      if (firstAvailableCharacter) {
+        setSelectedCharacterId(firstAvailableCharacter.id);
+        setCharacters(prev => prev.map(char => ({
+          ...char,
+          isSelected: char.id === firstAvailableCharacter.id
+        })));
+      }
+    }
+  };
   const closeSMSModal = () => {
     setShowSMSModal(false);
   };
@@ -263,7 +288,7 @@ export default function EditNotification() {
     return details.trim() !== '' && 
            startDate !== null && 
            time.trim() !== '' && 
-           selectedCharacterId !== null;
+           (selectedCharacterId !== null || sendWithoutAI); // Allow saving if AI-free is selected
   };
 
   if (!fontsLoaded) {
@@ -434,17 +459,26 @@ export default function EditNotification() {
           
           <View style={styles.characterSlots}>
             {characters.map((character) => (
+              // Show profile icon if AI-free is selected, otherwise show character
+              const showProfileIcon = sendWithoutAI;
+              const isSelected = !sendWithoutAI && character.isSelected && !character.isEmpty;
+              
               <TouchableOpacity
                 key={character.id}
-                style={styles.characterSlot}
-                onPress={() => handleCharacterSelect(character.id)}
+                  onPress={() => !sendWithoutAI && handleCharacterSelect(character.id)}
+                  activeOpacity={character.isEmpty || sendWithoutAI ? 1 : 0.7}
+                  disabled={character.isEmpty || sendWithoutAI}
                 activeOpacity={0.7}
               >
                 <View style={[
-                  styles.characterAvatarContainer,
-                  character.isSelected && !character.isEmpty && styles.selectedCharacterAvatar,
+                    character.isEmpty && styles.emptyCharacterSlot,
+                    isSelected && styles.selectedCharacterAvatar,
+                    sendWithoutAI && !character.isEmpty && styles.aiFreeModeAvatar
                   character.isEmpty && styles.emptyCharacterSlot
-                ]}>
+                    {showProfileIcon && !character.isEmpty ? (
+                      // Show profile icon when AI-free is selected
+                      <User size={32} color="#9CA3AF" />
+                    ) : character.isEmpty ? (
                   {character.isEmpty ? (
                     <Text style={styles.addCharacterText}>+</Text>
                   ) : (
@@ -456,10 +490,11 @@ export default function EditNotification() {
                   )}
                 </View>
                 <Text style={[
-                  styles.characterName,
-                  character.isSelected && !character.isEmpty && styles.characterNameSelected,
+                    character.isEmpty && styles.characterNameEmpty,
+                    isSelected && styles.characterNameSelected,
+                    sendWithoutAI && !character.isEmpty && styles.characterNameAIFree
                   character.isEmpty && styles.characterNameEmpty
-                ]}>
+                    {showProfileIcon && !character.isEmpty ? 'You' : character.name}
                   {character.name}
                 </Text>
               </TouchableOpacity>
@@ -471,7 +506,7 @@ export default function EditNotification() {
         <View style={styles.aiCheckboxSection}>
           <TouchableOpacity 
             style={styles.aiCheckbox}
-            onPress={() => setSendWithoutAI(!sendWithoutAI)}
+            onPress={handleSendWithoutAIToggle}
             activeOpacity={0.7}
           >
             <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -832,6 +867,11 @@ const styles = StyleSheet.create({
     borderColor: '#4B5563',
     borderStyle: 'dashed',
   },
+  aiFreeModeAvatar: {
+    backgroundColor: '#6B7280',
+    borderColor: '#9CA3AF',
+    borderStyle: 'solid',
+  },
   addCharacterText: {
     fontSize: 32,
     fontWeight: '300',
@@ -858,6 +898,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '400',
     color: '#9CA3AF',
+  },
+  characterNameAIFree: {
+    color: '#9CA3AF',
+    fontWeight: '400',
   },
   aiCheckboxSection: {
     alignItems: 'flex-start',

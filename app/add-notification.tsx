@@ -253,12 +253,28 @@ export default function AddNotification() {
     }
   };
 
+  // Handle AI-free checkbox toggle
+  const handleSendWithoutAIToggle = () => {
+    const newValue = !sendWithoutAI;
+    setSendWithoutAI(newValue);
+    
+    // If enabling AI-free mode, deselect all characters
+    if (newValue) {
+      setSelectedCharacterId(null);
+    } else {
+      // If disabling AI-free mode, select the first available character
+      const firstAvailableCharacter = characters.find(char => !char.isEmpty);
+      if (firstAvailableCharacter) {
+        setSelectedCharacterId(firstAvailableCharacter.id);
+      }
+    }
+  };
   // Check if all required fields are filled for Save button
   const canSaveNotification = () => {
     return details.trim() !== '' && 
            startDate !== null && 
            time.trim() !== '' && 
-           selectedCharacterId !== null;
+           (selectedCharacterId !== null || sendWithoutAI); // Allow saving if AI-free is selected
   };
 
   const closeSMSModal = () => {
@@ -441,21 +457,29 @@ export default function AddNotification() {
           
           <View style={styles.characterSlots}>
             {characters.map((character) => (
+              // Show profile icon if AI-free is selected, otherwise show character
+              const showProfileIcon = sendWithoutAI;
+              const isSelected = !sendWithoutAI && selectedCharacterId === character.id && !character.isEmpty;
+              
               <TouchableOpacity
                 key={character.id}
                 style={[
-                  styles.characterSlot,
+                    isSelected && styles.characterSlotSelected
                   selectedCharacterId === character.id && !character.isEmpty && styles.characterSlotSelected
-                ]}
-                onPress={() => handleCharacterSelect(character.id)}
-                activeOpacity={character.isEmpty ? 1 : 0.7}
+                  onPress={() => !sendWithoutAI && handleCharacterSelect(character.id)}
+                  activeOpacity={character.isEmpty || sendWithoutAI ? 1 : 0.7}
+                  disabled={character.isEmpty || sendWithoutAI}
                 disabled={character.isEmpty}
               >
                 <View style={[
                   styles.characterAvatarContainer,
-                  character.isEmpty && styles.emptyCharacterSlot,
+                    isSelected && styles.selectedCharacterAvatar,
+                    sendWithoutAI && !character.isEmpty && styles.aiFreeModeAvatar
                   selectedCharacterId === character.id && !character.isEmpty && styles.selectedCharacterAvatar
-                ]}>
+                    {showProfileIcon && !character.isEmpty ? (
+                      // Show profile icon when AI-free is selected
+                      <User size={32} color="#9CA3AF" />
+                    ) : character.isEmpty ? (
                   {character.isEmpty ? (
                     <Text style={styles.addCharacterText}>+</Text>
                   ) : (
@@ -468,9 +492,10 @@ export default function AddNotification() {
                 </View>
                 <Text style={[
                   styles.characterName,
-                  character.isEmpty && styles.characterNameEmpty,
+                    isSelected && styles.characterNameSelected,
+                    sendWithoutAI && !character.isEmpty && styles.characterNameAIFree
                   selectedCharacterId === character.id && !character.isEmpty && styles.characterNameSelected
-                ]}>
+                    {showProfileIcon && !character.isEmpty ? 'You' : character.name}
                   {character.name}
                 </Text>
               </TouchableOpacity>
@@ -481,7 +506,7 @@ export default function AddNotification() {
           <View style={styles.aiCheckboxSection}>
             <TouchableOpacity 
               style={styles.aiCheckbox}
-              onPress={() => setSendWithoutAI(!sendWithoutAI)}
+              onPress={handleSendWithoutAIToggle}
               activeOpacity={0.7}
             >
               <Svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -875,6 +900,11 @@ const styles = StyleSheet.create({
     borderColor: '#8DD3C8',
     borderStyle: 'solid',
   },
+  aiFreeModeAvatar: {
+    backgroundColor: '#6B7280',
+    borderColor: '#9CA3AF',
+    borderStyle: 'solid',
+  },
   addCharacterText: {
     fontSize: 32,
     fontWeight: '300',
@@ -901,6 +931,10 @@ const styles = StyleSheet.create({
   characterNameSelected: {
     color: '#8DD3C8',
     fontWeight: '600',
+  },
+  characterNameAIFree: {
+    color: '#9CA3AF',
+    fontWeight: '400',
   },
   aiCheckboxSection: {
     alignItems: 'flex-start',
