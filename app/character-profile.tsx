@@ -228,7 +228,7 @@ export default function CharacterProfile() {
       >
         {/* Title */}
         <View style={styles.titleSection}>
-          <Text style={styles.title}>Character Profile</Text>
+          <Text style={styles.title}>Character profile</Text>
           <Text style={styles.subtitle}>Edit your character's details</Text>
         </View>
 

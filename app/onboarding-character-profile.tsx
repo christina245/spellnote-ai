@@ -92,7 +92,7 @@ export default function OnboardingCharacterProfile() {
       >
         {/* Title */}
         <View style={styles.titleSection}>
-          <Text style={styles.title}>Character Profile</Text>
+          <Text style={styles.title}>Character profile</Text>
         </View>
 
         {/* Avatar Section */}

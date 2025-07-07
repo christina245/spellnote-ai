@@ -51,7 +51,7 @@ export default function NotificationPreview() {
   const hasUserNotification = () => {
     const header = getNotificationHeader();
     const details = getNotificationDetails();
-    return header.trim() !== '' || details.trim() !== '';
+    return header.trim() !== '' && details.trim() !== '';
   };
 
   // Function to get the appropriate avatar source
