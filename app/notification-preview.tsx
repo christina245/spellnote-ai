@@ -115,28 +115,37 @@ export default function NotificationPreview() {
       } else {
         // Generate character-specific content for water drinking
         const vibes = notificationData.characterVibes || [];
-        const isDramatic = vibes.includes('dramatic');
-        const isWitty = vibes.includes('witty');
-        const isFiery = vibes.includes('fiery');
-        const isEnergetic = vibes.includes('energetic');
-        const isHealthConscious = vibes.includes('health-conscious');
+        const characterName = notificationData.characterName;
         
-        if (isDramatic && isFiery) {
-          setCollapsedText('⚔️ HYDRATION BATTLE AWAITS! ⚔️');
-          setOpenText('Listen up, mortal! The time has come to DRINK A BOTTLE OF WATER! Your body is a temple and it DEMANDS hydration! Failure is NOT an option! Victory through H2O! 🔥💧');
-        } else if (isWitty && isDramatic) {
-          setCollapsedText('🎭 Your dramatic hydration destiny');
-          setOpenText('Well, well, well... looks like someone needs a reminder to "drink a bottle of water." How very... ordinary. But hey, even the most mundane tasks deserve dramatic flair! 💧✨');
-        } else if (isEnergetic && isHealthConscious) {
-          setCollapsedText('💪 HYDRATION TIME! 💧');
-          setOpenText('Yo! Time to fuel that body with some H2O! Trust me, I\'ve been through enough festivals to know - staying hydrated is KEY! Drink that bottle of water and keep the energy flowing! 🌊⚡');
-        } else if (isWitty) {
-          setCollapsedText('🧠 Time for some "hydration" action 💧');
-          setOpenText('Oh, so you need a reminder to "drink a bottle of water"? What\'s next, reminding you to breathe? 😏 But seriously, this won\'t handle itself. Get to it! 💦');
+        // ARIA spacecraft AI character
+        if (characterName === 'ARIA') {
+          setCollapsedText('HYDRATION PROTOCOL: System recommends 8oz fluid intake');
+          setOpenText('BIOLOGICAL SYSTEMS: Water reserves require replenishment. Status: Pending. Please proceed to hydration station. Current time: optimal hydration window detected.');
         } else {
-          // Default character response for water drinking
-          setCollapsedText('💧 Hydration time approaches!');
-          setOpenText('Hey there! Time for your reminder: drink a bottle of water. Your body will thank you for it! Stay healthy! 🏆');
+          // Other character logic
+          const isDramatic = vibes.includes('dramatic');
+          const isWitty = vibes.includes('witty');
+          const isFiery = vibes.includes('fiery');
+          const isEnergetic = vibes.includes('energetic');
+          const isHealthConscious = vibes.includes('health-conscious');
+          
+          if (isDramatic && isFiery) {
+            setCollapsedText('⚔️ HYDRATION BATTLE AWAITS! ⚔️');
+            setOpenText('Listen up, mortal! The time has come to DRINK A BOTTLE OF WATER! Your body is a temple and it DEMANDS hydration! Failure is NOT an option! Victory through H2O! 🔥💧');
+          } else if (isWitty && isDramatic) {
+            setCollapsedText('🎭 Your dramatic hydration destiny');
+            setOpenText('Well, well, well... looks like someone needs a reminder to "drink a bottle of water." How very... ordinary. But hey, even the most mundane tasks deserve dramatic flair! 💧✨');
+          } else if (isEnergetic && isHealthConscious) {
+            setCollapsedText('💪 HYDRATION TIME! 💧');
+            setOpenText('Yo! Time to fuel that body with some H2O! Trust me, I\'ve been through enough festivals to know - staying hydrated is KEY! Drink that bottle of water and keep the energy flowing! 🌊⚡');
+          } else if (isWitty) {
+            setCollapsedText('🧠 Time for some "hydration" action 💧');
+            setOpenText('Oh, so you need a reminder to "drink a bottle of water"? What\'s next, reminding you to breathe? 😏 But seriously, this won\'t handle itself. Get to it! 💦');
+          } else {
+            // Default character response for water drinking
+            setCollapsedText('💧 Hydration time approaches!');
+            setOpenText('Hey there! Time for your reminder: drink a bottle of water. Your body will thank you for it! Stay healthy! 🏆');
+          }
         }
       }
     } else {
@@ -164,40 +173,103 @@ export default function NotificationPreview() {
         setCollapsedText(notificationData.notificationHeader || (notificationData.notificationDetails ? 'Reminder' : 'Reminder'));
         setOpenText(notificationData.notificationDetails || notificationData.notificationHeader || 'Your reminder details will appear here.');
       } else {
-        // Generate character-specific content based on vibes and description
-        const vibes = notificationData.characterVibes || [];
-        const isDramatic = vibes.includes('dramatic');
-        const isWitty = vibes.includes('witty');
-        const isFiery = vibes.includes('fiery');
         const userHeader = notificationData.notificationHeader;
         const userDetails = notificationData.notificationDetails;
+        const characterName = notificationData.characterName;
         
-        // Generate character responses based on actual user input and character vibes
         const mainContent = userDetails || userHeader;
         const headerContent = userHeader || 'Reminder';
         
-        if (isDramatic && isFiery && mainContent) {
-          setCollapsedText(`⚔️ ${headerContent.toUpperCase()} AWAITS! ⚔️`);
-          setOpenText(`Listen up, mortal! The time has come for: ${mainContent}. You WILL conquer this task with the fury of a thousand suns! Failure is NOT an option! Victory awaits! 🔥⚔️`);
-        } else if (isWitty && isDramatic && mainContent) {
-          setCollapsedText(`🎭 Your dramatic destiny: ${headerContent}`);
-          setOpenText(`Well, well, well... looks like someone needs a reminder about "${mainContent}." Don't worry, I'll make sure you handle this with all the dramatic flair it deserves. Try not to overthink it! 🎲✨`);
-        } else if (isWitty && mainContent) {
-          setCollapsedText(`🧠 Time for some "${headerContent}" action 📚`);
-          setOpenText(`Oh, so you need a reminder about "${mainContent}"? What's next, reminding you to breathe? 😏 But seriously, this won't handle itself. Get to it! 🎯`);
-        } else if (mainContent) {
-          // Default character response using user input
-          setCollapsedText(`🎯 ${headerContent} time approaches!`);
-          setOpenText(`Hey there! Time for your reminder: ${mainContent}. You've got this! 🏆`);
+        // ARIA spacecraft AI character
+        if (characterName === 'ARIA') {
+          const ariaResponse = generateARIANotification(userHeader, userDetails);
+          setCollapsedText(ariaResponse.collapsed);
+          setOpenText(ariaResponse.open);
         } else {
-          // Fallback if no user input (shouldn't happen with validation)
-          setCollapsedText('🎯 Reminder time!');
-          setOpenText('Hey there! This is your scheduled reminder. You\'ve got this! 🏆');
+          // Generate character-specific content based on vibes and description
+          const vibes = notificationData.characterVibes || [];
+          const isDramatic = vibes.includes('dramatic');
+          const isWitty = vibes.includes('witty');
+          const isFiery = vibes.includes('fiery');
+          
+          if (isDramatic && isFiery && mainContent) {
+            setCollapsedText(`⚔️ ${headerContent.toUpperCase()} AWAITS! ⚔️`);
+            setOpenText(`Listen up, mortal! The time has come for: ${mainContent}. You WILL conquer this task with the fury of a thousand suns! Failure is NOT an option! Victory awaits! 🔥⚔️`);
+          } else if (isWitty && isDramatic && mainContent) {
+            setCollapsedText(`🎭 Your dramatic destiny: ${headerContent}`);
+            setOpenText(`Well, well, well... looks like someone needs a reminder about "${mainContent}." Don't worry, I'll make sure you handle this with all the dramatic flair it deserves. Try not to overthink it! 🎲✨`);
+          } else if (isWitty && mainContent) {
+            setCollapsedText(`🧠 Time for some "${headerContent}" action 📚`);
+            setOpenText(`Oh, so you need a reminder about "${mainContent}"? What's next, reminding you to breathe? 😏 But seriously, this won't handle itself. Get to it! 🎯`);
+          } else if (mainContent) {
+            // Default character response using user input
+            setCollapsedText(`🎯 ${headerContent} time approaches!`);
+            setOpenText(`Hey there! Time for your reminder: ${mainContent}. You've got this! 🏆`);
+          } else {
+            // Fallback if no user input (shouldn't happen with validation)
+            setCollapsedText('🎯 Reminder time!');
+            setOpenText('Hey there! This is your scheduled reminder. You\'ve got this! 🏆');
+          }
         }
       }
     }
     
     setIsLoading(false);
+  };
+
+  // ARIA notification generation function
+  const generateARIANotification = (userHeader: string, userDetails: string) => {
+    const mainContent = userDetails || userHeader;
+    const headerContent = userHeader || 'Task Reminder';
+    
+    // Detect content type for appropriate ARIA protocol
+    const content = mainContent.toLowerCase();
+    
+    // Water/Hydration
+    if (content.includes('water') || content.includes('drink') || content.includes('hydrat')) {
+      return {
+        collapsed: 'HYDRATION PROTOCOL: System recommends fluid intake',
+        open: `BIOLOGICAL SYSTEMS: Water reserves require replenishment. Reference: ${mainContent}. Status: Pending. Please proceed to hydration station.`
+      };
+    }
+    
+    // Exercise/Movement
+    if (content.includes('exercise') || content.includes('workout') || content.includes('gym') || content.includes('run') || content.includes('walk') || content.includes('stretch')) {
+      return {
+        collapsed: 'MOBILITY PROTOCOL: Physical activity cycle scheduled',
+        open: `SYSTEM ADVISORY: Cardiovascular maintenance routine now available for execution. Reference: ${mainContent}. Awaiting user confirmation.`
+      };
+    }
+    
+    // Medication
+    if (content.includes('medication') || content.includes('medicine') || content.includes('pill') || content.includes('dose') || content.includes('prescription')) {
+      return {
+        collapsed: 'PHARMACEUTICAL PROTOCOL: Medication administration window active',
+        open: `MEDICAL SYSTEMS: Prescription compliance reminder. Reference: ${mainContent}. Health maintenance schedule indicates dosage required at current time.`
+      };
+    }
+    
+    // Sleep/Rest
+    if (content.includes('sleep') || content.includes('bed') || content.includes('rest') || content.includes('nap')) {
+      return {
+        collapsed: 'SLEEP CYCLE OPTIMIZATION: Rest period protocol initiated',
+        open: `BIOLOGICAL SYSTEMS: Sleep preparation sequence should commence. Reference: ${mainContent}. System recommends shutdown procedures.`
+      };
+    }
+    
+    // Board games (specific to the demo content)
+    if (content.includes('board game') || content.includes('catan') || content.includes('game night')) {
+      return {
+        collapsed: 'RECREATIONAL PROTOCOL: Game preparation sequence initiated',
+        open: `TASK REMINDER: User-defined recreational objective requires attention. Reference: ${mainContent}. Priority: Standard. Execution window now open.`
+      };
+    }
+    
+    // Generic task
+    return {
+      collapsed: `TASK REMINDER: ${headerContent} protocol queued`,
+      open: `SCHEDULED ACTIVITY: User-defined objective requires attention. Reference: ${mainContent}. Priority: Standard. Execution window now open.`
+    };
   };
 
   const handleBack = () => {
