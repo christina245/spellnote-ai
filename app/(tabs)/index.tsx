@@ -90,6 +90,18 @@ export default function HomeTab() {
     isDemo: true
   });
 
+  // Create The Rave Addict character
+  const createRaveAddictCharacter = (): CharacterInfo => ({
+    id: 'demo-rave-addict-3',
+    name: 'The Rave Addict',
+    type: 'character',
+    avatarSource: require('../../assets/images/20250706_2138_Festival Fun_remix_01jzhjrj5xejnvemxvax2k067h.png'),
+    description: 'Lives for the drop, sleeps under the stars, and has collected more wristbands than most people have socks. This seasoned festival-goer has navigated everything from muddy fields to desert heat waves, always emerging with stories and a slightly hoarse voice. His phone camera roll is 90% stage shots and 10% blurry group pics at 3 AM.',
+    vibes: ['energetic', 'health-conscious', 'street smart'],
+    tagline: 'A seasoned raver who knows that a healthy lifestyle = more fun at the festivals.',
+    isDemo: true
+  });
+
   // Initialize component only once
   useEffect(() => {
     if (isInitialized) return;
@@ -122,7 +134,8 @@ export default function HomeTab() {
     // Always start with demo character in slot 1
     const demoCharacter = createDemoCharacter();
     const ariaCharacter = createARIACharacter();
-    let initialCharacters = [demoCharacter, ariaCharacter]; // Only Muffin and ARIA by default
+    const raveAddictCharacter = createRaveAddictCharacter();
+    let initialCharacters = [demoCharacter, ariaCharacter, raveAddictCharacter]; // All three demo characters
     let initialActiveId = demoCharacter.id;
 
     // Handle new character creation or updates
@@ -158,12 +171,12 @@ export default function HomeTab() {
 
       // CRITICAL: Always preserve Muffin in slot 1, add new characters to slots 2 and 3
       if (characterNameParam !== 'Muffin the fluffy bunny') {
-        // This is a new character, add it to slot 3 (index 2), keeping ARIA in slot 2
+        // This is a new character, replace The Rave Addict in slot 3
         initialCharacters = [demoCharacter, ariaCharacter, newCharacter];
         initialActiveId = newCharacter.id; // Make new character active
       } else {
         // This is an update to Muffin (shouldn't happen in normal flow, but just in case)
-        initialCharacters = [{ ...demoCharacter, ...newCharacter, id: demoCharacter.id, isDemo: true }, ariaCharacter];
+        initialCharacters = [{ ...demoCharacter, ...newCharacter, id: demoCharacter.id, isDemo: true }, ariaCharacter, raveAddictCharacter];
         initialActiveId = demoCharacter.id;
       }
 
