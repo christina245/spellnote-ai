@@ -110,7 +110,7 @@ export default function SubmitFeedback() {
           </Text>
           
           <View style={styles.reportIssueContainer}>
-            <Text style={styles.reportIssueIcon}>👇</Text>
+            <Text style={styles.reportIssueIcon}>✋</Text>
             <Text style={styles.reportIssueText}>
               <Text style={styles.reportIssueLabel}>Need to report an issue?</Text>{' '}
               <TouchableOpacity 
@@ -297,9 +297,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   reportIssueLink: {
+    fontSize: 16,
     fontWeight: '600',
     color: '#F3CC95',
     textDecorationLine: 'underline',
+    fontFamily: 'Inter',
+    lineHeight: 20,
   },
   fieldGroup: {
     marginBottom: 24,
