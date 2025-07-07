@@ -195,7 +195,6 @@ export default function CharacterCreation() {
           time: params.time,
           isRepeat: params.isRepeat,
           isTextItToMe: params.isTextItToMe,
-          notificationTimestamp: params.notificationTimestamp
         }
       });
     } else {
