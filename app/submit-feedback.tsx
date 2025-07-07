@@ -187,7 +187,7 @@ export default function SubmitFeedback() {
             style={[styles.textInput, styles.textInputMultiline]}
             value={details}
             onChangeText={setDetails}
-            placeholder="Enter feedback details. Explain as thoroughly as you can! Suggestions would also be helpful."
+            placeholder="What would you like to tell us? Feel free to drop any suggestions."
             placeholderTextColor="rgba(255, 255, 255, 0.50)"
             multiline={true}
             numberOfLines={6}
