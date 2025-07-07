@@ -301,24 +301,35 @@ Give as much description as you can!"
         <View style={styles.vibesSection}>
           <Text style={styles.sectionLabel}>CHARACTER VIBES</Text>
           <View style={styles.vibesGrid}>
-            {allVibeOptions.map((vibe, index) => (
-              <TouchableOpacity
-                key={`${vibe}-${index}`}
-                style={[
-                  styles.vibeButton,
-                  selectedVibes.includes(vibe) && styles.vibeButtonSelected
-                ]}
-                onPress={() => handleVibeSelect(vibe)}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.vibeButtonText,
-                  selectedVibes.includes(vibe) && styles.vibeButtonTextSelected
-                ]}>
-                  {vibe}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {allVibeOptions.map((vibe, index) => {
+              // Check if this is ARIA and add "serious" to selected vibes
+              const isARIA = params.characterName === 'ARIA';
+              const isSerious = vibe === 'serious';
+              const isSelected = selectedVibes.includes(vibe) || (isARIA && isSerious);
+              
+              return (
+                <TouchableOpacity
+                  key={`${vibe}-${index}`}
+                  style={[
+                    styles.vibeButton,
+                    isSelected && styles.vibeButtonSelected
+                  ]}
+                  onPress={() => {
+                    // Don't allow deselecting "serious" for ARIA
+                    if (isARIA && isSerious) return;
+                    handleVibeSelect(vibe);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[
+                    styles.vibeButtonText,
+                    isSelected && styles.vibeButtonTextSelected
+                  ]}>
+                    {vibe}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
