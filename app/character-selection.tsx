@@ -6,27 +6,16 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  SafeAreaView
+  Image
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, ArrowRight } from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 
-const { width: screenWidth } = Dimensions.get('window');
-
-interface Interest {
-  id: string;
-  label: string;
-}
-
-interface CharacterTrait {
-  id: string;
-  label: string;
-}
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export default function CharacterSelection() {
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [selectedTraits, setSelectedTraits] = useState<string[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -34,88 +23,69 @@ export default function CharacterSelection() {
     Montserrat_700Bold,
   });
 
-  const interests: Interest[] = [
-    { id: 'fitness', label: 'Fitness & Health' },
-    { id: 'cooking', label: 'Cooking & Food' },
-    { id: 'travel', label: 'Travel & Adventure' },
-    { id: 'reading', label: 'Reading & Learning' },
-    { id: 'gaming', label: 'Gaming' },
-    { id: 'music', label: 'Music & Arts' },
-    { id: 'technology', label: 'Technology' },
-    { id: 'nature', label: 'Nature & Outdoors' },
-    { id: 'fashion', label: 'Fashion & Style' },
-    { id: 'productivity', label: 'Productivity' },
-    { id: 'mindfulness', label: 'Mindfulness & Meditation' },
-    { id: 'social', label: 'Social & Relationships' },
-  ];
-
-  const characterTraits: CharacterTrait[] = [
-    { id: 'encouraging', label: 'Encouraging' },
-    { id: 'witty', label: 'Witty' },
-    { id: 'calm', label: 'Calm' },
-    { id: 'energetic', label: 'Energetic' },
-    { id: 'wise', label: 'Wise' },
-    { id: 'playful', label: 'Playful' },
-    { id: 'serious', label: 'Serious' },
-    { id: 'gentle', label: 'Gentle' },
-    { id: 'motivational', label: 'Motivational' },
-    { id: 'humorous', label: 'Humorous' },
-    { id: 'supportive', label: 'Supportive' },
-    { id: 'direct', label: 'Direct' },
-    { id: 'creative', label: 'Creative' },
-    { id: 'analytical', label: 'Analytical' },
-    { id: 'empathetic', label: 'Empathetic' },
-    { id: 'confident', label: 'Confident' },
-  ];
-
   const handleBack = () => {
     router.back();
   };
 
-  const handleInterestToggle = (interestId: string) => {
-    setSelectedInterests(prev => 
-      prev.includes(interestId) 
-        ? prev.filter(id => id !== interestId)
-        : [...prev, interestId]
-    );
-  };
-
-  const handleTraitToggle = (traitId: string) => {
-    setSelectedTraits(prev => 
-      prev.includes(traitId) 
-        ? prev.filter(id => id !== traitId)
-        : [...prev, traitId]
-    );
-  };
-
-  const handleNextStep = () => {
-    // Navigate to browse characters with selected preferences
-    router.push({
-      pathname: '/browse-characters',
-      params: {
-        selectedInterests: JSON.stringify(selectedInterests),
-        selectedTraits: JSON.stringify(selectedTraits),
-        // Pass through any notification data if it exists
-        notificationHeader: params.notificationHeader,
-        notificationDetails: params.notificationDetails,
-        startDate: params.startDate,
-        endDate: params.endDate,
-        time: params.time,
-        isRepeat: params.isRepeat,
-        isTextItToMe: params.isTextItToMe
+  const handleOptionSelect = (option: string) => {
+    setSelectedOption(option);
+    // Navigate based on selected option
+    setTimeout(() => {
+      if (option === 'ai-free') {
+        router.push({
+          pathname: '/ai-free',
+          params: {
+            // Pass notification data to ai-free screen
+            notificationHeader: params.notificationHeader,
+            notificationDetails: params.notificationDetails,
+            startDate: params.startDate,
+            endDate: params.endDate,
+            time: params.time,
+            isRepeat: params.isRepeat,
+            isTextItToMe: params.isTextItToMe
+          }
+        });
+      } else if (option === 'character') {
+        router.push({
+          pathname: '/character-creation',
+          params: {
+            // Pass notification data to character creation
+            notificationHeader: params.notificationHeader,
+            notificationDetails: params.notificationDetails,
+            startDate: params.startDate,
+            endDate: params.endDate,
+            time: params.time,
+            isRepeat: params.isRepeat,
+            isTextItToMe: params.isTextItToMe
+          }
+        });
+      } else if (option === 'spellbot') {
+        router.push({
+          pathname: '/spellbot',
+          params: {
+            // Pass notification data to spellbot screen
+            notificationHeader: params.notificationHeader,
+            notificationDetails: params.notificationDetails,
+            startDate: params.startDate,
+            endDate: params.endDate,
+            time: params.time,
+            isRepeat: params.isRepeat,
+            isTextItToMe: params.isTextItToMe
+          }
+        });
+      } else {
+        // For other modes, navigate to main app tabs for now
+        router.push('/(tabs)');
       }
-    });
+    }, 300);
   };
-
-  // Check if user has made at least some selections
-  const canProceed = selectedInterests.length > 0 || selectedTraits.length > 0;
 
   if (!fontsLoaded) {
     return null;
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Header with Back Button */}
       <View style={styles.header}>
         <TouchableOpacity 
@@ -126,6 +96,8 @@ export default function CharacterSelection() {
           <ArrowLeft size={20} color="#F3CC95" />
           <Text style={styles.backText}>BACK</Text>
         </TouchableOpacity>
+        
+        <Text style={styles.headerTitle}>Now, who's sending it?</Text>
       </View>
 
       {/* Scrollable Content */}
@@ -134,104 +106,100 @@ export default function CharacterSelection() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Title and Description */}
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>
-            Tell us about yourself
+        {/* Introduction Text */}
+        <View style={styles.introSection}>
+          <Text style={styles.introText}>
+            We originally created Spellnote so you could enjoy receiving texts from your original characters, but we understand that's not for everybody.
           </Text>
-          <Text style={styles.subtitle}>
-            Select your interests and preferred character traits to help us recommend the perfect characters for you.
+          
+          <Text style={styles.introText}>
+            You can use Spellnote with or without a character and even without AI, ensuring your notes are delivered to you exactly as you've written them.
           </Text>
         </View>
 
-        {/* Interests Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>YOUR INTERESTS</Text>
-          <View style={styles.buttonGrid}>
-            {interests.map((interest) => (
-              <TouchableOpacity
-                key={interest.id}
-                style={[
-                  styles.selectionButton,
-                  selectedInterests.includes(interest.id) && styles.selectionButtonSelected
-                ]}
-                onPress={() => handleInterestToggle(interest.id)}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.selectionButtonText,
-                  selectedInterests.includes(interest.id) && styles.selectionButtonTextSelected
-                ]}>
-                  {interest.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Character Traits Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PREFERRED CHARACTER TRAITS</Text>
-          <View style={styles.buttonGrid}>
-            {characterTraits.map((trait) => (
-              <TouchableOpacity
-                key={trait.id}
-                style={[
-                  styles.selectionButton,
-                  selectedTraits.includes(trait.id) && styles.selectionButtonSelected
-                ]}
-                onPress={() => handleTraitToggle(trait.id)}
-                activeOpacity={0.7}
-              >
-                <Text style={[
-                  styles.selectionButtonText,
-                  selectedTraits.includes(trait.id) && styles.selectionButtonTextSelected
-                ]}>
-                  {trait.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        {/* Bottom spacing for floating button */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-
-      {/* Floating Next Step Button */}
-      <View style={styles.floatingButtonContainer}>
+        {/* Character Mode Option */}
         <TouchableOpacity 
-          style={[
-            styles.nextStepButton,
-            !canProceed && styles.nextStepButtonDisabled
-          ]}
-          onPress={handleNextStep}
-          disabled={!canProceed}
-          activeOpacity={canProceed ? 0.8 : 1}
+          style={styles.optionCard}
+          onPress={() => handleOptionSelect('character')}
+          activeOpacity={0.8}
         >
-          <Text style={[
-            styles.nextStepButtonText,
-            !canProceed && styles.nextStepButtonTextDisabled
-          ]}>
-            Next step
-          </Text>
-          <ArrowRight 
-            size={16} 
-            color={!canProceed ? "#9CA3AF" : "#1D1B20"} 
-          />
+          <View style={styles.optionContainer}>
+            <View style={styles.optionImageContainer}>
+              <Image 
+                source={require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png')}
+                style={styles.optionImage}
+                resizeMode="cover"
+              />
+            </View>
+            <View style={styles.optionContent}>
+              <Text style={styles.optionTitle}>CHARACTER MODE</Text>
+              <Text style={styles.optionDescription}>
+                Hear from your original characters! Max 3 free, $10/month each additional.
+              </Text>
+            </View>
+          </View>
         </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+
+        {/* Spellbot Option */}
+        <TouchableOpacity 
+          style={styles.optionCard}
+          onPress={() => handleOptionSelect('spellbot')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.optionContainer}>
+            <View style={styles.optionImageContainer}>
+              <Image 
+                source={require('../assets/images/square logo (2).png')}
+                style={styles.optionImage}
+                resizeMode="contain"
+              />
+            </View>
+            <View style={styles.optionContent}>
+              <Text style={styles.optionTitle}>SPELLBOT</Text>
+              <Text style={styles.optionDescription}>
+                Just our generic app bot giving similar vibes to ChatGPT. Lawful neutral.
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        {/* AI-Free Option */}
+        <TouchableOpacity 
+          style={styles.optionCard}
+          onPress={() => handleOptionSelect('ai-free')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.optionContainer}>
+            <View style={styles.optionImageContainer}>
+              <Image 
+                source={require('../assets/images/20250629_2006_No AI Symbol_simple_compose_01jyzcradxfyjrsjerpkw5regx.png')}
+                style={styles.optionImage}
+                resizeMode="contain"
+              />
+            </View>
+            <View style={styles.optionContent}>
+              <View style={styles.titleWithIcon}>
+                <Text style={styles.optionTitle}>AI-FREE</Text>
+                <Text style={styles.prohibitedIcon}>🚫</Text>
+              </View>
+              <Text style={styles.optionDescription}>
+                Just text me whatever I write whenever I say so. Nothing more.
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1C1830',
+    backgroundColor: '#1C1830', // Changed from #2D2B4A to #1C1830
   },
   header: {
-    paddingTop: 16,
+    paddingTop: 60,
     paddingHorizontal: 24,
     paddingBottom: 20,
   },
@@ -239,12 +207,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    marginBottom: 30, // Minimum 30px between Back button and header text
   },
   backText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#F3CC95',
     fontFamily: 'Inter',
+  },
+  headerTitle: {
+    color: '#FFF',
+    fontFamily: 'Montserrat_700Bold', // Using the properly loaded font
+    fontSize: 24,
+    fontStyle: 'normal',
+    fontWeight: '700',
+    lineHeight: 31.2, // 130% of 24px
+    letterSpacing: -0.24,
   },
   scrollView: {
     flex: 1,
@@ -253,105 +231,70 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 40,
   },
-  titleSection: {
-    marginBottom: 40,
+  introSection: {
+    marginBottom: 32,
   },
-  title: {
-    fontSize: 28,
-    fontFamily: 'Montserrat_700Bold',
-    fontWeight: '700',
-    color: '#FFFFFF',
-    lineHeight: 36,
-    letterSpacing: -0.28,
-    marginBottom: 16,
-  },
-  subtitle: {
+  introText: {
     fontSize: 16,
     fontWeight: '400',
     color: '#FFFFFF',
-    lineHeight: 22,
+    lineHeight: 20,
     fontFamily: 'Inter',
+    marginBottom: 16,
   },
-  section: {
-    marginBottom: 40,
+  optionCard: {
+    marginBottom: 24,
   },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '500',
+  optionContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.10)', // Reduced from 20% to 10% opacity
+    borderRadius: 10,
+    padding: 16,
+    alignItems: 'center', // Vertically center contents
+  },
+  optionImageContainer: {
+    marginRight: 16,
+    width: 80,
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'visible', // Prevent any clipping
+  },
+  optionImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  optionContent: {
+    flex: 1,
+  },
+  optionTitle: {
+    fontSize: 16,
+    fontWeight: '600', // Decreased from 700 to 600 (100 weight decrease)
     color: '#8DD3C8',
     fontFamily: 'Inter',
-    letterSpacing: 0.7,
-    marginBottom: 20,
+    marginBottom: 5, // 5px gap before white text
+    letterSpacing: 0.5,
   },
-  buttonGrid: {
+  titleWithIcon: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  selectionButton: {
-    backgroundColor: '#BEC0ED', // Unselected state
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 20,
-    minHeight: 44,
-    justifyContent: 'center',
     alignItems: 'center',
-    flexShrink: 1,
+    marginBottom: 5, // 5px gap before white text
   },
-  selectionButtonSelected: {
-    backgroundColor: '#4A3A7B', // Selected state
+  prohibitedIcon: {
+    fontSize: 14.4, // Shrunk by another 10% (was 16, now 14.4)
+    marginLeft: 8,
+    // Perfect inline alignment with AI-FREE text
+    lineHeight: 16, // Match the title line height
+    height: 16, // Explicit height to ensure proper alignment
+    textAlignVertical: 'center',
+    includeFontPadding: false, // Remove extra font padding on Android
   },
-  selectionButtonText: {
+  optionDescription: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#1D1B20', // Dark text for unselected
+    fontWeight: '400',
+    color: '#FFFFFF',
+    lineHeight: 18,
     fontFamily: 'Inter',
-    textAlign: 'center',
-  },
-  selectionButtonTextSelected: {
-    color: '#FFFFFF', // White text for selected
-  },
-  bottomSpacing: {
-    height: 100, // Space for floating button
-  },
-  floatingButtonContainer: {
-    position: 'absolute',
-    bottom: 40,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
-  nextStepButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    width: 160,
-    height: 56,
-    backgroundColor: '#F3CC95', // Yellow button
-    borderRadius: 12,
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  nextStepButtonDisabled: {
-    backgroundColor: '#6B7280', // Gray when disabled
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  nextStepButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1D1B20',
-    fontFamily: 'Inter',
-  },
-  nextStepButtonTextDisabled: {
-    color: '#9CA3AF', // Gray text when disabled
   },
 });
