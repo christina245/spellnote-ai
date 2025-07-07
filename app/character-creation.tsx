@@ -194,9 +194,9 @@ export default function CharacterCreation() {
           endDate: params.endDate,
           time: params.time,
           isRepeat: params.isRepeat,
-          isTextItToMe: params.isTextItToMe
-        isTextItToMe: params.isTextItToMe,
-        notificationTimestamp: params.notificationTimestamp
+          isTextItToMe: params.isTextItToMe,
+          notificationTimestamp: params.notificationTimestamp
+        }
       });
     } else {
       // User skipped notification creation, go directly to dashboard
@@ -574,11 +574,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14, // Changed from 28 to 14px as requested
+    fontSize: 14,
     fontWeight: '400',
     color: '#FFFFFF',
-    lineHeight: 17.5, // Adjusted line height for 14px font
-    fontFamily: 'Inter', // Keeping Inter font as requested
+    lineHeight: 17.5,
+    fontFamily: 'Inter',
     marginBottom: 16,
   },
   disclaimer: {
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
   },
   uploadText: {
     fontSize: 12,
-    fontWeight: '300', // Decreased by 100 (was 400, now 300)
+    fontWeight: '300',
     color: '#6B7280',
     fontFamily: 'Inter',
     textAlign: 'center',
@@ -632,7 +632,7 @@ const styles = StyleSheet.create({
   },
   cameraIcon: {
     position: 'absolute',
-    right: screenWidth / 2 - 60 - 16, // Moved to right side of avatar (negative value moves it to the right)
+    right: screenWidth / 2 - 60 - 16,
     bottom: 0,
     width: 32,
     height: 32,
@@ -669,7 +669,7 @@ const styles = StyleSheet.create({
     lineHeight: 17.5,
     color: '#FFF',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)', // Decreased opacity by 50% (was 0.1, now 0.05)
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   textInputMultiline: {
     minHeight: 120,
@@ -680,16 +680,16 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   characterCounter: {
-    fontSize: 10, // Small 10px font size as requested
+    fontSize: 10,
     fontFamily: 'Inter',
     fontWeight: '400',
-    color: '#9CA3AF', // Default color for the rest of the text
+    color: '#9CA3AF',
   },
   characterCountNumber: {
-    color: '#E64646', // Red color for the number until it hits 75
+    color: '#E64646',
   },
   characterCountNumberValid: {
-    color: '#9CA3AF', // Same color as rest of text when 75+ characters
+    color: '#9CA3AF',
   },
   vibesSection: {
     marginBottom: 32,
@@ -709,7 +709,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 36,
     justifyContent: 'center',
-    paddingHorizontal: 16,
   },
   vibeButtonSelected: {
     backgroundColor: '#4A3A7B',
@@ -735,8 +734,8 @@ const styles = StyleSheet.create({
     minHeight: 36,
   },
   sparkleImage: {
-    width: 16, // Same dimensions as the emoji was (16px)
-    height: 16, // Same dimensions as the emoji was (16px)
+    width: 16,
+    height: 16,
   },
   generateMoreLabel: {
     fontSize: 12,
@@ -748,9 +747,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sparkleImageInline: {
-    width: 12, // Slightly smaller for inline text (12px)
-    height: 12, // Slightly smaller for inline text (12px)
-    marginHorizontal: 2, // Small margin for spacing
+    width: 12,
+    height: 12,
+    marginHorizontal: 2,
   },
   taglineHeader: {
     flexDirection: 'row',
@@ -761,7 +760,7 @@ const styles = StyleSheet.create({
   characterLimit: {
     fontSize: 12,
     fontWeight: '400',
-    color: 'rgba(255, 255, 255, 0.343)', // Decreased opacity by 30% (was 0.49, now 0.343)
+    color: 'rgba(255, 255, 255, 0.343)',
     fontFamily: 'Inter',
   },
   toggleSection: {
@@ -777,7 +776,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 30,
     borderRadius: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.35)', // Changed to #FFFFFF at 35% opacity
+    backgroundColor: 'rgba(255, 255, 255, 0.35)',
     justifyContent: 'center',
     paddingHorizontal: 2,
   },
@@ -820,8 +819,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   nextStepButtonDisabled: {
-    backgroundColor: '#6B7280', // Gray background when disabled
-    shadowOpacity: 0, // Remove shadow when disabled
+    backgroundColor: '#6B7280',
+    shadowOpacity: 0,
     elevation: 0,
   },
   nextStepButtonText: {
@@ -831,7 +830,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
   },
   nextStepButtonTextDisabled: {
-    color: '#9CA3AF', // Gray text when disabled
+    color: '#9CA3AF',
   },
   modalOverlay: {
     flex: 1,
