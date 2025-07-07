@@ -797,7 +797,7 @@ export default function HomeTab() {
                         </View>
                         <Text style={[
                           styles.characterName,
-                          isActive && styles.activeCharacterName
+                          !notification.sendWithoutAI && styles.notificationDetailsAIFree
                         ]}>
                           {character.name}
                         </Text>
@@ -907,7 +907,7 @@ export default function HomeTab() {
                         </Text>
 
                         {/* AI-Free Badge */}
-                        {notification.sendWithoutAI && (
+                        {!notification.sendWithoutAI && (
                           <View style={styles.aiFreeBadge}>
                             <Text style={styles.aiFreeBadgeText}>AI-FREE</Text>
                           </View>
