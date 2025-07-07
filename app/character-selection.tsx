@@ -120,7 +120,7 @@ export default function CharacterSelection() {
         {/* Character Mode Option */}
         <TouchableOpacity 
           style={styles.optionCard}
-          onPress={() => handleOptionSelect('character')}
+          onPress={() => router.push('/character-selection-new')}
           activeOpacity={0.8}
         >
           <View style={styles.optionContainer}>
