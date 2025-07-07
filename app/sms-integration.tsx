@@ -25,12 +25,9 @@ export default function SMSIntegration() {
     Montserrat_700Bold,
   });
 
-  // Get character data from params
-  const characterName = params.characterName as string || 'Character Name';
-  const characterType = params.characterType as string || 'character';
-  const avatarSource = characterType === 'spellbot' 
-    ? require('../assets/images/square logo 2.png')
-    : require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
+  // Use generic character data to keep page static
+  const characterName = 'Character name';
+  const avatarSource = require('../assets/images/20250616_1452_Diverse Character Ensemble_simple_compose_01jxxbhwf0e8qrb67cd6e42xf8.png');
 
   const handleBack = () => {
     router.back();
@@ -45,9 +42,9 @@ export default function SMSIntegration() {
     router.push({
       pathname: '/(tabs)',
       params: {
-        userMode: characterType, // Pass the character type to set the correct mode
-        characterType: characterType,
-        characterName: characterName,
+        userMode: params.characterType || 'character', // Pass the character type to set the correct mode
+        characterType: params.characterType || 'character',
+        characterName: params.characterName || 'Character Name',
         userAvatarUri: params.userAvatarUri,
         characterDescription: params.characterDescription,
         characterVibes: params.characterVibes,
