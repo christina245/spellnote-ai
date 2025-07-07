@@ -57,6 +57,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
            (selectedCharacterId !== null || sendWithoutAI); // Allow saving when AI-free is selected
   };
 
+        <View>
           <View style={styles.characterSlots}>
             {characters.map((character) => {
               const showProfileIcon = sendWithoutAI;
@@ -107,6 +108,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
             activeOpacity={0.7}
           >
           </TouchableOpacity>
+        </View>
 
   characterNameEmpty: {
     fontSize: 12,
