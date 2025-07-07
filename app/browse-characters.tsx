@@ -150,16 +150,34 @@ export default function BrowseCharacters() {
               </View>
             </TouchableOpacity>
 
-            {/* Third placeholder slot */}
-            <View style={styles.forYouCard}>
-              <View style={styles.placeholderAvatar} />
+            {/* The Rave Addict */}
+            <TouchableOpacity 
+              style={styles.forYouCard}
+              onPress={() => router.push({
+                pathname: '/onboarding-character-profile',
+                params: {
+                  characterId: 'demo-rave-addict-3',
+                  characterName: 'The Rave Addict',
+                  characterDescription: 'Lives for the drop, sleeps under the stars, and has collected more wristbands than most people have socks. This seasoned festival-goer has navigated everything from muddy fields to desert heat waves, always emerging with stories and a slightly hoarse voice. His phone camera roll is 90% stage shots and 10% blurry group pics at 3 AM.',
+                  characterVibes: JSON.stringify(['energetic', 'health-conscious', 'street smart']),
+                  characterTagline: 'A seasoned raver who knows that a healthy lifestyle = more fun at the festivals.',
+                  avatarSource: 'rave-addict'
+                }
+              })}
+              activeOpacity={0.8}
+            >
+              <Image 
+                source={require('../assets/images/20250706_2138_Festival Fun_remix_01jzhjrj5xejnvemxvax2k067h.png')}
+                style={styles.characterAvatar}
+                resizeMode="cover"
+              />
               <View style={styles.forYouCardContent}>
-                <Text style={styles.placeholderName}>Character Name</Text>
-                <Text style={styles.placeholderDescription}>
-                  Please generate a character description. Max 3 lines and 150 characters. Center aligned.
+                <Text style={styles.characterName}>The Rave Addict</Text>
+                <Text style={styles.characterDescription}>
+                  A seasoned raver who knows that a healthy lifestyle = more fun at the festivals.
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
           
           <TouchableOpacity style={styles.viewMoreButton} activeOpacity={0.7}>
