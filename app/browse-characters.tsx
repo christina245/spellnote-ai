@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   Dimensions,
   SafeAreaView,
-  TextInput
+  TextInput,
+  Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Search, ChevronDown } from 'lucide-react-native';
