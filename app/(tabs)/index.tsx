@@ -185,7 +185,7 @@ export default function HomeTab() {
     // Always start with demo character in slot 1
     const demoCharacter = createDemoCharacter();
     const ariaCharacter = createARIACharacter();
-    let initialCharacters = [demoCharacter, ariaCharacter]; // Only Muffin and ARIA, leave slot 3 empty
+    let initialCharacters = [demoCharacter, ariaCharacter]; // Muffin in slot 1, ARIA in slot 2, slot 3 empty
     let initialActiveId = demoCharacter.id;
 
     // Handle new character creation or updates
@@ -221,7 +221,7 @@ export default function HomeTab() {
 
       // CRITICAL: Always preserve Muffin in slot 1, add new characters to slots 2 and 3
       if (characterNameParam !== 'Muffin the fluffy bunny') {
-        // This is a new character, add to slot 3 (or replace ARIA if slot 2 is targeted)
+        // This is a new character, add to slot 3
         initialCharacters = [demoCharacter, ariaCharacter, newCharacter];
         initialActiveId = newCharacter.id; // Make new character active
       } else {
