@@ -68,7 +68,7 @@ export default function AddNotification() {
         console.log('Error parsing selected date:', error);
       }
     }
-  }, [params]);
+  }, [params.characters, params.activeCharacterId, params.selectedDate, sendWithoutAI]);
 
   const handleBack = () => {
     router.back();

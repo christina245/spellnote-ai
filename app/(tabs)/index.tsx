@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   View, 
   Text, 
@@ -61,6 +61,55 @@ export default function HomeTab() {
   const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
   const params = useLocalSearchParams();
+  
+  // Memoize params to prevent infinite re-renders
+  const memoizedParams = useMemo(() => ({
+    userMode: params.userMode as string,
+    characterType: params.characterType as string,
+    characterName: params.characterName as string,
+    userAvatarUri: params.userAvatarUri as string,
+    characterDescription: params.characterDescription as string,
+    characterVibes: params.characterVibes as string,
+    characterTagline: params.characterTagline as string,
+    characterDeleted: params.characterDeleted as string,
+    newNotificationHeader: params.newNotificationHeader as string,
+    newNotificationDetails: params.newNotificationDetails as string,
+    newNotificationTime: params.newNotificationTime as string,
+    newNotificationDate: params.newNotificationDate as string,
+    selectedCharacterId: params.selectedCharacterId as string,
+    sendWithoutAI: params.sendWithoutAI as string,
+    notificationTimestamp: params.notificationTimestamp as string,
+    notificationHeader: params.notificationHeader as string,
+    notificationDetails: params.notificationDetails as string,
+    time: params.time as string,
+    startDate: params.startDate as string,
+    endDate: params.endDate as string,
+    isRepeat: params.isRepeat as string,
+    isTextItToMe: params.isTextItToMe as string
+  }), [
+    params.userMode,
+    params.characterType,
+    params.characterName,
+    params.userAvatarUri,
+    params.characterDescription,
+    params.characterVibes,
+    params.characterTagline,
+    params.characterDeleted,
+    params.newNotificationHeader,
+    params.newNotificationDetails,
+    params.newNotificationTime,
+    params.newNotificationDate,
+    params.selectedCharacterId,
+    params.sendWithoutAI,
+    params.notificationTimestamp,
+    params.notificationHeader,
+    params.notificationDetails,
+    params.time,
+    params.startDate,
+    params.endDate,
+    params.isRepeat,
+    params.isTextItToMe
+  ]);
 
   const [fontsLoaded] = useFonts({
     Montserrat_700Bold,
@@ -106,15 +155,17 @@ export default function HomeTab() {
   useEffect(() => {
     if (isInitialized) return;
 
-    // Extract specific values from params to avoid infinite re-renders
-    const userModeParam = params.userMode as string;
-    const characterTypeParam = params.characterType as string;
-    const characterNameParam = params.characterName as string;
-    const userAvatarUriParam = params.userAvatarUri as string;
-    const characterDescriptionParam = params.characterDescription as string;
-    const characterVibesParam = params.characterVibes as string;
-    const characterTaglineParam = params.characterTagline as string;
-    const characterDeletedParam = params.characterDeleted as string;
+    // Use memoized params to avoid infinite re-renders
+    const {
+      userMode: userModeParam,
+      characterType: characterTypeParam,
+      characterName: characterNameParam,
+      userAvatarUri: userAvatarUriParam,
+      characterDescription: characterDescriptionParam,
+      characterVibes: characterVibesParam,
+      characterTagline: characterTaglineParam,
+      characterDeleted: characterDeletedParam
+    } = memoizedParams;
 
     // Handle character deletion
     if (characterDeletedParam === 'true') {
@@ -199,24 +250,24 @@ export default function HomeTab() {
     setWeekStartDate(startOfWeek);
     
     setIsInitialized(true);
-  }, [isInitialized]);
+  }, [isInitialized, memoizedParams]);
 
   // CRITICAL: Load notifications whenever params change (new notifications added)
   useEffect(() => {
     if (!isInitialized) return;
     loadNotifications();
   }, [
-    params.newNotificationHeader,
-    params.newNotificationDetails,
-    params.newNotificationTime,
-    params.newNotificationDate,
-    params.selectedCharacterId,
-    params.sendWithoutAI,
-    params.notificationTimestamp, // Add this to detect new notifications
-    params.notificationHeader, // Add original notification params
-    params.notificationDetails,
-    params.time,
-    params.startDate,
+    memoizedParams.newNotificationHeader,
+    memoizedParams.newNotificationDetails,
+    memoizedParams.newNotificationTime,
+    memoizedParams.newNotificationDate,
+    memoizedParams.selectedCharacterId,
+    memoizedParams.sendWithoutAI,
+    memoizedParams.notificationTimestamp,
+    memoizedParams.notificationHeader,
+    memoizedParams.notificationDetails,
+    memoizedParams.time,
+    memoizedParams.startDate,
     characters,
     activeCharacterId,
     isInitialized
@@ -236,10 +287,10 @@ export default function HomeTab() {
     let loadedNotifications: NotificationEntry[] = [...globalNotifications];
 
     // 1. Load the original onboarding notification from first-notification.tsx (if exists and not already loaded)
-    const originalHeader = params.notificationHeader as string;
-    const originalDetails = params.notificationDetails as string;
-    const originalTime = params.time as string;
-    const originalStartDate = params.startDate as string;
+    const originalHeader = memoizedParams.notificationHeader;
+    const originalDetails = memoizedParams.notificationDetails;
+    const originalTime = memoizedParams.time;
+    const originalStartDate = memoizedParams.startDate;
     const originalId = 'original-1';
 
     // CRITICAL: Check if we have actual user input from first-notification.tsx
@@ -280,13 +331,13 @@ export default function HomeTab() {
     }
 
     // 2. Load new notification from add-notification screen (if exists)
-    const newHeader = params.newNotificationHeader as string;
-    const newDetails = params.newNotificationDetails as string;
-    const newTime = params.newNotificationTime as string;
-    const newDate = params.newNotificationDate as string;
-    const selectedCharacterId = params.selectedCharacterId as string;
-    const sendWithoutAI = params.sendWithoutAI === 'true';
-    const notificationTimestamp = params.notificationTimestamp as string;
+    const newHeader = memoizedParams.newNotificationHeader;
+    const newDetails = memoizedParams.newNotificationDetails;
+    const newTime = memoizedParams.newNotificationTime;
+    const newDate = memoizedParams.newNotificationDate;
+    const selectedCharacterId = memoizedParams.selectedCharacterId;
+    const sendWithoutAI = memoizedParams.sendWithoutAI === 'true';
+    const notificationTimestamp = memoizedParams.notificationTimestamp;
 
     if ((newHeader?.trim() || newDetails?.trim()) && notificationTimestamp) {
       // Create unique ID based on timestamp to ensure uniqueness

@@ -76,7 +76,13 @@ export default function CharacterProfile() {
     if (params.userAvatarUri) {
       setAvatarUri(params.userAvatarUri as string);
     }
-  }, [params]);
+  }, [
+    params.characterName,
+    params.characterDescription,
+    params.characterTagline,
+    params.characterVibes,
+    params.userAvatarUri
+  ]);
 
   const handleBack = () => {
     router.back();

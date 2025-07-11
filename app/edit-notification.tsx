@@ -74,7 +74,14 @@ export default function EditNotification() {
     if (!sendWithoutAI) {
       setSelectedCharacterId('1'); // Default to first character
     }
-  }, [params]);
+  }, [
+    params.notificationHeader,
+    params.notificationDetails,
+    params.notificationTime,
+    params.startDate,
+    params.sendWithoutAI,
+    sendWithoutAI
+  ]);
 
   const handleBack = () => {
     router.back();
