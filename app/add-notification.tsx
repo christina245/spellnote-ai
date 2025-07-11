@@ -62,10 +62,29 @@ export default function AddNotification() {
     // Set initial date if provided
     if (params.selectedDate) {
       try {
-        const date = new Date(params.selectedDate as string);
-        setStartDate(date);
+        const dateStr = params.selectedDate as string;
+        let date: Date;
+        
+        // Handle different date formats
+        if (dateStr.includes('/')) {
+          // MM/DD/YYYY format
+          const [month, day, year] = dateStr.split('/');
+          date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        } else {
+          // ISO string or other format
+          date = new Date(dateStr);
+        }
+        
+        // Validate the date
+        if (!isNaN(date.getTime())) {
+          setStartDate(date);
+        } else {
+          console.warn('Invalid date from params:', dateStr);
+          setStartDate(new Date()); // Fallback to today
+        }
       } catch (error) {
         console.log('Error parsing selected date:', error);
+        setStartDate(new Date()); // Fallback to today
       }
     }
   }, [params.characters, params.activeCharacterId, params.selectedDate, sendWithoutAI]);

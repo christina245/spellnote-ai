@@ -28,9 +28,26 @@ export default function DatePickerModal({
   initialDate = new Date(),
   title = "Select date"
 }: DatePickerModalProps) {
-  const [selectedDate, setSelectedDate] = useState(initialDate);
-  const [currentMonth, setCurrentMonth] = useState(initialDate.getMonth());
-  const [currentYear, setCurrentYear] = useState(initialDate.getFullYear());
+  // Ensure we always have a valid date
+  const getValidDate = (date: Date) => {
+    if (!date || isNaN(date.getTime())) {
+      return new Date();
+    }
+    return date;
+  };
+
+  const validInitialDate = getValidDate(initialDate);
+  const [selectedDate, setSelectedDate] = useState(validInitialDate);
+  const [currentMonth, setCurrentMonth] = useState(validInitialDate.getMonth());
+  const [currentYear, setCurrentYear] = useState(validInitialDate.getFullYear());
+
+  // Update state when initialDate changes
+  useEffect(() => {
+    const validDate = getValidDate(initialDate);
+    setSelectedDate(validDate);
+    setCurrentMonth(validDate.getMonth());
+    setCurrentYear(validDate.getFullYear());
+  }, [initialDate]);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -51,9 +68,12 @@ export default function DatePickerModal({
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
-    const dayName = days[selectedDate.getDay()];
-    const monthName = months[selectedDate.getMonth()];
-    const date = selectedDate.getDate();
+    // Ensure selectedDate is valid
+    const validDate = getValidDate(selectedDate);
+    
+    const dayName = days[validDate.getDay()];
+    const monthName = months[validDate.getMonth()];
+    const date = validDate.getDate();
     
     return `${dayName}, ${monthName} ${date}`;
   };
@@ -77,7 +97,12 @@ export default function DatePickerModal({
   };
 
   const selectDate = (day: number) => {
+    // Ensure we create a valid date
     const newDate = new Date(currentYear, currentMonth, day);
+    if (isNaN(newDate.getTime())) {
+      console.warn('Invalid date created:', currentYear, currentMonth, day);
+      return;
+    }
     setSelectedDate(newDate);
   };
 
@@ -102,9 +127,10 @@ export default function DatePickerModal({
 
     // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const isSelected = selectedDate.getDate() === day && 
-                        selectedDate.getMonth() === currentMonth && 
-                        selectedDate.getFullYear() === currentYear;
+      const validSelectedDate = getValidDate(selectedDate);
+      const isSelected = validSelectedDate.getDate() === day && 
+                        validSelectedDate.getMonth() === currentMonth && 
+                        validSelectedDate.getFullYear() === currentYear;
       
       days.push(
         <TouchableOpacity

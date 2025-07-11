@@ -50,13 +50,29 @@ export default function EditNotification() {
     }
     if (params.startDate) {
       try {
-        // Parse MM/DD/YYYY format
         const dateStr = params.startDate as string;
-        const [month, day, year] = dateStr.split('/');
-        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        setStartDate(date);
+        let date: Date;
+        
+        // Handle different date formats
+        if (dateStr.includes('/')) {
+          // MM/DD/YYYY format
+          const [month, day, year] = dateStr.split('/');
+          date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        } else {
+          // ISO string or other format
+          date = new Date(dateStr);
+        }
+        
+        // Validate the date
+        if (!isNaN(date.getTime())) {
+          setStartDate(date);
+        } else {
+          console.warn('Invalid date from params:', dateStr);
+          setStartDate(new Date()); // Fallback to today
+        }
       } catch (error) {
         console.log('Error parsing date:', error);
+        setStartDate(new Date()); // Fallback to today
       }
     }
     if (params.sendWithoutAI) {
