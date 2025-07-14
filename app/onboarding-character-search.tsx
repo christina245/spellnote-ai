@@ -17,6 +17,8 @@ const { width: screenWidth } = Dimensions.get('window');
 export default function CharacterSelectionNew() {
   const [selectedVibes, setSelectedVibes] = useState<string[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [generatedVibes, setGeneratedVibes] = useState<string[]>([]);
+  const [generateClickCount, setGenerateClickCount] = useState(0);
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -29,6 +31,19 @@ export default function CharacterSelectionNew() {
     'fiery', 'stern', 'brooding',
     'dramatic', 'sassy', 'derpy',
     'deadpan', 'eccentric', 'practical'
+  ];
+
+  // Extended pool of character vibes for AI generation
+  const allVibeOptions = [
+    'bubbly', 'mellow', 'witty', 'fiery', 'stern', 'brooding',
+    'dramatic', 'sassy', 'derpy', 'deadpan', 'eccentric', 'practical',
+    'mysterious', 'cheerful', 'grumpy', 'wise', 'playful', 'serious',
+    'optimistic', 'cynical', 'energetic', 'calm', 'rebellious', 'loyal',
+    'ambitious', 'laid-back', 'curious', 'cautious', 'bold', 'shy',
+    'confident', 'humble', 'creative', 'logical', 'spontaneous', 'methodical',
+    'compassionate', 'ruthless', 'patient', 'impulsive', 'charming', 'awkward',
+    'sophisticated', 'quirky', 'intense', 'gentle', 'fierce', 'tender',
+    'analytical', 'intuitive', 'adventurous', 'homebody', 'social', 'introverted'
   ];
 
   const interests = [
@@ -68,6 +83,79 @@ export default function CharacterSelectionNew() {
     } else {
       setSelectedInterests([...selectedInterests, interestId]);
     }
+  };
+
+  const generateVibesBasedOnSelection = () => {
+    // Get currently displayed vibes (initial + generated)
+    const currentVibes = [...characterVibes, ...generatedVibes];
+    
+    // Filter out already displayed vibes
+    const availableVibes = allVibeOptions.filter(vibe => !currentVibes.includes(vibe));
+    
+    if (selectedVibes.length > 0) {
+      // Generate vibes similar to selected ones
+      const similarVibes = [];
+      
+      // Define vibe categories for better AI-like suggestions
+      const vibeCategories = {
+        energetic: ['bubbly', 'fiery', 'dramatic', 'energetic', 'playful', 'bold', 'spontaneous', 'adventurous'],
+        calm: ['mellow', 'stern', 'deadpan', 'calm', 'patient', 'methodical', 'gentle', 'wise'],
+        humorous: ['witty', 'sassy', 'derpy', 'playful', 'quirky', 'charming', 'eccentric'],
+        serious: ['brooding', 'practical', 'serious', 'analytical', 'logical', 'intense', 'ambitious'],
+        social: ['bubbly', 'charming', 'social', 'confident', 'optimistic', 'cheerful'],
+        mysterious: ['mysterious', 'brooding', 'intense', 'sophisticated', 'intuitive']
+      };
+      
+      // Find categories that match selected vibes
+      const matchingCategories = [];
+      for (const [category, vibes] of Object.entries(vibeCategories)) {
+        if (selectedVibes.some(selected => vibes.includes(selected))) {
+          matchingCategories.push(category);
+        }
+      }
+      
+      // Generate suggestions from matching categories
+      for (const category of matchingCategories) {
+        const categoryVibes = vibeCategories[category as keyof typeof vibeCategories];
+        const availableCategoryVibes = categoryVibes.filter(vibe => 
+          availableVibes.includes(vibe) && !similarVibes.includes(vibe)
+        );
+        similarVibes.push(...availableCategoryVibes.slice(0, 2));
+      }
+      
+      // Fill remaining slots with random available vibes
+      while (similarVibes.length < 3 && availableVibes.length > similarVibes.length) {
+        const randomVibe = availableVibes[Math.floor(Math.random() * availableVibes.length)];
+        if (!similarVibes.includes(randomVibe)) {
+          similarVibes.push(randomVibe);
+        }
+      }
+      
+      return similarVibes.slice(0, 3);
+    } else {
+      // Generate random vibes if no selection
+      const randomVibes = [];
+      while (randomVibes.length < 3 && availableVibes.length > 0) {
+        const randomIndex = Math.floor(Math.random() * availableVibes.length);
+        const randomVibe = availableVibes[randomIndex];
+        if (!randomVibes.includes(randomVibe)) {
+          randomVibes.push(randomVibe);
+          availableVibes.splice(randomIndex, 1);
+        }
+      }
+      return randomVibes;
+    }
+  };
+
+  const handleGenerateMoreVibes = () => {
+    // Check if we've reached the limit of 3 clicks (9 new vibes total)
+    if (generateClickCount >= 3) {
+      return;
+    }
+    
+    const newVibes = generateVibesBasedOnSelection();
+    setGeneratedVibes([...generatedVibes, ...newVibes]);
+    setGenerateClickCount(generateClickCount + 1);
   };
 
   const handleNextStep = () => {
@@ -127,7 +215,7 @@ export default function CharacterSelectionNew() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>CHARACTER VIBES</Text>
           <View style={styles.vibesGrid}>
-            {characterVibes.map((vibe, index) => (
+            {[...characterVibes, ...generatedVibes].map((vibe, index) => (
               <TouchableOpacity
                 key={`${vibe}-${index}`}
                 style={[
@@ -146,13 +234,20 @@ export default function CharacterSelectionNew() {
               </TouchableOpacity>
             ))}
             
-            {/* Generate More Button */}
-            <TouchableOpacity
-              style={styles.generateMoreButton}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.generateMoreText}>✨</Text>
-            </TouchableOpacity>
+            {/* Generate More Button - only show if under limit of 3 clicks */}
+            {generateClickCount < 3 && (
+              <TouchableOpacity
+                style={styles.generateMoreButton}
+                onPress={handleGenerateMoreVibes}
+                activeOpacity={0.7}
+              >
+                <Image 
+                  source={require('../assets/images/20250629_2206_Dark Gold Sparkle_simple_compose_01jyzknxm0f04vtfmz59seta4x 1.png')}
+                  style={styles.sparkleImage}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -297,8 +392,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 36,
   },
-  generateMoreText: {
-    fontSize: 16,
+  sparkleImage: {
+    width: 16,
+    height: 16,
   },
   interestsGrid: {
     flexDirection: 'row',
