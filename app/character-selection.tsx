@@ -112,11 +112,11 @@ export default function CharacterSelection() {
         {/* Introduction Text */}
         <View style={styles.introSection}>
           <Text style={styles.introText}>
-            We originally created Spellnote so you could enjoy receiving texts from your original characters, but we understand that's not for everybody.
+            From cute animals, ambitious entrepreneurs, or dragon tamers, we've created a variety of AI assistants for a variety of unique hobbies and lives.
           </Text>
           
           <Text style={styles.introText}>
-            You can use Spellnote with or without a character and even without AI, ensuring your notes are delivered to you exactly as you've written them.
+            However, you can use the app without a character assistant. Or go completely AI-free.
           </Text>
         </View>
 
@@ -137,30 +137,7 @@ export default function CharacterSelection() {
             <View style={styles.optionContent}>
               <Text style={styles.optionTitle}>CHARACTER MODE</Text>
               <Text style={styles.optionDescription}>
-                Hear from your original characters! Max 3 free, $10/month each additional.
-              </Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-
-        {/* Spellbot Option */}
-        <TouchableOpacity 
-          style={styles.optionCard}
-          onPress={() => handleOptionSelect('spellbot')}
-          activeOpacity={0.8}
-        >
-          <View style={styles.optionContainer}>
-            <View style={styles.optionImageContainer}>
-              <Image 
-                source={require('../assets/images/square logo (2).png')}
-                style={styles.optionImage}
-                resizeMode="contain"
-              />
-            </View>
-            <View style={styles.optionContent}>
-              <Text style={styles.optionTitle}>SPELLBOT</Text>
-              <Text style={styles.optionDescription}>
-                Just our generic app bot giving similar vibes to ChatGPT. Lawful neutral.
+                Choose from a library of our original AI assistants. Pick 2 more later.
               </Text>
             </View>
           </View>
