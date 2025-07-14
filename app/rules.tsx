@@ -76,7 +76,7 @@ export default function Rules() {
             </View>
             
             <Text style={styles.warningText}>
-              This means you cannot respond to your character's notifications with text. To modify the notifications, you must edit the notification settings or the character traits.
+              This means you cannot respond to your character's notifications with text. To modify the notifications, you must manually edit your task or report the characters for any inappropriate behavior.
             </Text>
           </View>
 
