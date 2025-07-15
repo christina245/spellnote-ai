@@ -38,7 +38,7 @@ export default function OnboardingCharacterProfile() {
   const handleChooseCharacter = () => {
     // Navigate to notification preview with selected character data
     router.push({
-      pathname: '/notification-preview',
+      pathname: '/notification-preview-user',
       params: {
         characterType: 'character',
         characterName: characterName,

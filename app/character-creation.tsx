@@ -179,7 +179,7 @@ export default function CharacterCreation() {
     if (hasNotificationData) {
       // Navigate to notification preview with character data AND notification data
       router.push({
-        pathname: '/notification-preview',
+        pathname: '/notification-preview-user',
         params: {
           characterType: 'character',
           characterName: characterName,

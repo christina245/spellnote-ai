@@ -29,7 +29,7 @@ export default function SpellbotScreen() {
   const handleViewNotificationPreview = () => {
     // Navigate to notification preview screen with Spellbot data AND notification data
     router.push({
-      pathname: '/notification-preview',
+      pathname: '/notification-preview-user',
       params: {
         characterType: 'spellbot',
         characterName: 'Spellnote.ai',
