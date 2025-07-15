@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Compass, Chrome as Home, User } from 'lucide-react-native';
+import { Compass, Home, User, Trophy } from 'lucide-react-native';
 import { usePathname } from 'expo-router';
 
 export default function TabLayout() {
@@ -26,6 +26,15 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ size, color }) => (
             <Home size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="goals"
+        options={{
+          title: 'Goals',
+          tabBarIcon: ({ size, color }) => (
+            <Trophy size={size} color={color} />
           ),
         }}
       />
