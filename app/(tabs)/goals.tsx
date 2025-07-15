@@ -1,49 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
-import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function GoalsTab() {
-  const [fontsLoaded] = useFonts({
-    Montserrat_700Bold,
-  });
+  const router = useRouter();
 
-  if (!fontsLoaded) {
-    return null;
-  }
+  useEffect(() => {
+    // Immediately redirect to my-goals page
+    router.replace('/my-goals');
+  }, [router]);
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Goals</Text>
-        <Text style={styles.subtitle}>Coming soon...</Text>
-      </View>
-    </SafeAreaView>
-  );
+  // Return null since we're immediately redirecting
+  return null;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#2D2B4A',
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: 'Montserrat_700Bold',
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 16,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: '400',
-    color: '#9CA3AF',
-    fontFamily: 'Inter',
-    textAlign: 'center',
-  },
-});
