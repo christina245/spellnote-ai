@@ -350,12 +350,12 @@ export default function NotificationPreview() {
         <View style={styles.titleSection}>
           <Text style={styles.title}>
             Here's how your{'\n'}
-            If you set a reminder to drink a bottle of water with this character, here's what they might say:
-              <Text style={styles.subtitle}>
-                Remember, this is all AI and not a real person.
-              </Text>
+            notification will look
+          </Text>
+          {hasUserNotification() ? (
+            <>
               <Text style={styles.description}>
-                Not satisfied with your character's tone? You can always modify it at any time by entering directions like "slightly less obnoxious" or "don't ever scream at me or use all caps" on the character's profile page.
+                If you encounter any inappropriate or inaccurate AI output, you can always report it later on the character's profile page.
               </Text>
             </>
           ) : (
