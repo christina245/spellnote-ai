@@ -297,7 +297,6 @@ export default function HomeTab() {
     if ((originalHeader && originalHeader.trim() !== '') || (originalDetails && originalDetails.trim() !== '')) {
       // Additional check to ensure we don't load if user skipped notification creation
       if (!globalProcessedIds.has(originalId)) {
-        !globalProcessedIds.has(originalId)) {
       // Get active character info for notification
       const activeCharacter = characters.find(char => char.id === activeCharacterId);
       
