@@ -154,7 +154,9 @@ export default function AddGoal() {
             style={[styles.textInput, styles.textInputMultiline]}
             value={goalDescription}
             onChangeText={setGoalDescription}
-            placeholder="Describe your goal in more detail (optional)"
+            placeholder="How will you accomplish this goal? What have you accomplished so far? 
+
+Everything you enter helps your characters better tailor their messages."
             placeholderTextColor="rgba(255, 255, 255, 0.5)"
             multiline={true}
             numberOfLines={4}
@@ -170,7 +172,7 @@ export default function AddGoal() {
             style={styles.textInput}
             value={goalDeadline}
             onChangeText={setGoalDeadline}
-            placeholder="When do you want to accomplish this by? (optional)"
+            placeholder="When do you want to accomplish this by?"
             placeholderTextColor="rgba(255, 255, 255, 0.5)"
           />
         </View>
@@ -182,13 +184,21 @@ export default function AddGoal() {
             How urgent is this goal to accomplish?
           </Text>
           <View style={styles.urgencyContainer}>
-            <Text style={styles.urgencyLabel}>Not urgent</Text>
+            <View style={styles.urgencyLabelContainer}>
+              <Text style={styles.urgencyEmoji}>😌</Text>
+              <Text style={styles.urgencyLabel}>Not urgent</Text>
+            </View>
             <View style={styles.urgencyScale}>
               {renderUrgencyScale()}
             </View>
-            <Text style={styles.urgencyLabel}>Very urgent</Text>
+            <View style={styles.urgencyLabelContainer}>
+              <Text style={styles.urgencyEmoji}>😱</Text>
+              <Text style={styles.urgencyLabel}>Very urgent</Text>
+            </View>
           </View>
-          <Text style={styles.urgencyValue}>Level: {urgencyLevel}/10</Text>
+          <Text style={styles.urgencyValue}>
+            <Text style={styles.urgencyLevelLabel}>Level:</Text> {urgencyLevel}/10
+          </Text>
         </View>
 
         {/* Extra spacing for floating button */}
@@ -263,7 +273,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 48, // Increased by 50% (32px * 1.5 = 48px)
   },
   sectionLabel: {
     color: '#8DD3C8',
@@ -340,11 +350,20 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 8,
   },
+  urgencyLabelContainer: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  urgencyEmoji: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
   urgencyLabel: {
     fontSize: 12,
     fontWeight: '400',
     color: '#9CA3AF',
     fontFamily: 'Inter',
+    textAlign: 'center',
   },
   urgencyScale: {
     flexDirection: 'row',
@@ -367,9 +386,12 @@ const styles = StyleSheet.create({
   urgencyValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#F3CC95',
+    color: '#FFFFFF',
     fontFamily: 'Inter',
     textAlign: 'center',
+  },
+  urgencyLevelLabel: {
+    color: '#BEC0ED',
   },
   bottomSpacing: {
     height: 100,
