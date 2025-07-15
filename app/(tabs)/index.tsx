@@ -127,15 +127,15 @@ export default function HomeTab() {
     isDemo: true
   });
 
-  // Create ARIA spacecraft AI character
-  const createARIACharacter = (): CharacterInfo => ({
-    id: 'demo-aria-2',
-    name: 'ARIA',
+  // Create Silicon Valley Techie character
+  const createSiliconValleyTechieCharacter = (): CharacterInfo => ({
+    id: 'demo-techie-2',
+    name: 'Silicon Valley Techie',
     type: 'character',
-    avatarSource: require('../../assets/images/20250706_1541_Futuristic Spacecraft Cockpit_simple_compose_01jzgyc3yserjtsrq38jpjn75t copy copy.png'),
-    description: 'ARIA (Automated Reminder & Instruction Assistant) - I AM THE AI SYSTEM OF YOUR SPACECRAFT. MY PRIMARY FUNCTION IS TO PROVIDE NOTIFICATIONS AND INSTRUCTIONS TO ENSURE OPTIMAL MISSION PERFORMANCE.',
-    vibes: ['practical', 'deadpan', 'systematic', 'serious', 'robotic'],
-    tagline: 'SPACECRAFT AI NOTIFICATION SYSTEM',
+    avatarSource: require('../../assets/images/20250714_1838_Software Engineer in San Francisco_remix_01k05vn4ypfv3s4xd60vezymnb.png'),
+    description: 'Silicon Valley engineer-turned-product manager who\'s navigated the ups and downs of the tech ecosystem, powered by climbing gyms and Y-Combinator podcasts. Has survived multiple pivots, product launches, and the occasional layoff while maintaining their belief that technology can solve meaningful problems. Knows every hiking trail within a 50-mile radius and can debug code as efficiently as they can belay a climbing partner. Their Notion workspace is perfectly organized, their Tesla is always charged, and they genuinely get excited about AI development despite not always knowing the risks.',
+    vibes: ['pragmatic', 'ambitious', 'awkward', 'nerdy', 'technical'],
+    tagline: 'A typical software developer "building the future, one pull request at a time."',
     isDemo: true
   });
 
@@ -184,8 +184,8 @@ export default function HomeTab() {
 
     // Always start with demo character in slot 1
     const demoCharacter = createDemoCharacter();
-    const ariaCharacter = createARIACharacter();
-    let initialCharacters = [demoCharacter, ariaCharacter]; // Muffin in slot 1, ARIA in slot 2, slot 3 empty
+    const techieCharacter = createSiliconValleyTechieCharacter();
+    let initialCharacters = [demoCharacter, techieCharacter]; // Muffin in slot 1, Silicon Valley Techie in slot 2, slot 3 empty
     let initialActiveId = demoCharacter.id;
 
     // Handle new character creation or updates
@@ -221,12 +221,12 @@ export default function HomeTab() {
 
       // CRITICAL: Always preserve Muffin in slot 1, add new characters to slots 2 and 3
       if (characterNameParam !== 'Muffin the fluffy bunny') {
-        // This is a new character, add to slot 3
-        initialCharacters = [demoCharacter, ariaCharacter, newCharacter];
+        // This is a new character, add to slot 3  
+        initialCharacters = [demoCharacter, techieCharacter, newCharacter];
         initialActiveId = newCharacter.id; // Make new character active
       } else {
         // This is an update to Muffin (shouldn't happen in normal flow, but just in case)
-        initialCharacters = [{ ...demoCharacter, ...newCharacter, id: demoCharacter.id, isDemo: true }, ariaCharacter];
+        initialCharacters = [{ ...demoCharacter, ...newCharacter, id: demoCharacter.id, isDemo: true }, techieCharacter];
         initialActiveId = demoCharacter.id;
       }
 
@@ -293,8 +293,10 @@ export default function HomeTab() {
     const originalStartDate = memoizedParams.startDate;
     const originalId = 'original-1';
 
-    // CRITICAL: Check if we have actual user input from first-notification.tsx
-    if ((originalHeader?.trim() || originalDetails?.trim()) && 
+    // CRITICAL: Only load if we have actual user input from first-notification.tsx (not empty/undefined)
+    if ((originalHeader && originalHeader.trim() !== '') || (originalDetails && originalDetails.trim() !== '')) {
+      // Additional check to ensure we don't load if user skipped notification creation
+      if (!globalProcessedIds.has(originalId)) {
         !globalProcessedIds.has(originalId)) {
       // Get active character info for notification
       const activeCharacter = characters.find(char => char.id === activeCharacterId);

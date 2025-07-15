@@ -287,7 +287,7 @@ export default function NotificationPreviewUser() {
             Remember, this is all AI and not a real person.
           </Text>
           <Text style={styles.description}>
-            Not satisfied with your character's tone? You can always modify it at any time by entering directions like "slightly less obnoxious" or "don't ever scream at me or use all caps" on the character's profile page.
+            Character outputs may contain mistakes. You can report issues and inappropriate outputs on each character's profile page.
           </Text>
         </View>
 
