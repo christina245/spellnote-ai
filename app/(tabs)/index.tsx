@@ -52,5 +52,5 @@ export default function HomeTab() {
 }
 
 const styles = StyleSheet.create({
-  // ... [all style definitions remain exactly the same]
+  // ... [styles remain exactly the same]
 });
