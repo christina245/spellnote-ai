@@ -151,64 +151,6 @@ export default function AddGoal() {
     return dots;
   };
 
-  const handleSaveGoal = () => {
-    if (goalTitle.length < 10) {
-      Alert.alert('Error', 'Goal title must be at least 10 characters long');
-      return;
-    }
-
-    // Create goal data object
-    const goalData = {
-      id: Date.now().toString(),
-      title: goalTitle,
-      description: goalDescription,
-      deadline: goalDeadline,
-      urgency: urgencyLevel,
-      coverImage: coverImageUri,
-      createdAt: new Date().toISOString()
-    };
-
-    Alert.alert(
-      'Goal Saved',
-      'Your goal has been saved successfully!',
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            router.push({
-              pathname: '/my-goals',
-              params: {
-                newGoal: JSON.stringify(goalData)
-              }
-            });
-          }
-        }
-      ]
-    );
-  };
-
-  const canSaveGoal = () => {
-    return goalTitle.length >= 10;
-  };
-
-  const renderUrgencyScale = () => {
-    const dots = [];
-    for (let i = 1; i <= 10; i++) {
-      dots.push(
-        <TouchableOpacity
-          key={i}
-          style={[
-            styles.urgencyDot,
-            i <= urgencyLevel && styles.urgencyDotActive
-          ]}
-          onPress={() => setUrgencyLevel(i)}
-          activeOpacity={0.7}
-        />
-      );
-    }
-    return dots;
-  };
-
   if (!fontsLoaded) {
     return null;
   }
