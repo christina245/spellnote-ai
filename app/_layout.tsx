@@ -31,6 +31,14 @@ export default function RootLayout() {
         <Stack.Screen name="edit-notification" />
         <Stack.Screen name="my-goals" />
         <Stack.Screen name="add-goal" />
+        <Stack.Screen name="onboarding-character-search" />
+        <Stack.Screen name="browse-characters" />
+        <Stack.Screen name="character-preview" />
+        <Stack.Screen name="user-profile" />
+        <Stack.Screen name="resources" />
+        <Stack.Screen name="submit-feedback" />
+        <Stack.Screen name="report-issue" />
+        <Stack.Screen name="add-notification" />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
