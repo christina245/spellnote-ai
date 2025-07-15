@@ -1,7 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Redirect } from 'expo-router';
+import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
 
 export default function GoalsTab() {
-  return <Redirect href="/(tabs)/goals/" />;
+  const router = useRouter();
+
+  useEffect(() => {
+    // Immediately redirect to my-goals page
+    router.replace('/my-goals');
+  }, [router]);
+
+  // Return null since we're immediately redirecting
+  return null;
 }
