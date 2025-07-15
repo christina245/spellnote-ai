@@ -48,7 +48,7 @@ export default function CharacterSelection() {
         });
       } else if (option === 'character') {
         router.push({
-          pathname: '/character-creation',
+          pathname: '/onboarding-character-search',
           params: {
             // Pass notification data to character creation
             notificationHeader: params.notificationHeader,
@@ -123,7 +123,7 @@ export default function CharacterSelection() {
         {/* Character Mode Option */}
         <TouchableOpacity 
           style={styles.optionCard}
-          onPress={() => router.push('/character-selection-new')}
+          onPress={() => handleOptionSelect('character')}
           activeOpacity={0.8}
         >
           <View style={styles.optionContainer}>
