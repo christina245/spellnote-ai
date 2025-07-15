@@ -44,7 +44,7 @@ export default function MyGoals() {
         description: 'Goal description',
         urgency: 5,
         deadline: 'Goal deadline',
-        coverImage: require('../../../../assets/images/square placeholder image.png'),
+        coverImage: require('../../../assets/images/square placeholder image.png'),
         createdAt: new Date().toISOString()
       },
       {
@@ -53,7 +53,7 @@ export default function MyGoals() {
         description: 'Goal description',
         urgency: 3,
         deadline: 'Goal deadline',
-        coverImage: require('../../../../assets/images/square placeholder image.png'),
+        coverImage: require('../../../assets/images/square placeholder image.png'),
         createdAt: new Date().toISOString()
       },
       {
@@ -62,7 +62,7 @@ export default function MyGoals() {
         description: 'Goal description',
         urgency: 8,
         deadline: 'Goal deadline',
-        coverImage: require('../../../../assets/images/square placeholder image.png'),
+        coverImage: require('../../../assets/images/square placeholder image.png'),
         createdAt: new Date().toISOString()
       }
     ];
@@ -90,7 +90,7 @@ export default function MyGoals() {
     if (goal.coverImage && typeof goal.coverImage === 'string') {
       return { uri: goal.coverImage };
     }
-    return require('../../../../assets/images/square placeholder image.png');
+    return require('../../../assets/images/square placeholder image.png');
   };
 
   const handleSortSelect = (option: string) => {
