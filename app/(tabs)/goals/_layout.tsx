@@ -1,10 +1,5 @@
-import { Stack } from 'expo-router/stack';
+import { Slot } from 'expo-router';
 
 export default function GoalsLayout() {
-  return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="add-goal" options={{ headerShown: false }} />
-    </Stack>
-  );
+  return <Slot />;
 }
