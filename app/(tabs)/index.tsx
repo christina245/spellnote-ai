@@ -10,7 +10,7 @@ import {
   SafeAreaView
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Bell, Plus, Calendar, ChevronLeft, ChevronRight, MoveHorizontal as MoreHorizontal } from 'lucide-react-native';
+import { Bell, Plus, Calendar, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import DatePickerModal from '@/components/DatePickerModal';
 import NavigationMenu from '@/components/NavigationMenu';
@@ -29,7 +29,7 @@ export default function HomeTab() {
     Montserrat_700Bold,
   });
 
-  // Characters data
+  // Characters data with border colors
   const characters = [
     {
       id: '1',
@@ -89,9 +89,9 @@ export default function HomeTab() {
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
     if (direction === 'prev') {
-      newDate.setDate(newDate.getDate() - 1);
+      newDate.setDate(newDate.getDate() - 7); // Move by week
     } else {
-      newDate.setDate(newDate.getDate() + 1);
+      newDate.setDate(newDate.getDate() + 7); // Move by week
     }
     setCurrentDate(newDate);
   };
@@ -155,30 +155,23 @@ export default function HomeTab() {
     });
   };
 
-  // Generate calendar days
-  const generateCalendarDays = () => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
-
-    const days = [];
+  // Generate current week days with today in center
+  const generateWeekDays = () => {
     const today = new Date();
+    const currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - 3); // 3 days before today to center it
     
-    for (let i = 0; i < 42; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(currentWeekStart);
+      date.setDate(currentWeekStart.getDate() + i);
       
-      const isCurrentMonth = date.getMonth() === month;
       const isToday = date.toDateString() === today.toDateString();
       const isSelected = date.toDateString() === currentDate.toDateString();
       
       days.push({
         date,
         day: date.getDate(),
-        isCurrentMonth,
         isToday,
         isSelected
       });
@@ -188,7 +181,7 @@ export default function HomeTab() {
   };
 
   const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-  const calendarDays = generateCalendarDays();
+  const currentWeekDays = generateWeekDays();
   const todayNotifications = getNotificationsForDate(currentDate);
 
   if (!fontsLoaded) {
@@ -211,7 +204,11 @@ export default function HomeTab() {
           onPress={() => setShowNavigationMenu(true)}
           activeOpacity={0.7}
         >
-          <MoreHorizontal size={24} color="#FFFFFF" />
+          <Image 
+            source={require('../../assets/images/nav bar dots copy copy.png')}
+            style={styles.dotsIcon}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
 
@@ -252,7 +249,7 @@ export default function HomeTab() {
           </View>
         </View>
 
-        {/* Calendar Section */}
+        {/* Calendar Section - Single Week Row */}
         <View style={styles.calendarSection}>
           <View style={styles.calendarHeader}>
             <TouchableOpacity 
@@ -285,9 +282,9 @@ export default function HomeTab() {
             ))}
           </View>
 
-          {/* Calendar Grid */}
-          <View style={styles.calendarGrid}>
-            {calendarDays.map((dayInfo, index) => (
+          {/* Single Week Row */}
+          <View style={styles.weekRow}>
+            {currentWeekDays.map((dayInfo, index) => (
               <TouchableOpacity
                 key={index}
                 style={[
@@ -300,7 +297,6 @@ export default function HomeTab() {
               >
                 <Text style={[
                   styles.calendarDayText,
-                  !dayInfo.isCurrentMonth && styles.otherMonthText,
                   dayInfo.isSelected && styles.selectedDayText,
                   dayInfo.isToday && styles.todayDayText
                 ]}>
@@ -311,7 +307,7 @@ export default function HomeTab() {
           </View>
         </View>
 
-        {/* Selected Date Header */}
+        {/* Selected Date Header - Centered */}
         <View style={styles.selectedDateSection}>
           <Text style={styles.selectedDateText}>
             {currentDate.toLocaleDateString('en-US', { 
@@ -345,7 +341,10 @@ export default function HomeTab() {
                 >
                   <View style={styles.notificationContent}>
                     <View style={styles.notificationHeader}>
-                      <View style={styles.notificationAvatarContainer}>
+                      <View style={[
+                        styles.notificationAvatarContainer,
+                        character && { borderColor: character.borderColor }
+                      ]}>
                         {character && (
                           <Image 
                             source={character.avatarSource}
@@ -354,14 +353,16 @@ export default function HomeTab() {
                           />
                         )}
                       </View>
-                      <View style={styles.notificationInfo}>
-                        <Text style={styles.notificationTitle}>{notification.header}</Text>
-                        <Text style={styles.notificationTime}>{notification.time}</Text>
+                      <View style={styles.notificationTextContent}>
+                        <View style={styles.notificationTitleRow}>
+                          <Text style={styles.notificationTitle}>{notification.header}</Text>
+                          <Text style={styles.notificationTime}>{notification.time}</Text>
+                        </View>
+                        <Text style={styles.notificationDetails} numberOfLines={2}>
+                          {notification.details}
+                        </Text>
                       </View>
                     </View>
-                    <Text style={styles.notificationDetails} numberOfLines={2}>
-                      {notification.details}
-                    </Text>
                   </View>
                 </TouchableOpacity>
               );
@@ -422,6 +423,10 @@ const styles = StyleSheet.create({
   },
   headerButton: {
     padding: 8,
+  },
+  dotsIcon: {
+    width: 24,
+    height: 24,
   },
   scrollView: {
     flex: 1,
@@ -497,12 +502,11 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontFamily: 'Inter',
   },
-  calendarGrid: {
+  weekRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
   },
   calendarDay: {
-    width: `${100/7}%`,
+    flex: 1,
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -522,9 +526,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontFamily: 'Inter',
   },
-  otherMonthText: {
-    color: '#6B7280',
-  },
   selectedDayText: {
     color: '#1C1830',
     fontWeight: '600',
@@ -534,7 +535,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   selectedDateSection: {
+    alignItems: 'center',
     marginBottom: 16,
+    marginTop: 40, // Maximum 40px beneath the dates
   },
   selectedDateText: {
     fontSize: 14,
@@ -557,8 +560,7 @@ const styles = StyleSheet.create({
   },
   notificationHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
+    alignItems: 'flex-start',
   },
   notificationAvatarContainer: {
     width: 40,
@@ -566,28 +568,34 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 12,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   notificationAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
-  notificationInfo: {
+  notificationTextContent: {
     flex: 1,
+  },
+  notificationTitleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
   notificationTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
     fontFamily: 'Inter',
+    flex: 1,
   },
   notificationTime: {
     fontSize: 14,
     fontWeight: '400',
-    color: '#9CA3AF',
+    color: '#E1B8B2',
     fontFamily: 'Inter',
   },
   notificationDetails: {
