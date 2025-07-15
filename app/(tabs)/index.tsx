@@ -10,7 +10,7 @@ import {
   SafeAreaView
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Bell, Plus, Calendar, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react-native';
+import { Bell, Plus, Calendar, ChevronLeft, ChevronRight, MoveHorizontal as MoreHorizontal } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import DatePickerModal from '@/components/DatePickerModal';
 import NavigationMenu from '@/components/NavigationMenu';
