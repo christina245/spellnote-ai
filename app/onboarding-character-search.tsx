@@ -6,7 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  SafeAreaView
+  SafeAreaView,
+  Image
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, ArrowRight } from 'lucide-react-native';
