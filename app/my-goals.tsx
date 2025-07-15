@@ -18,7 +18,9 @@ const { width: screenWidth } = Dimensions.get('window');
 export default function MyGoals() {
   const [sortBy, setSortBy] = useState('Newest first');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [goals, setGoals] = useState<any[]>([]);
   const router = useRouter();
+  const params = useLocalSearchParams();
 
   const [fontsLoaded] = useFonts({
     Montserrat_700Bold,
@@ -32,33 +34,64 @@ export default function MyGoals() {
     'A-Z'
   ];
 
-  // Placeholder goals data
-  const goals = [
-    {
-      id: '1',
-      title: 'Goal title',
-      description: 'Goal description',
-      urgency: 'Urgency level',
-      deadline: 'Goal deadline',
-      coverImage: require('../assets/images/square placeholder image.png')
-    },
-    {
-      id: '2',
-      title: 'Goal title',
-      description: 'Goal description',
-      urgency: 'Urgency level',
-      deadline: 'Goal deadline',
-      coverImage: require('../assets/images/square placeholder image.png')
-    },
-    {
-      id: '3',
-      title: 'Goal title',
-      description: 'Goal description',
-      urgency: 'Urgency level',
-      deadline: 'Goal deadline',
-      coverImage: require('../assets/images/square placeholder image.png')
+  // Load goals and handle new goal from add-goal page
+  useEffect(() => {
+    // Initialize with placeholder goals
+    const initialGoals = [
+      {
+        id: '1',
+        title: 'Goal title',
+        description: 'Goal description',
+        urgency: 5,
+        deadline: 'Goal deadline',
+        coverImage: require('../assets/images/square placeholder image.png'),
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '2',
+        title: 'Goal title',
+        description: 'Goal description',
+        urgency: 3,
+        deadline: 'Goal deadline',
+        coverImage: require('../assets/images/square placeholder image.png'),
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '3',
+        title: 'Goal title',
+        description: 'Goal description',
+        urgency: 8,
+        deadline: 'Goal deadline',
+        coverImage: require('../assets/images/square placeholder image.png'),
+        createdAt: new Date().toISOString()
+      }
+    ];
+
+    setGoals(initialGoals);
+
+    // Check if there's a new goal from add-goal page
+    if (params.newGoal) {
+      try {
+        const newGoal = JSON.parse(params.newGoal as string);
+        setGoals(prevGoals => [newGoal, ...prevGoals]);
+      } catch (error) {
+        console.error('Error parsing new goal:', error);
+      }
     }
-  ];
+  }, [params.newGoal]);
+
+  const getUrgencyText = (level: number) => {
+    if (level <= 3) return 'Low urgency';
+    if (level <= 6) return 'Medium urgency';
+    return 'High urgency';
+  };
+
+  const getGoalImage = (goal: any) => {
+    if (goal.coverImage && typeof goal.coverImage === 'string') {
+      return { uri: goal.coverImage };
+    }
+    return require('../assets/images/square placeholder image.png');
+  };
 
   const handleSortSelect = (option: string) => {
     setSortBy(option);
@@ -132,16 +165,24 @@ export default function MyGoals() {
             >
               <View style={styles.goalImageContainer}>
                 <Image 
-                  source={goal.coverImage}
+                  source={getGoalImage(goal)}
                   style={styles.goalImage}
                   resizeMode="cover"
                 />
               </View>
               <View style={styles.goalContent}>
-                <Text style={styles.goalTitle}>{goal.title}</Text>
-                <Text style={styles.goalDescription}>{goal.description}</Text>
-                <Text style={styles.goalUrgency}>{goal.urgency}</Text>
-                <Text style={styles.goalDeadline}>{goal.deadline}</Text>
+                <Text style={styles.goalTitle}>
+                  {goal.title === 'Goal title' ? goal.title : goal.title}
+                </Text>
+                <Text style={styles.goalDescription}>
+                  {goal.description === 'Goal description' ? goal.description : goal.description || 'Goal description'}
+                </Text>
+                <Text style={styles.goalUrgency}>
+                  {typeof goal.urgency === 'number' ? getUrgencyText(goal.urgency) : 'Urgency level'}
+                </Text>
+                <Text style={styles.goalDeadline}>
+                  {goal.deadline === 'Goal deadline' ? goal.deadline : goal.deadline || 'Goal deadline'}
+                </Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -282,7 +323,7 @@ const styles = StyleSheet.create({
   goalTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.5)', // 50% opacity placeholder
+    color: 'rgba(255, 255, 255, 0.5)', // 50% opacity for placeholder, full opacity for real data
     fontFamily: 'Inter',
     marginBottom: 4,
   },

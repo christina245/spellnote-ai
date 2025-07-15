@@ -16,6 +16,16 @@ import { ArrowLeft, Camera } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import PhotoUploadModal from '@/components/PhotoUploadModal';
 
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  useAnimatedGestureHandler,
+  runOnJS,
+  interpolate,
+  clamp
+} from 'react-native-reanimated';
+
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function AddGoal() {
@@ -25,6 +35,7 @@ export default function AddGoal() {
   const [urgencyLevel, setUrgencyLevel] = useState(5); // Default to middle (5 out of 10)
   const [coverImageUri, setCoverImageUri] = useState<string | null>(null);
   const [showPhotoUploadModal, setShowPhotoUploadModal] = useState(false);
+  const sliderPosition = useSharedValue(4); // 0-based index for position 5
   const router = useRouter();
 
   const [fontsLoaded] = useFonts({
@@ -46,14 +57,131 @@ export default function AddGoal() {
       return;
     }
 
-    // TODO: Save goal data
+    // Create goal data object
+    const goalData = {
+      id: Date.now().toString(),
+      title: goalTitle,
+      description: goalDescription,
+      deadline: goalDeadline,
+      urgency: urgencyLevel,
+      coverImage: coverImageUri,
+      createdAt: new Date().toISOString()
+    };
+
+    // Navigate back to my-goals with the new goal data
+    router.push({
+      pathname: '/my-goals',
+      params: {
+        newGoal: JSON.stringify(goalData)
+      }
+    });
+  };
+
+  const updateUrgencyLevel = (level: number) => {
+    setUrgencyLevel(level);
+  };
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart: (_, context) => {
+      context.startX = sliderPosition.value;
+    },
+    onActive: (event, context) => {
+      const sliderWidth = screenWidth - 48 - 80; // Account for padding and label containers
+      const newPosition = context.startX + (event.translationX / sliderWidth) * 9;
+      sliderPosition.value = clamp(newPosition, 0, 9);
+      
+      const level = Math.round(sliderPosition.value) + 1;
+      runOnJS(updateUrgencyLevel)(level);
+    },
+    onEnd: () => {
+      const level = Math.round(sliderPosition.value) + 1;
+      sliderPosition.value = level - 1;
+      runOnJS(updateUrgencyLevel)(level);
+    }
+  });
+
+  const animatedSliderStyle = useAnimatedStyle(() => {
+    const sliderWidth = screenWidth - 48 - 80;
+    const translateX = interpolate(sliderPosition.value, [0, 9], [0, sliderWidth - 24]);
+    
+    return {
+      transform: [{ translateX }]
+    };
+  });
+
+  const renderUrgencySlider = () => {
+    return (
+      <View style={styles.urgencySliderContainer}>
+        <View style={styles.urgencyTrack}>
+          {Array.from({ length: 10 }, (_, i) => (
+            <View
+              key={i}
+              style={[
+                styles.urgencyTrackDot,
+                i < urgencyLevel && styles.urgencyTrackDotActive
+              ]}
+            />
+          ))}
+        </View>
+        <PanGestureHandler onGestureEvent={gestureHandler}>
+          <Animated.View style={[styles.urgencySliderThumb, animatedSliderStyle]} />
+        </PanGestureHandler>
+      </View>
+    );
+  };
+
+  const renderUrgencyScale = () => {
+    const dots = [];
+    for (let i = 1; i <= 10; i++) {
+      dots.push(
+        <TouchableOpacity
+          key={i}
+          style={[
+            styles.urgencyDot,
+            i <= urgencyLevel && styles.urgencyDotActive
+          ]}
+          onPress={() => {
+            setUrgencyLevel(i);
+            sliderPosition.value = i - 1;
+          }}
+          activeOpacity={0.7}
+        />
+      );
+    }
+    return dots;
+  };
+
+  const handleSaveGoal = () => {
+    if (goalTitle.length < 10) {
+      Alert.alert('Error', 'Goal title must be at least 10 characters long');
+      return;
+    }
+
+    // Create goal data object
+    const goalData = {
+      id: Date.now().toString(),
+      title: goalTitle,
+      description: goalDescription,
+      deadline: goalDeadline,
+      urgency: urgencyLevel,
+      coverImage: coverImageUri,
+      createdAt: new Date().toISOString()
+    };
+
     Alert.alert(
       'Goal Saved',
       'Your goal has been saved successfully!',
       [
         {
           text: 'OK',
-          onPress: () => router.back()
+          onPress: () => {
+            router.push({
+              pathname: '/my-goals',
+              params: {
+                newGoal: JSON.stringify(goalData)
+              }
+            });
+          }
         }
       ]
     );
@@ -135,11 +263,11 @@ export default function AddGoal() {
             GOAL<Text style={styles.asterisk}>*</Text>
           </Text>
           <TextInput
-            style={styles.textInput}
+            style={styles.goalInput}
             value={goalTitle}
             onChangeText={setGoalTitle}
             placeholder="What do you want to accomplish?"
-            placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            placeholderTextColor="rgba(255, 255, 255, 0.5)" // Keep 50% opacity for placeholder
             maxLength={100}
           />
           <Text style={styles.characterCount}>
@@ -188,9 +316,7 @@ Everything you enter helps your characters better tailor their messages."
               <Text style={styles.urgencyEmoji}>😌</Text>
               <Text style={styles.urgencyLabel}>Not urgent</Text>
             </View>
-            <View style={styles.urgencyScale}>
-              {renderUrgencyScale()}
-            </View>
+            {renderUrgencySlider()}
             <View style={styles.urgencyLabelContainer}>
               <Text style={styles.urgencyEmoji}>😱</Text>
               <Text style={styles.urgencyLabel}>Very urgent</Text>
@@ -317,9 +443,22 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 14,
+    fontSize: 14, // Keep 14px for regular inputs
     fontFamily: 'Inter',
     fontWeight: '400',
+    lineHeight: 17.5,
+    color: '#FFF',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  goalInput: {
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14, // 14px as requested
+    fontFamily: 'Inter',
+    fontWeight: '700', // Bold as requested
     lineHeight: 17.5,
     color: '#FFF',
     borderWidth: 1,
@@ -366,10 +505,51 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   urgencyScale: {
-    flexDirection: 'row',
     flex: 1,
+    marginHorizontal: 12,
+  },
+  urgencySliderContainer: {
+    flex: 1,
+    height: 40,
+    justifyContent: 'center',
+    marginHorizontal: 12,
+  },
+  urgencyTrack: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 2,
+    position: 'relative',
+  },
+  urgencyTrackDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    position: 'absolute',
+  },
+  urgencyTrackDotActive: {
+    backgroundColor: '#F3CC95',
+  },
+  urgencySliderThumb: {
+    position: 'absolute',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#F3CC95',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+    top: -10, // Center on track
   },
   urgencyDot: {
     width: 12,
