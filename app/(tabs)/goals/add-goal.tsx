@@ -68,9 +68,9 @@ export default function AddGoal() {
       createdAt: new Date().toISOString()
     };
 
-    // Navigate back to my-goals with the new goal data
+    // Navigate back to the goals index page with the new goal data
     router.push({
-      pathname: '/my-goals',
+      pathname: '../index',
       params: {
         newGoal: JSON.stringify(goalData)
       }

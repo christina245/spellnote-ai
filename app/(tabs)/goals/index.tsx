@@ -99,7 +99,11 @@ export default function MyGoals() {
   };
 
   const handleAddGoal = () => {
-    router.push('/add-goal');
+    router.push('add-goal');
+  };
+
+  const canSaveGoal = () => {
+    return goalTitle.length >= 10;
   };
 
   if (!fontsLoaded) {
