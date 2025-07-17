@@ -99,7 +99,7 @@ export default function MyGoals() {
   };
 
   const handleAddGoal = () => {
-    router.push('add-goal');
+    router.push('/(tabs)/goals/add-goal');
   };
 
   const canSaveGoal = () => {
