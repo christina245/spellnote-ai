@@ -156,6 +156,8 @@ export default function AddGoal() {
     return null;
   }
 
+  console.log('Styles object:', styles);
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
