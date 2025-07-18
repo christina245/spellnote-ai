@@ -54,6 +54,7 @@ export default function AddGoal() {
   const handleSaveGoal = () => {
     if (goalTitle.length < 10) {
       Alert.alert('Error', 'Goal title must be at least 10 characters long');
+      console.log('Styles object:', styles);
       return;
     }
 
