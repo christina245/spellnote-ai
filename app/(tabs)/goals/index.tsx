@@ -10,15 +10,26 @@ import {
   Image
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Plus, ChevronDown } from 'lucide-react-native';
+import { ArrowLeft, Plus, ChevronDown } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 
 const { width: screenWidth } = Dimensions.get('window');
 
+interface Goal {
+  id: string;
+  title: string;
+  dueDate: string;
+  details: string;
+  motivation: string;
+  urgency: number;
+  coverImage?: string;
+  createdAt: string;
+}
+
 export default function MyGoals() {
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [sortBy, setSortBy] = useState('Newest first');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
-  const [goals, setGoals] = useState<any[]>([]);
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -28,47 +39,12 @@ export default function MyGoals() {
 
   const sortOptions = [
     'Newest first',
-    'Oldest first',
-    'Least to most urgent',
-    'Most to least urgent',
-    'A-Z'
+    'Oldest first', 
+    'Most urgent',
+    'Due date'
   ];
 
-  // Load goals and handle new goal from add-goal page
   useEffect(() => {
-    // Initialize with placeholder goals
-    const initialGoals = [
-      {
-        id: '1',
-        title: 'Goal title',
-        description: 'Goal description',
-        urgency: 5,
-        deadline: 'Goal deadline',
-        coverImage: require('../../../assets/images/square placeholder image.png'),
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        title: 'Goal title',
-        description: 'Goal description',
-        urgency: 3,
-        deadline: 'Goal deadline',
-        coverImage: require('../../../assets/images/square placeholder image.png'),
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '3',
-        title: 'Goal title',
-        description: 'Goal description',
-        urgency: 8,
-        deadline: 'Goal deadline',
-        coverImage: require('../../../assets/images/square placeholder image.png'),
-        createdAt: new Date().toISOString()
-      }
-    ];
-
-    setGoals(initialGoals);
-
     // Check if there's a new goal from add-goal page
     if (params.newGoal) {
       try {
@@ -80,30 +56,79 @@ export default function MyGoals() {
     }
   }, [params.newGoal]);
 
-  const getUrgencyText = (level: number) => {
-    if (level <= 3) return 'Low urgency';
-    if (level <= 6) return 'Medium urgency';
-    return 'High urgency';
+  const handleBack = () => {
+    router.back();
   };
 
-  const getGoalImage = (goal: any) => {
-    if (goal.coverImage && typeof goal.coverImage === 'string') {
-      return { uri: goal.coverImage };
-    }
-    return require('../../../assets/images/square placeholder image.png');
+  const handleAddGoal = () => {
+    router.push('/add-goal');
   };
 
   const handleSortSelect = (option: string) => {
     setSortBy(option);
     setShowSortDropdown(false);
+    
+    // Sort goals based on selected option
+    const sortedGoals = [...goals].sort((a, b) => {
+      switch (option) {
+        case 'Oldest first':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'Most urgent':
+          return b.urgency - a.urgency;
+        case 'Due date':
+          // Goals with due dates first, then by date
+          if (!a.dueDate && !b.dueDate) return 0;
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        case 'Newest first':
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+    
+    setGoals(sortedGoals);
   };
 
-  const handleAddGoal = () => {
-    router.push('/(tabs)/goals/add-goal');
+  const handleGoalPress = (goal: Goal) => {
+    // Navigate to edit goal screen (which is the same as add-goal but with pre-filled data)
+    router.push({
+      pathname: '/add-goal',
+      params: {
+        editMode: 'true',
+        goalId: goal.id,
+        goalTitle: goal.title,
+        goalDueDate: goal.dueDate,
+        goalDetails: goal.details,
+        goalMotivation: goal.motivation,
+        goalUrgency: goal.urgency.toString(),
+        goalCoverImage: goal.coverImage || ''
+      }
+    });
   };
 
-  const canSaveGoal = () => {
-    return goalTitle.length >= 10;
+  const formatDueDate = (dateString: string) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${month}/${day}`;
+    } catch {
+      return '';
+    }
+  };
+
+  const truncateText = (text: string, maxLines: number = 2) => {
+    const words = text.split(' ');
+    const wordsPerLine = 8; // Approximate words per line
+    const maxWords = wordsPerLine * maxLines;
+    
+    if (words.length <= maxWords) {
+      return text;
+    }
+    
+    return words.slice(0, maxWords).join(' ') + '...';
   };
 
   if (!fontsLoaded) {
@@ -114,10 +139,25 @@ export default function MyGoals() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>My goals</Text>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={handleBack}
+          activeOpacity={0.7}
+        >
+          <ArrowLeft size={20} color="#F3CC95" />
+          <Text style={styles.backText}>BACK</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Sort Toggle */}
+      {/* Title and Subtitle */}
+      <View style={styles.titleSection}>
+        <Text style={styles.title}>My goals</Text>
+        <Text style={styles.subtitle}>
+          What are you looking to accomplish? Adding your goals helps your characters better understand how to talk to you!
+        </Text>
+      </View>
+
+      {/* Sort Dropdown */}
       <View style={styles.sortSection}>
         <TouchableOpacity 
           style={styles.sortButton}
@@ -127,7 +167,7 @@ export default function MyGoals() {
           <Text style={styles.sortButtonText}>{sortBy}</Text>
           <ChevronDown 
             size={16} 
-            color="#FFFFFF" 
+            color="#F3CC95" 
             style={[
               styles.sortIcon,
               showSortDropdown && styles.sortIconRotated
@@ -159,38 +199,49 @@ export default function MyGoals() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Goals List */}
-        <View style={styles.goalsList}>
-          {goals.map((goal) => (
-            <TouchableOpacity 
-              key={goal.id}
-              style={styles.goalCard}
-              activeOpacity={0.8}
-            >
-              <View style={styles.goalImageContainer}>
-                <Image 
-                  source={getGoalImage(goal)}
-                  style={styles.goalImage}
-                  resizeMode="cover"
-                />
-              </View>
-              <View style={styles.goalContent}>
-                <Text style={styles.goalTitle}>
-                  {goal.title === 'Goal title' ? goal.title : goal.title}
-                </Text>
-                <Text style={styles.goalDescription}>
-                  {goal.description === 'Goal description' ? goal.description : goal.description || 'Goal description'}
-                </Text>
-                <Text style={styles.goalUrgency}>
-                  {typeof goal.urgency === 'number' ? getUrgencyText(goal.urgency) : 'Urgency level'}
-                </Text>
-                <Text style={styles.goalDeadline}>
-                  {goal.deadline === 'Goal deadline' ? goal.deadline : goal.deadline || 'Goal deadline'}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {/* Goals List or Empty State */}
+        {goals.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No goals added yet</Text>
+          </View>
+        ) : (
+          <View style={styles.goalsList}>
+            {goals.map((goal) => (
+              <TouchableOpacity 
+                key={goal.id}
+                style={styles.goalCard}
+                onPress={() => handleGoalPress(goal)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.goalImageContainer}>
+                  {goal.coverImage ? (
+                    <Image 
+                      source={{ uri: goal.coverImage }}
+                      style={styles.goalImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.goalImagePlaceholder}>
+                      <Text style={styles.placeholderText}>📷</Text>
+                    </View>
+                  )}
+                </View>
+                <View style={styles.goalContent}>
+                  <Text style={styles.goalTitle}>{goal.title}</Text>
+                  {goal.dueDate && (
+                    <Text style={styles.goalDueDate}>Due: {formatDueDate(goal.dueDate)}</Text>
+                  )}
+                  <Text style={styles.goalDetails}>
+                    {truncateText(goal.details)}
+                  </Text>
+                  <Text style={styles.goalUrgency}>
+                    <Text style={styles.urgencyNumber}>{goal.urgency}</Text>/10
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         {/* Extra spacing for floating button */}
         <View style={styles.bottomSpacing} />
@@ -219,6 +270,21 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 24,
     paddingTop: 16,
+    paddingBottom: 8,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#F3CC95',
+    fontFamily: 'Inter',
+  },
+  titleSection: {
+    paddingHorizontal: 24,
     paddingBottom: 24,
   },
   title: {
@@ -228,6 +294,14 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     lineHeight: 36,
     letterSpacing: -0.28,
+    marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#FFFFFF',
+    lineHeight: 20,
+    fontFamily: 'Inter',
   },
   sortSection: {
     paddingHorizontal: 24,
@@ -253,6 +327,7 @@ const styles = StyleSheet.create({
   },
   sortIcon: {
     transform: [{ rotate: '0deg' }],
+    fontWeight: 'bold',
   },
   sortIconRotated: {
     transform: [{ rotate: '180deg' }],
@@ -299,6 +374,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 40,
   },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#9CA3AF',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+  },
   goalsList: {
     gap: 16,
   },
@@ -307,7 +395,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     overflow: 'hidden',
-    height: 120, // Fixed height as specified
+    minHeight: 120,
   },
   goalImageContainer: {
     width: 120,
@@ -319,6 +407,17 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
   },
+  goalImagePlaceholder: {
+    width: 120,
+    height: 120,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 32,
+    opacity: 0.5,
+  },
   goalContent: {
     flex: 1,
     padding: 16,
@@ -327,29 +426,34 @@ const styles = StyleSheet.create({
   goalTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.5)', // 50% opacity for placeholder, full opacity for real data
+    color: '#FFFFFF',
     fontFamily: 'Inter',
     marginBottom: 4,
   },
-  goalDescription: {
+  goalDueDate: {
     fontSize: 14,
     fontWeight: '400',
-    color: 'rgba(255, 255, 255, 0.5)', // 50% opacity placeholder
+    color: '#F3CC95',
     fontFamily: 'Inter',
-    marginBottom: 4,
+    marginBottom: 8,
+  },
+  goalDetails: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#E5E7EB',
+    fontFamily: 'Inter',
+    lineHeight: 18,
+    flex: 1,
   },
   goalUrgency: {
     fontSize: 14,
     fontWeight: '400',
-    color: 'rgba(255, 255, 255, 0.5)', // 50% opacity placeholder
+    color: '#FFFFFF',
     fontFamily: 'Inter',
-    marginBottom: 4,
+    marginTop: 8,
   },
-  goalDeadline: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: 'rgba(255, 255, 255, 0.5)', // 50% opacity placeholder
-    fontFamily: 'Inter',
+  urgencyNumber: {
+    fontWeight: '700',
   },
   bottomSpacing: {
     height: 100,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -9,38 +9,63 @@ import {
   Dimensions,
   SafeAreaView,
   Image,
-  Alert
+  Alert,
+  Platform
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { ArrowLeft, Camera } from 'lucide-react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ArrowLeft, Camera, Calendar, Clock } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import PhotoUploadModal from '@/components/PhotoUploadModal';
-
-import { PanGestureHandler, State } from 'react-native-gesture-handler';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  useAnimatedGestureHandler,
-  runOnJS,
-  interpolate,
-  clamp
-} from 'react-native-reanimated';
+import DatePickerModal from '@/components/DatePickerModal';
+import TimePickerModal from '@/components/TimePickerModal';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function AddGoal() {
   const [goalTitle, setGoalTitle] = useState('');
-  const [goalDescription, setGoalDescription] = useState('');
-  const [goalDeadline, setGoalDeadline] = useState('');
-  const [urgencyLevel, setUrgencyLevel] = useState(5); // Default to middle (5 out of 10)
+  const [goalDueDate, setGoalDueDate] = useState<Date | null>(null);
+  const [goalDueTime, setGoalDueTime] = useState('');
+  const [goalDetails, setGoalDetails] = useState('');
+  const [goalMotivation, setGoalMotivation] = useState('');
+  const [urgencyLevel, setUrgencyLevel] = useState(5);
   const [coverImageUri, setCoverImageUri] = useState<string | null>(null);
   const [showPhotoUploadModal, setShowPhotoUploadModal] = useState(false);
-  const sliderPosition = useSharedValue(4); // 0-based index for position 5
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [goalId, setGoalId] = useState<string | null>(null);
+  
   const router = useRouter();
+  const params = useLocalSearchParams();
 
   const [fontsLoaded] = useFonts({
     Montserrat_700Bold,
   });
+
+  useEffect(() => {
+    // Check if we're in edit mode
+    if (params.editMode === 'true') {
+      setIsEditMode(true);
+      setGoalId(params.goalId as string);
+      setGoalTitle(params.goalTitle as string || '');
+      setGoalDetails(params.goalDetails as string || '');
+      setGoalMotivation(params.goalMotivation as string || '');
+      setUrgencyLevel(parseInt(params.goalUrgency as string) || 5);
+      setCoverImageUri(params.goalCoverImage as string || null);
+      
+      // Parse due date if available
+      if (params.goalDueDate) {
+        try {
+          const date = new Date(params.goalDueDate as string);
+          if (!isNaN(date.getTime())) {
+            setGoalDueDate(date);
+          }
+        } catch (error) {
+          console.log('Error parsing due date:', error);
+        }
+      }
+    }
+  }, [params]);
 
   const handleBack = () => {
     router.back();
@@ -51,86 +76,91 @@ export default function AddGoal() {
     setShowPhotoUploadModal(false);
   };
 
+  const handleDateConfirm = (date: Date) => {
+    setGoalDueDate(date);
+    setShowDatePicker(false);
+  };
+
+  const handleTimeConfirm = (time: string) => {
+    setGoalDueTime(time);
+    setShowTimePicker(false);
+  };
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return 'Select date';
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
   const handleSaveGoal = () => {
-    if (goalTitle.length < 10) {
-      Alert.alert('Error', 'Goal title must be at least 10 characters long');
+    if (!goalTitle.trim()) {
+      Alert.alert('Error', 'Goal title is required');
       return;
     }
 
-    // Create goal data object
+    // Combine date and time if both are provided
+    let combinedDateTime = null;
+    if (goalDueDate) {
+      combinedDateTime = new Date(goalDueDate);
+      if (goalDueTime) {
+        // Parse time and set it on the date
+        const timeMatch = goalDueTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        if (timeMatch) {
+          let hours = parseInt(timeMatch[1]);
+          const minutes = parseInt(timeMatch[2]);
+          const period = timeMatch[3].toUpperCase();
+          
+          if (period === 'PM' && hours !== 12) hours += 12;
+          if (period === 'AM' && hours === 12) hours = 0;
+          
+          combinedDateTime.setHours(hours, minutes, 0, 0);
+        }
+      }
+    }
+
     const goalData = {
-      id: Date.now().toString(),
+      id: isEditMode ? goalId : Date.now().toString(),
       title: goalTitle,
-      description: goalDescription,
-      deadline: goalDeadline,
+      dueDate: combinedDateTime ? combinedDateTime.toISOString() : '',
+      details: goalDetails,
+      motivation: goalMotivation,
       urgency: urgencyLevel,
       coverImage: coverImageUri,
-      createdAt: new Date().toISOString()
+      createdAt: isEditMode ? params.goalCreatedAt as string || new Date().toISOString() : new Date().toISOString()
     };
 
-    // Navigate back to the goals index page with the new goal data
-    router.push({
-      pathname: '../index',
-      params: {
-        newGoal: JSON.stringify(goalData)
-      }
-    });
-  };
-
-  const updateUrgencyLevel = (level: number) => {
-    setUrgencyLevel(level);
-  };
-
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, context) => {
-      context.startX = sliderPosition.value;
-    },
-    onActive: (event, context) => {
-      const sliderWidth = screenWidth - 48 - 80; // Account for padding and label containers
-      const newPosition = context.startX + (event.translationX / sliderWidth) * 9;
-      sliderPosition.value = clamp(newPosition, 0, 9);
-      
-      const level = Math.round(sliderPosition.value) + 1;
-      runOnJS(updateUrgencyLevel)(level);
-    },
-    onEnd: () => {
-      const level = Math.round(sliderPosition.value) + 1;
-      sliderPosition.value = level - 1;
-      runOnJS(updateUrgencyLevel)(level);
+    if (isEditMode) {
+      Alert.alert(
+        'Goal Updated',
+        'Your goal has been updated successfully!',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              router.push({
+                pathname: '/(tabs)/goals',
+                params: {
+                  updatedGoal: JSON.stringify(goalData)
+                }
+              });
+            }
+          }
+        ]
+      );
+    } else {
+      // Navigate back to goals index with new goal data
+      router.push({
+        pathname: '/(tabs)/goals',
+        params: {
+          newGoal: JSON.stringify(goalData)
+        }
+      });
     }
-  });
-
-  const animatedSliderStyle = useAnimatedStyle(() => {
-    const sliderWidth = screenWidth - 48 - 80;
-    const translateX = interpolate(sliderPosition.value, [0, 9], [0, sliderWidth - 24]);
-    
-    return {
-      transform: [{ translateX }]
-    };
-  });
+  };
 
   const renderUrgencySlider = () => {
-    return (
-      <View style={styles.urgencySliderContainer}>
-        <View style={styles.urgencyTrack}>
-          {Array.from({ length: 10 }, (_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.urgencyTrackDot,
-                i < urgencyLevel && styles.urgencyTrackDotActive
-              ]}
-            />
-          ))}
-        </View>
-        <PanGestureHandler onGestureEvent={gestureHandler}>
-          <Animated.View style={[styles.urgencySliderThumb, animatedSliderStyle]} />
-        </PanGestureHandler>
-      </View>
-    );
-  };
-
-  const renderUrgencyScale = () => {
     const dots = [];
     for (let i = 1; i <= 10; i++) {
       dots.push(
@@ -140,22 +170,34 @@ export default function AddGoal() {
             styles.urgencyDot,
             i <= urgencyLevel && styles.urgencyDotActive
           ]}
-          onPress={() => {
-            setUrgencyLevel(i);
-            sliderPosition.value = i - 1;
-          }}
+          onPress={() => setUrgencyLevel(i)}
           activeOpacity={0.7}
         />
       );
     }
-    return dots;
+    return (
+      <View style={styles.urgencySliderContainer}>
+        <View style={styles.urgencyLabels}>
+          <View style={styles.urgencyLabelLeft}>
+            <Text style={styles.urgencyEmoji}>😌</Text>
+            <Text style={styles.urgencyLabelText}>Not that big of a deal</Text>
+          </View>
+          <View style={styles.urgencyLabelRight}>
+            <Text style={styles.urgencyEmoji}>😱</Text>
+            <Text style={styles.urgencyLabelText}>MUST. ACHIEVE. ASAP.</Text>
+          </View>
+        </View>
+        <View style={styles.urgencyDotsContainer}>
+          {dots}
+        </View>
+      </View>
+    );
   };
 
   if (!fontsLoaded) {
     return null;
   }
 
-  console.log('Styles object:', styles);
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -169,7 +211,7 @@ export default function AddGoal() {
           <Text style={styles.backText}>BACK</Text>
         </TouchableOpacity>
         
-        <Text style={styles.title}>Add goal</Text>
+        <Text style={styles.title}>{isEditMode ? 'Edit goal' : 'Add goal'}</Text>
       </View>
 
       <ScrollView 
@@ -179,7 +221,7 @@ export default function AddGoal() {
       >
         {/* Cover Photo Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>COVER PHOTO</Text>
+          <Text style={styles.sectionLabel}>COVER</Text>
           <TouchableOpacity 
             style={styles.coverPhotoContainer}
             onPress={() => setShowPhotoUploadModal(true)}
@@ -193,10 +235,12 @@ export default function AddGoal() {
               />
             ) : (
               <View style={styles.coverPhotoPlaceholder}>
-                <Camera size={32} color="#9CA3AF" />
-                <Text style={styles.coverPhotoText}>Add cover photo</Text>
+                <Text style={styles.coverPhotoText}>UPLOAD IMAGE</Text>
               </View>
             )}
+            <View style={styles.uploadIconContainer}>
+              <Camera size={20} color="#FFFFFF" />
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -206,68 +250,91 @@ export default function AddGoal() {
             GOAL<Text style={styles.asterisk}>*</Text>
           </Text>
           <TextInput
-            style={styles.goalInput}
+            style={styles.textInput}
             value={goalTitle}
             onChangeText={setGoalTitle}
-            placeholder="What do you want to accomplish?"
-            placeholderTextColor="rgba(255, 255, 255, 0.5)" // Keep 50% opacity for placeholder
+            placeholder="What will you accomplish?"
+            placeholderTextColor="rgba(255, 255, 255, 0.5)"
             maxLength={100}
           />
-          <Text style={styles.characterCount}>
-            {goalTitle.length}/10 characters minimum
-          </Text>
         </View>
 
-        {/* Goal Description */}
+        {/* When will you accomplish this by? */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>GOAL DESCRIPTION</Text>
+          <Text style={styles.sectionLabel}>When will you accomplish this by?</Text>
+          <View style={styles.dateTimeContainer}>
+            <TouchableOpacity
+              style={styles.dateTimeButton}
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.dateTimeText,
+                !goalDueDate && styles.placeholderText
+              ]}>
+                {formatDate(goalDueDate)}
+              </Text>
+              <Calendar size={16} color="#8DD3C8" />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.dateTimeButton}
+              onPress={() => setShowTimePicker(true)}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.dateTimeText,
+                !goalDueTime && styles.placeholderText
+              ]}>
+                {goalDueTime || 'Select time'}
+              </Text>
+              <Clock size={16} color="#8DD3C8" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Goal Details */}
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>GOAL DETAILS</Text>
           <TextInput
             style={[styles.textInput, styles.textInputMultiline]}
-            value={goalDescription}
-            onChangeText={setGoalDescription}
-            placeholder="How will you accomplish this goal? What have you accomplished so far? 
-
-Everything you enter helps your characters better tailor their messages."
+            value={goalDetails}
+            onChangeText={setGoalDetails}
+            placeholder="How will you accomplish this goal? What have you accomplished so far?"
             placeholderTextColor="rgba(255, 255, 255, 0.5)"
             multiline={true}
             numberOfLines={4}
             textAlignVertical="top"
             maxLength={500}
           />
+          <Text style={styles.helperText}>
+            Everything you enter helps your characters better tailor their messages.
+          </Text>
         </View>
 
-        {/* Goal Deadline */}
+        {/* Motivation */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>GOAL DEADLINE</Text>
+          <Text style={styles.sectionLabel}>MOTIVATION</Text>
           <TextInput
-            style={styles.textInput}
-            value={goalDeadline}
-            onChangeText={setGoalDeadline}
-            placeholder="When do you want to accomplish this by?"
+            style={[styles.textInput, styles.textInputMultiline]}
+            value={goalMotivation}
+            onChangeText={setGoalMotivation}
+            placeholder="What's your purpose? Is there someone you're doing this for?"
             placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            multiline={true}
+            numberOfLines={4}
+            textAlignVertical="top"
+            maxLength={500}
           />
+          <Text style={styles.helperText}>
+            Everything you enter helps your characters better tailor their messages.
+          </Text>
         </View>
 
-        {/* Urgency Section */}
+        {/* Urgency */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>URGENCY</Text>
-          <Text style={styles.urgencyDescription}>
-            How urgent is this goal to accomplish?
-          </Text>
-          <View style={styles.urgencyContainer}>
-            <View style={styles.urgencyLabelContainer}>
-              <Text style={styles.urgencyEmoji}>😌</Text>
-              <Text style={styles.urgencyLabel}>Not urgent</Text>
-            </View>
-            {renderUrgencySlider()}
-            <View style={styles.urgencyLabelContainer}>
-              <Text style={styles.urgencyEmoji}>😱</Text>
-              <Text style={styles.urgencyLabel}>Very urgent</Text>
-            </View>
-          </View>
-          <Text style={styles.urgencyValue}>
-            <Text style={styles.urgencyLevelLabel}>Level:</Text> {urgencyLevel}/10
-          </Text>
+          {renderUrgencySlider()}
         </View>
 
         {/* Extra spacing for floating button */}
@@ -279,17 +346,17 @@ Everything you enter helps your characters better tailor their messages."
         <TouchableOpacity 
           style={[
             styles.saveButton,
-            canSaveGoal() && styles.saveButtonEnabled
+            !goalTitle.trim() && styles.saveButtonDisabled
           ]}
           onPress={handleSaveGoal}
-          disabled={!canSaveGoal()}
-          activeOpacity={canSaveGoal() ? 0.8 : 1}
+          disabled={!goalTitle.trim()}
+          activeOpacity={goalTitle.trim() ? 0.8 : 1}
         >
           <Text style={[
             styles.saveButtonText,
-            canSaveGoal() && styles.saveButtonTextEnabled
+            !goalTitle.trim() && styles.saveButtonTextDisabled
           ]}>
-            Save goal
+            {isEditMode ? 'Save changes' : 'Save goal'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -299,6 +366,26 @@ Everything you enter helps your characters better tailor their messages."
         visible={showPhotoUploadModal}
         onClose={() => setShowPhotoUploadModal(false)}
         onPhotoSelected={handlePhotoSelected}
+      />
+
+      {/* Date Picker Modal */}
+      <DatePickerModal
+        visible={showDatePicker}
+        onClose={() => setShowDatePicker(false)}
+        onCancel={() => setShowDatePicker(false)}
+        onConfirm={handleDateConfirm}
+        initialDate={goalDueDate || new Date()}
+        title="Select due date"
+      />
+
+      {/* Time Picker Modal */}
+      <TimePickerModal
+        visible={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+        onCancel={() => setShowTimePicker(false)}
+        onConfirm={handleTimeConfirm}
+        initialTime={goalDueTime || "6:00 PM"}
+        title="Select time"
       />
     </SafeAreaView>
   );
@@ -342,7 +429,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   section: {
-    marginBottom: 48, // Increased by 50% (32px * 1.5 = 48px)
+    marginBottom: 32,
   },
   sectionLabel: {
     color: '#8DD3C8',
@@ -364,6 +451,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     borderStyle: 'dashed',
+    position: 'relative',
   },
   coverPhoto: {
     width: '100%',
@@ -373,7 +461,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
   },
   coverPhotoText: {
     fontSize: 14,
@@ -381,27 +468,25 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontFamily: 'Inter',
   },
+  uploadIconContainer: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   textInput: {
     backgroundColor: 'rgba(60, 60, 67, 0.30)',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 14, // Keep 14px for regular inputs
+    fontSize: 14,
     fontFamily: 'Inter',
     fontWeight: '400',
-    lineHeight: 17.5,
-    color: '#FFF',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  goalInput: {
-    backgroundColor: 'rgba(60, 60, 67, 0.30)',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 14, // 14px as requested
-    fontFamily: 'Inter',
-    fontWeight: '700', // Bold as requested
     lineHeight: 17.5,
     color: '#FFF',
     borderWidth: 1,
@@ -411,110 +496,84 @@ const styles = StyleSheet.create({
     minHeight: 100,
     paddingTop: 12,
   },
-  characterCount: {
+  helperText: {
     fontSize: 12,
     fontWeight: '400',
     color: '#9CA3AF',
     fontFamily: 'Inter',
-    marginTop: 4,
-    textAlign: 'right',
+    marginTop: 8,
+    lineHeight: 16,
   },
-  urgencyDescription: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: '#FFFFFF',
-    fontFamily: 'Inter',
-    marginBottom: 16,
+  dateTimeContainer: {
+    flexDirection: 'row',
+    gap: 12,
   },
-  urgencyContainer: {
+  dateTimeButton: {
+    flex: 1,
+    backgroundColor: 'rgba(60, 60, 67, 0.30)',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 8,
+    justifyContent: 'space-between',
   },
-  urgencyLabelContainer: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  urgencyEmoji: {
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  urgencyLabel: {
-    fontSize: 12,
-    fontWeight: '400',
-    color: '#9CA3AF',
+  dateTimeText: {
+    fontSize: 14,
     fontFamily: 'Inter',
-    textAlign: 'center',
+    fontWeight: '400',
+    lineHeight: 17.5,
+    color: '#FFF',
   },
-  urgencyScale: {
-    flex: 1,
-    marginHorizontal: 12,
+  placeholderText: {
+    color: 'rgba(255, 255, 255, 0.5)',
   },
   urgencySliderContainer: {
-    flex: 1,
-    height: 40,
-    justifyContent: 'center',
-    marginHorizontal: 12,
+    marginTop: 8,
   },
-  urgencyTrack: {
+  urgencyLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 2,
-    position: 'relative',
+    marginBottom: 16,
   },
-  urgencyTrackDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    position: 'absolute',
+  urgencyLabelLeft: {
+    alignItems: 'flex-start',
+    flex: 1,
   },
-  urgencyTrackDotActive: {
-    backgroundColor: '#F3CC95',
+  urgencyLabelRight: {
+    alignItems: 'flex-end',
+    flex: 1,
   },
-  urgencySliderThumb: {
-    position: 'absolute',
+  urgencyEmoji: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  urgencyLabelText: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: '#9CA3AF',
+    fontFamily: 'Inter',
+    textAlign: 'center',
+    maxWidth: 80,
+  },
+  urgencyDotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
+  urgencyDot: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#F3CC95',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-    top: -10, // Center on track
-  },
-  urgencyDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   urgencyDotActive: {
     backgroundColor: '#F3CC95',
     borderColor: '#F3CC95',
-  },
-  urgencyValue: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#FFFFFF',
-    fontFamily: 'Inter',
-    textAlign: 'center',
-  },
-  urgencyLevelLabel: {
-    color: '#BEC0ED',
   },
   bottomSpacing: {
     height: 100,
@@ -528,15 +587,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   saveButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: '#F3CC95',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 32,
     alignItems: 'center',
     minWidth: 160,
-  },
-  saveButtonEnabled: {
-    backgroundColor: '#F3CC95',
     shadowColor: '#000000',
     shadowOffset: {
       width: 0,
@@ -546,13 +602,18 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
+  saveButtonDisabled: {
+    backgroundColor: '#6B7280',
+    shadowOpacity: 0,
+    elevation: 0,
+  },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#9CA3AF',
+    color: '#1C1830',
     fontFamily: 'Inter',
   },
-  saveButtonTextEnabled: {
-    color: '#1C1830',
+  saveButtonTextDisabled: {
+    color: '#9CA3AF',
   },
 });
