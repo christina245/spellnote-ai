@@ -4,15 +4,13 @@ import { usePathname } from 'expo-router';
 
 export default function TabLayout() {
   const pathname = usePathname();
-  
-  // Hide tab bar on homepage (index) and any page with "add notification" button
-  const hideTabBar = pathname === '/(tabs)' || pathname === '/(tabs)/index';
+
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: hideTabBar ? { display: 'none' } : {
+        tabBarStyle: {
           backgroundColor: '#1C1830',
           borderTopColor: '#374151',
           borderTopWidth: 1,
