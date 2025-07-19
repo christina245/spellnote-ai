@@ -61,7 +61,7 @@ export default function MyGoals() {
   };
 
   const handleAddGoal = () => {
-    router.push('/add-goal');
+    router.push('/goals/add-goal');
   };
 
   const handleSortSelect = (option: string) => {
