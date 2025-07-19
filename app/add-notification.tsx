@@ -7,9 +7,9 @@ import {
   Image, 
   TextInput, 
   ScrollView,
-  SafeAreaView,
   Dimensions 
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Calendar, Clock, User, Plus } from 'lucide-react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
