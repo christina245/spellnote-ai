@@ -8,7 +8,7 @@ import {
   Dimensions,
   Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Bell, Plus, Calendar, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useFonts, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
@@ -189,7 +189,7 @@ export default function HomeTab() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity 
@@ -404,7 +404,7 @@ export default function HomeTab() {
         onNavigate={handleNavigationMenuPress}
         userMode="character"
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
