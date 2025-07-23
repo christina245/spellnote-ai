@@ -417,7 +417,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 16,
     paddingBottom: 20,
   },
   headerButton: {
