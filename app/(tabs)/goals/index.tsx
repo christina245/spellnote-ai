@@ -235,7 +235,7 @@ export default function MyGoals() {
                   </Text>
                   <Text style={styles.goalUrgency}>
                     <Text style={styles.urgencyNumber}>{goal.urgency}</Text>/10
-                  </Text>
+                    <Text>/10</Text>
                 </View>
               </TouchableOpacity>
             ))}
