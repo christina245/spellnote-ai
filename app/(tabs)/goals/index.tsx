@@ -233,14 +233,15 @@ export default function MyGoals() {
                   <Text style={styles.goalDetails}>
                     {truncateText(goal.details)}
                   </Text>
-                  <Text style={styles.goalUrgency}>
-                    <Text style={styles.urgencyNumber}>{goal.urgency}</Text>/10
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+                                  <Text style={styles.goalUrgency}>
+                  <Text style={styles.urgencyNumber}>{goal.urgency}</Text><Text>/10</Text>
+                </Text> {/* <-- Add this closing tag */}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
 
         {/* Extra spacing for floating button */}
         <View style={styles.bottomSpacing} />
