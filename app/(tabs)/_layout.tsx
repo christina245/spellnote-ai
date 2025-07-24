@@ -1,14 +1,12 @@
 import { Tabs } from 'expo-router';
 import { Compass, Chrome as Home, User, Trophy } from 'lucide-react-native';
 import { usePathname } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context'; // Import SafeAreaView
 
 export default function TabLayout() {
   const pathname = usePathname();
 
 
   return (
-  <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right']}> {/* Add SafeAreaView here */}
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -57,6 +55,5 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
-  </SafeAreaView> // Close SafeAreaView
   );
 }
