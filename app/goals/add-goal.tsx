@@ -335,7 +335,6 @@ export default function AddGoal() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>URGENCY</Text>
           {renderUrgencySlider()}
-            {/* {renderUrgencySlider()} */} // Keep this line commented out for now
         </View>
 
         {/* Extra spacing for floating button */}
