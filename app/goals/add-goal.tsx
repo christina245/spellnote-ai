@@ -152,7 +152,7 @@ export default function AddGoal() {
     } else {
       // Navigate back to goals index with new goal data
       router.push({
-        pathname: '/(tabs)/goals',
+        pathname: '/goals',
         params: {
           newGoal: JSON.stringify(goalData)
         }
