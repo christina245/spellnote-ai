@@ -121,7 +121,7 @@ export default function AddGoal() {
     }
 
     const goalData = {
-      id: isEditMode ? goalId : Date.now().toString(),
+      id: isEditMode ? goalId : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       title: goalTitle,
       dueDate: combinedDateTime ? combinedDateTime.toISOString() : '',
       details: goalDetails,
