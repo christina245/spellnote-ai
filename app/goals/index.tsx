@@ -234,8 +234,8 @@ export default function MyGoals() {
                     {truncateText(goal.details)}
                   </Text>
                   <Text style={styles.goalUrgency}>
-                    <Text style={styles.urgencyNumber}>{goal.urgency}</Text>/10
-                  </Text>
+  {goal.urgency}/10
+</Text>
                 </View>
               </TouchableOpacity>
             ))}
