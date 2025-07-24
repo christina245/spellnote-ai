@@ -56,7 +56,7 @@ export default function MyGoals() {
   }, [params.newGoal]);
 
   const handleBack = () => {
-    router.back();
+    router.push('/(tabs)');
   };
 
   const handleAddGoal = () => {

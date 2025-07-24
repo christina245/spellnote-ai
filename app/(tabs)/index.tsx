@@ -116,6 +116,9 @@ export default function HomeTab() {
       case 'account':
         router.push('/user-profile');
         break;
+      case 'goals':
+        router.push('/goals');
+        break;
       case 'switch-to-ai-free':
         router.push('/switch-to-ai-free');
         break;

@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { User, Sparkles, Compass, FileText, CircleHelp as HelpCircle, MessageSquare, TriangleAlert as AlertTriangle, MessageCircle, LogOut } from 'lucide-react-native';
-import { HeartCrack } from 'lucide-react-native';
+import { HeartCrack, Trophy } from 'lucide-react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -40,6 +40,11 @@ export default function NavigationMenu({
       icon: User,
       label: 'Account',
       route: 'account',
+    },
+    {
+      icon: Trophy,
+      label: 'Goals',
+      route: 'goals',
     },
     {
       icon: Sparkles,
