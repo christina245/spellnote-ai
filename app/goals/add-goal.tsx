@@ -172,8 +172,7 @@ export default function AddGoal() {
           ]}
           onPress={() => setUrgencyLevel(i)}
           activeOpacity={0.7}
-        >
-        </TouchableOpacity>
+        />
       );
     }
     return (
