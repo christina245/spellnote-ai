@@ -42,11 +42,6 @@ export default function NavigationMenu({
       route: 'account',
     },
     {
-      icon: Trophy,
-      label: 'Goals',
-      route: 'goals',
-    },
-    {
       icon: Sparkles,
       label: userMode === 'ai-free' ? 'Switch to AI Mode' : 'Switch to AI-Free',
       route: userMode === 'ai-free' ? 'switch-to-ai-mode' : 'switch-to-ai-free',
