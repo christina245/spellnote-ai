@@ -234,7 +234,7 @@ export default function MyGoals() {
                     {truncateText(goal.details)}
                   </Text>
                   <View style={styles.urgencyDotsContainer}>
-  <Text style={styles.goalUrgencyDots}>
+  <Text style={styles.urgencyDots}>
     {'●'.repeat(goal.urgency)}{'○'.repeat(10 - goal.urgency)}
   </Text>
 </View>
