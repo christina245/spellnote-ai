@@ -92,7 +92,7 @@ export default function MyGoals() {
   const handleGoalPress = (goal: Goal) => {
     // Navigate to edit goal screen (which is the same as add-goal but with pre-filled data)
     router.push({
-      pathname: '/add-goal',
+      pathname: '/goals/add-goal',
       params: {
         editMode: 'true',
         goalId: goal.id,
