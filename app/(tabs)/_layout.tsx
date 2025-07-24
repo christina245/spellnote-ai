@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Compass, Home, User } from 'lucide-react-native';
+import { Compass, Chrome as Home, User } from 'lucide-react-native'-native';
 import { usePathname } from 'expo-router';
 
 export default function TabLayout() {
