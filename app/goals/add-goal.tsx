@@ -140,7 +140,7 @@ export default function AddGoal() {
             text: 'OK',
             onPress: () => {
               router.push({
-                pathname: '/(tabs)/goals',
+                pathname: '/goals',
                 params: {
                   updatedGoal: JSON.stringify(goalData)
                 }
