@@ -233,9 +233,11 @@ export default function MyGoals() {
                   <Text style={styles.goalDetails}>
                     {truncateText(goal.details)}
                   </Text>
-                  <Text style={styles.goalUrgency}>
-  {goal.urgency}/10
-</Text>
+                  <View style={styles.urgencyDotsContainer}>
+  <Text style={styles.goalUrgencyDots}>
+    {'●'.repeat(goal.urgency)}{'○'.repeat(10 - goal.urgency)}
+  </Text>
+</View>
                 </View>
               </TouchableOpacity>
             ))}
