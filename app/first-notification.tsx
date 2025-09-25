@@ -108,11 +108,6 @@ export default function FirstNotification() {
   const validateFields = () => {
     const errors: {[key: string]: string} = {};
 
-    // Details is required
-    if (!details.trim()) {
-      errors.details = 'Details are required';
-    }
-
     // Start Date is required
     if (!startDate) {
       errors.startDate = 'Start date is required';
@@ -129,7 +124,7 @@ export default function FirstNotification() {
 
   // Check if all required fields are filled
   const areRequiredFieldsFilled = () => {
-    return details.trim() !== '' && startDate !== null && time.trim() !== '';
+    return startDate !== null && time.trim() !== '';
   };
 
   const handleNextStep = async () => {
@@ -208,10 +203,6 @@ export default function FirstNotification() {
 
   const handleDetailsChange = (text: string) => {
     setDetails(text);
-    // Clear validation error when field is filled
-    if (validationErrors.details && text.trim()) {
-      setValidationErrors(prev => ({ ...prev, details: '' }));
-    }
   };
 
   const handleHeaderChange = (text: string) => {
@@ -301,7 +292,7 @@ export default function FirstNotification() {
         {/* Details Field */}
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>
-            DETAILS<Text style={styles.asterisk}>*</Text>
+            DETAILS
           </Text>
           <TextInput
             style={[
@@ -323,7 +314,7 @@ export default function FirstNotification() {
           )}
           {details.length > 0 && (
             <Text style={styles.characterCount}>
-              {details.length}/75 characters minimum
+              {details.length}/1000 characters
             </Text>
           )}
         </View>
