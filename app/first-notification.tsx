@@ -108,6 +108,11 @@ export default function FirstNotification() {
   const validateFields = () => {
     const errors: {[key: string]: string} = {};
 
+    // Header is required with minimum 10 characters
+    if (header.trim().length < 10) {
+      errors.header = 'Header must be at least 10 characters';
+    }
+
     // Start Date is required
     if (!startDate) {
       errors.startDate = 'Start date is required';
@@ -124,13 +129,13 @@ export default function FirstNotification() {
 
   // Check if all required fields are filled
   const areRequiredFieldsFilled = () => {
-    return startDate !== null && time.trim() !== '';
+    return header.trim().length >= 10 && startDate !== null && time.trim() !== '';
   };
 
   const handleNextStep = async () => {
     // Validate required fields first
     if (!validateFields()) {
-      Alert.alert('Required Fields', 'Please fill in all required fields before continuing.');
+      Alert.alert('Required Fields', 'Please enter at least 10 characters in the header field and select a start date and time.');
       return;
     }
 
@@ -265,12 +270,13 @@ export default function FirstNotification() {
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>HEADER</Text>
           <Text style={styles.fieldNote}>
-            {header.trim() ? '' : 'Leave blank to auto-generate from details'}
+            10 characters minimum
           </Text>
           <TextInput
             style={[
               styles.headerInput,
-              header.length > 0 && styles.headerInputWithText
+              header.length > 0 && styles.headerInputWithText,
+              validationErrors.header && styles.inputError
             ]}
             value={header}
             onChangeText={handleHeaderChange}
@@ -279,6 +285,9 @@ export default function FirstNotification() {
             multiline={false}
             maxLength={100} // 100 character limit for manual headers
           />
+          {validationErrors.header && (
+            <Text style={styles.errorText}>{validationErrors.header}</Text>
+          )}
           {header.length >= 90 && (
             <Text style={[
               styles.characterCount,
