@@ -63,7 +63,7 @@ export default function CommunityGuidelines() {
 
         {/* AI Use: What's Allowed */}
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>✅ AI Use: What's Allowed</Text>
+          <Text style={styles.sectionHeader}>✅ AI Use: What's Allowed</Text></View>
           
           <View style={styles.bulletSection}>
             <Text style={styles.bulletHeader}>• Typical task reminders</Text>
