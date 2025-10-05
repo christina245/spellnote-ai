@@ -116,7 +116,7 @@ export default function CharacterSelection() {
           </Text>
           
           <Text style={styles.introText}>
-            However, you can use the app without a character assistant. Or go completely AI-free.
+            However, you can use the app without a character assistant by using Spellnotes completely AI-free. Remember: even on AI mode, you can still send any notification without AI.
           </Text>
         </View>
 
