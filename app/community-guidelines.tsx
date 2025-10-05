@@ -53,11 +53,11 @@ export default function CommunityGuidelines() {
         {/* Introduction */}
         <View style={styles.bodyContainer}>
           <Text style={styles.bodyText}>
-            We want you to create engaging characters that inspire you every week. To keep our community safe and legal, please follow these simple rules.
+            We want you to have fun while staying on top of your goals. To keep our community safe and legal, please follow these simple rules.
           </Text>
           
           <Text style={styles.bodyText}>
-            ⭐ <Text style={styles.boldText}>Important note:</Text> you also have the option to use this app with a generic Spellnote chatbot or without any AI at all. That way, your notes are texted to you exactly as you write them without AI modification.
+            ⭐ <Text style={styles.boldText}>Important note:</Text> you also have the option to use this app without any AI at all. We know that sometimes, you'd rather hear some reminders from yourself rather than an AI assistant. Each reminder gives you the option to be sent without AI modification. 
           </Text>
         </View>
 
@@ -66,36 +66,26 @@ export default function CommunityGuidelines() {
           <Text style={styles.sectionHeader}>✅ AI Use: What's Allowed</Text>
           
           <View style={styles.bulletSection}>
-            <Text style={styles.bulletHeader}>• Original characters</Text>
-            <Text style={styles.bulletText}>you create from your imagination</Text>
+            <Text style={styles.bulletHeader}>• Typical task reminders</Text>
+            <Text style={styles.bulletText}>such as "call mom at 5 pm, get milk"</Text>
           </View>
           
           <View style={styles.bulletSection}>
-            <Text style={styles.bulletHeader}>• General personality types</Text>
-            <Text style={styles.bulletText}>(friendly coach, wise mentor, sassy friend)</Text>
+            <Text style={styles.bulletHeader}>• Personal helpful notes</Text>
+            <Text style={styles.bulletText}>Such as "Don't forget to ask these questions on your date" or "stop texting your ex"</Text>
           </View>
           
-          <View style={styles.bulletSection}>
-            <Text style={styles.bulletHeader}>• Inspired-by concepts</Text>
-            <Text style={styles.bulletText}>(mysterious detective, energetic athlete)</Text>
-          </View>
-          
-          <View style={styles.bulletSection}>
-            <Text style={styles.bulletHeader}>• Existing characters from folklore and mythology</Text>
-            <Text style={styles.bulletText}>(Greek gods, King Arthur)</Text>
-          </View>
-        </View>
 
         {/* What's Not Allowed */}
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>🚫 What's Not Allowed</Text>
           
-          <Text style={styles.subHeader}>Real People</Text>
+          <Text style={styles.subHeader}>These are risk factors for unhealthy AI emotional dependency</Text>
           <View style={styles.bulletList}>
-            <Text style={styles.bulletText}>• No celebrities, influencers, or public figures</Text>
-            <Text style={styles.bulletText}>• No historical figures (living or deceased)</Text>
-            <Text style={styles.bulletText}>• No real family members, friends, or acquaintances</Text>
-            <Text style={styles.bulletText}>• No politicians or religious leaders</Text>
+            <Text style={styles.bulletText}>• Making AI characters text you NSFW material</Text>
+            <Text style={styles.bulletText}>• Soliciting emotionally intimate relationships with AI characters</Text>
+            <Text style={styles.bulletText}>• Submitting copyrighted or NSFW characters for use</Text>
+        
           </View>
 
           <Text style={styles.subHeader}>Copyrighted Characters</Text>
