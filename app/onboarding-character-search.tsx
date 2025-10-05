@@ -8,6 +8,7 @@ import {
   Dimensions,
   Image
 } from 'react-native';
+import { Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, ArrowRight } from 'lucide-react-native';
@@ -304,7 +305,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingTop: Platform.OS === 'web' ? 60 : 16,
     paddingBottom: 8,
   },
   backButton: {
