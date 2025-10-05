@@ -6,8 +6,8 @@ export default function RootLayout() {
   useFrameworkReady();
 
   return (
-   // <SafeAreaProvider> //
+   <SafeAreaProvider> 
       <Stack />
-   // </SafeAreaProvider> //
+   </SafeAreaProvider>
   );
 }
