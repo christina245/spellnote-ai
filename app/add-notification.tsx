@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   selectedCharacterAvatar: {
-    borderColor: '#34A853',
+    borderColor: '#8DD3C8',
   },
   aiFreeModeAvatar: {
     backgroundColor: '#374151',
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   characterNameSelected: {
-    color: '#34A853',
+    color: '#8DD3C8',
     fontWeight: '600',
   },
   characterNameEmpty: {
