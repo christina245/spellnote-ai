@@ -7,7 +7,8 @@ import {
   Image, 
   TextInput, 
   ScrollView,
-  Dimensions 
+  Dimensions,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Calendar, Clock, User, Plus } from 'lucide-react-native';
