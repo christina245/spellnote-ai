@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Image,
+  Platform,
 } from 'react-native';
 import { View } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -420,6 +421,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'web' ? 60 : 16,
     paddingBottom: 20,
   },
   headerButton: {
