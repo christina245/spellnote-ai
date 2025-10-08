@@ -91,8 +91,7 @@ export default function Resources() {
       >
         {/* Title */}
         <Text style={styles.title}>
-          Spellnotes aims to make{'\n'}
-          your life easier, not worse.
+          Spellnotes aims to make your life easier, not worse.
         </Text>
 
         {/* Main Content */}
