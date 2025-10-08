@@ -33,7 +33,7 @@ export default function HomeTab() {
   const characters = [
     {
       id: '1',
-      name: 'Muffin the fluffy bunny',
+      name: 'Muffin the Fluffy Bunny',
       avatarSource: require('../../assets/images/pink bunny copy.jpg'),
       borderColor: '#8B5CF6', // Purple
       isEmpty: false
