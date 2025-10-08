@@ -91,7 +91,7 @@ export default function Resources() {
       >
         {/* Title */}
         <Text style={styles.title}>
-          Spellnote aims to make{'\n'}
+          Spellnotes aims to make{'\n'}
           your life easier, not worse.
         </Text>
 
@@ -106,7 +106,7 @@ export default function Resources() {
           </Text>
 
           <Text style={styles.bodyText}>
-            Spellnote cannot substitute for professional mental health care. The AI characters cannot provide emotional support, therapy, or crisis intervention. They can only deliver pre-written reminders and messages that you create for yourself, just with their own flair.
+            Spellnotes cannot substitute for professional mental health care. The AI characters cannot provide emotional support, therapy, or crisis intervention. They can only deliver pre-written reminders and messages that you create for yourself, just with their own flair.
           </Text>
 
           <Text style={styles.bodyText}>
